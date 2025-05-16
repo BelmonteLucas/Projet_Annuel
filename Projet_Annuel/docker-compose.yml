@@ -36,6 +36,18 @@ services:
     volumes:
       - pgadmin-data:/var/lib/pgadmin
 
+  frontend:
+    image: python:3.10-slim
+    container_name: frontend
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    command: python3 -m http.server 5500
+    ports:
+      - "5500:5500"
+    depends_on:
+      - backend
+
 volumes:
   pgdata:
   pgadmin-data:
