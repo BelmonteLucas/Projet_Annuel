@@ -42,11 +42,16 @@ class UserEntry(BaseModel):
 class PasswordEntry(BaseModel):
     user: str
     site: str
+    account: str
     password: str
 
 class DeleteEntry(BaseModel):
     user: str
     site: str
+    account: str
+
+class DeleteAllEntry(BaseModel):
+    user: str
 
 @app.get("/")
 def read_root():
@@ -75,7 +80,12 @@ def add_password(entry: PasswordEntry):
     except Exception:
         raise HTTPException(status_code=400, detail="Nom d'utilisateur invalide")
 
-    pwd = Password(user=decoded_user, site=entry.site, password=entry.password)
+    # Vérifie l'unicité (user, site, account)
+    existing = db.query(Password).filter_by(user=decoded_user, site=entry.site, account=entry.account).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Ce compte existe déjà pour ce site.")
+
+    pwd = Password(user=decoded_user, site=entry.site, account=entry.account, password=entry.password)
     db.add(pwd)
     db.commit()
     db.refresh(pwd)
@@ -90,7 +100,7 @@ def get_passwords(user: str):
 
     db = Session()
     entries = db.query(Password).filter_by(user=decoded_user).all()
-    return {"passwords": [{"site": e.site, "password": e.password} for e in entries]}
+    return {"passwords": [{"site": e.site, "account": e.account, "password": e.password} for e in entries]}
 
 @app.post("/delete")
 def delete_password(entry: DeleteEntry):
@@ -100,9 +110,21 @@ def delete_password(entry: DeleteEntry):
     except Exception:
         raise HTTPException(status_code=400, detail="Nom d'utilisateur invalide")
 
-    pwd = db.query(Password).filter_by(user=decoded_user, site=entry.site).first()
+    pwd = db.query(Password).filter_by(user=decoded_user, site=entry.site, account=entry.account).first()
     if pwd:
         db.delete(pwd)
         db.commit()
         return {"message": "Mot de passe supprimé"}
     raise HTTPException(status_code=404, detail="Mot de passe non trouvé")
+
+@app.post("/delete_all")
+def delete_all_passwords(entry: DeleteAllEntry):
+    db = Session()
+    try:
+        decoded_user = base64.b64decode(entry.user).decode("utf-8")
+    except Exception:
+        raise HTTPException(status_code=400, detail="Nom d'utilisateur invalide")
+
+    deleted = db.query(Password).filter_by(user=decoded_user).delete()
+    db.commit()
+    return {"message": f"{deleted} mot(s) de passe supprimé(s)"}

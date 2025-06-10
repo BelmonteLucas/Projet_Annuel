@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestionnaire de Mots de Passe</title>
     <style>
+        /* --- Styles généraux et mise en page --- */
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
             background: linear-gradient(135deg, #e0e7ff 0%, #f4f4f4 100%);
@@ -50,7 +51,7 @@
             padding: 32px 28px 28px 28px;
             border-radius: 18px;
             box-shadow: 0 6px 32px rgba(59,130,246,0.10), 0 1.5px 4px rgba(0,0,0,0.04);
-            max-width: 410px;
+            max-width: 700px;
             min-width: 320px;
             transition: box-shadow 0.2s;
             display: none;
@@ -63,6 +64,7 @@
             color: #3b82f6;
             font-weight: 600;
         }
+        /* --- Styles des champs de saisie et boutons --- */
         input {
             width: 100%;
             padding: 12px;
@@ -93,6 +95,7 @@
         button:hover {
             background: #2563eb;
         }
+        /* --- Styles pour la liste des mots de passe --- */
         .password-item {
             display: flex;
             align-items: center;
@@ -126,18 +129,68 @@
             border-radius: 50%;
             box-shadow: 0 2px 12px rgba(59,130,246,0.10);
         }
+        /* --- Responsive --- */
+        @media (max-width: 800px) {
+            .card { max-width: 98vw; }
+        }
         @media (max-width: 500px) {
             .card { min-width: unset; width: 98vw; padding: 18px 4vw; }
             .topbar { font-size: 1.2em; }
         }
+        /* --- Champs et boutons du gestionnaire alignés verticalement et en largeur --- */
+        #app #account-username,
+        #app #site-link,
+        #app #password,
+        #app .action-btn {
+            width: 384px;
+            min-width: 240px;
+            max-width: 440px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        #app .actions-row {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin: 12px 0 8px 0;
+        }
+        #app .actions-row button {
+            width: 180px;
+            min-width: 120px;
+            max-width: 220px;
+            padding: 12px 0;
+            margin: 0;
+            display: inline-block;
+        }
+        /* --- Table des mots de passe --- */
+        #password-list table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+        #password-list th, #password-list td {
+            padding: 8px;
+            border-bottom: 1.5px solid #e5e7eb;
+            text-align: left;
+            word-break: break-all;
+        }
+        #password-list th {
+            background: #f1f5f9;
+        }
+        #password-list tr:nth-child(even) {
+            background: #f9fafb;
+        }
     </style>
 </head>
 <body>
+    <!-- Barre supérieure avec le titre et le bouton déconnexion -->
     <div class="topbar">
         Gestionnaire de Mots de Passe
         <button id="logout-btn" class="logout-btn" style="display:none;" onclick="logout()">Déconnexion</button>
     </div>
 
+    <!-- Page d'accueil : choix connexion ou création de compte -->
     <div id="auth-choice" class="card" style="display:block;">
         <h2>Bienvenue</h2>
         <img src="images/HoneyPot.png" alt="Logo" class="logo-img" style="display:block;margin-left:auto;margin-right:auto;">
@@ -145,27 +198,45 @@
         <button onclick="showLogin()">Se connecter</button>
     </div>
 
-    <div id="setup-container" class="card">
+    <!-- Formulaire de création de compte -->
+    <div id="setup-container" class="card" style="display: none;">
         <h2>Créer un compte</h2>
         <input type="text" id="new-username" placeholder="Identifiant">
-        <input type="password" id="new-master-password" placeholder="Nouveau mot de passe ">
+        <input type="password" id="new-master-password" placeholder="Nouveau mot de passe " oninput="updatePasswordHint()">
+        <div id="password-hint" style="font-size:0.98em;display:none;margin-bottom:10px;text-align:left;"></div>
         <button onclick="setMasterPassword()">Enregistrer</button>
+        <div style="margin-top:10px;text-align:center;">
+            <a href="#" onclick="showLogin();return false;" style="color:#3b82f6;text-decoration:underline;font-size:0.98em;">Déjà un compte ? Se connecter</a>
+        </div>
     </div>
 
+    <!-- Formulaire de connexion -->
     <div id="auth-container" class="card">
         <h2>Connexion</h2>
         <input type="text" id="login-username" placeholder="Identifiant">
         <input type="password" id="master-password" placeholder="Mot de passe ">
         <button onclick="authenticate()">Se connecter</button>
+        <div style="margin-top:10px;text-align:center;">
+            <a href="#" onclick="showSignup();return false;" style="color:#3b82f6;text-decoration:underline;font-size:0.98em;">Créer un compte</a>
+        </div>
     </div>
 
+    <!-- Gestionnaire de mots de passe (après connexion) -->
     <div id="app" class="card">
         <h2 style="margin-top:0;">Vos mots de passe</h2>
-        <input type="text" id="site" placeholder="Nom du site">
+        <!-- Champs de saisie empilés -->
+        <input type="text" id="account-username" placeholder="Identifiant du compte">
+        <input type="text" id="site-link" placeholder="Lien du site (ex: https://example.com)">
         <input type="password" id="password" placeholder="Mot de passe">
-        <button onclick="generatePassword()">Générer un mot de passe</button>
-        <button onclick="addPassword()">Ajouter</button>
-        <div id="password-list" style="margin-top:18px;"></div>
+        <!-- Boutons d'action alignés horizontalement -->
+        <div class="actions-row">
+            <button class="action-btn" onclick="generatePassword()">Générer un mot de passe</button>
+            <button class="action-btn" onclick="addPassword()">Ajouter</button>
+            <button class="action-btn" style="background:#ef4444;" onclick="deleteAllPasswords()">Supprimer tous les mots de passe</button>
+        </div>
+        <div id="add-error" style="color:#ef4444;font-size:0.98em;display:none;margin-top:8px;"></div>
+        <!-- Tableau des mots de passe -->
+        <div id="password-list" style="margin-top:8px;"></div>
     </div>
 
     <script>
@@ -177,10 +248,12 @@
             document.getElementById("logout-btn").style.display = (id === "app") ? "inline-block" : "none";
         }
 
+        // Affiche le formulaire de création de compte
         function showSignup() {
             showOnly("setup-container");
         }
 
+        // Affiche le formulaire de connexion
         function showLogin() {
             if (localStorage.getItem("masterPassword") && localStorage.getItem("username")) {
                 showOnly("auth-container");
@@ -189,10 +262,64 @@
             }
         }
 
+        // Vérifie la complexité du mot de passe
+        function checkPasswordComplexity(password) {
+            const minLength = 8;
+            const hasUpper = /[A-Z]/.test(password);
+            const hasLower = /[a-z]/.test(password);
+            const hasDigit = /\d/.test(password);
+            const hasSpecial = /[!@#$%^&*()_\-+=\[\]{};':"\\|,.<>\/?]/.test(password);
+            return {
+                minLength: password.length >= minLength,
+                hasUpper,
+                hasLower,
+                hasDigit,
+                hasSpecial
+            };
+        }
+
+        // Affiche les conseils de complexité du mot de passe
+        function updatePasswordHint() {
+            const password = document.getElementById("new-master-password").value;
+            const hintDiv = document.getElementById("password-hint");
+            const checks = checkPasswordComplexity(password);
+
+            let html = "Le mot de passe n'est pas assez complexe.<br>Il doit contenir au moins :<ul style='margin:4px 0 0 18px;padding:0;'>";
+            html += `<li style="color:${checks.minLength ? '#22c55e' : '#ef4444'}">8 caractères</li>`;
+            html += `<li style="color:${checks.hasUpper ? '#22c55e' : '#ef4444'}">une lettre majuscule</li>`;
+            html += `<li style="color:${checks.hasLower ? '#22c55e' : '#ef4444'}">une lettre minuscule</li>`;
+            html += `<li style="color:${checks.hasDigit ? '#22c55e' : '#ef4444'}">un chiffre</li>`;
+            html += `<li style="color:${checks.hasSpecial ? '#22c55e' : '#ef4444'}">un caractère spécial (ex: !@#$%^&amp;*)</li>`;
+            html += "</ul>";
+
+            // Affiche le hint si le champ n'est pas vide ou si tout n'est pas validé
+            if (password.length > 0 && Object.values(checks).some(v => !v)) {
+                hintDiv.innerHTML = html;
+                hintDiv.style.display = "block";
+            } else {
+                hintDiv.style.display = "none";
+            }
+        }
+
+        // Création de compte
         function setMasterPassword() {
             const newUsername = document.getElementById("new-username").value;
             const newPassword = document.getElementById("new-master-password").value;
-            if (!newUsername || !newPassword) return alert("Veuillez saisir un identifiant et un mot de passe");
+            const hintDiv = document.getElementById("password-hint");
+            hintDiv.style.display = "none";
+            hintDiv.textContent = "";
+
+            if (!newUsername || !newPassword) {
+                hintDiv.textContent = "Veuillez saisir un identifiant et un mot de passe.";
+                hintDiv.style.display = "block";
+                return;
+            }
+
+            const checks = checkPasswordComplexity(newPassword);
+            if (!checks.minLength || !checks.hasUpper || !checks.hasLower || !checks.hasDigit || !checks.hasSpecial) {
+                updatePasswordHint();
+                return;
+            }
 
             const hashedKey = btoa(newUsername + ":" + newPassword);
             localStorage.setItem("masterPassword", btoa(newPassword));
@@ -216,6 +343,7 @@
             .catch(err => alert("Erreur API : " + err.message));
         }
 
+        // Connexion utilisateur
         function authenticate() {
             const enteredUsername = document.getElementById("login-username").value;
             const enteredPassword = document.getElementById("master-password").value;
@@ -236,32 +364,59 @@
             }
         }
 
+        // Génère un mot de passe aléatoire
         function generatePassword() {
             const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
             const password = Array.from({ length: 12 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
             document.getElementById("password").value = password;
         }
 
+        // Stocke les mots de passe récupérés pour vérifier les doublons côté client
+        let currentPasswords = [];
+
+        // Ajoute un mot de passe pour un site/compte
         function addPassword() {
-            const site = document.getElementById("site").value;
+            const accountUsername = document.getElementById("account-username").value.trim();
+            const siteLink = document.getElementById("site-link").value.trim();
             const password = document.getElementById("password").value;
             const user = localStorage.getItem("currentUser");
+            const errorDiv = document.getElementById("add-error");
+            errorDiv.style.display = "none";
+            errorDiv.textContent = "";
 
-            if (!site || !password) return alert("Veuillez remplir tous les champs");
+            if (!accountUsername || !siteLink || !password) {
+                errorDiv.textContent = "Veuillez remplir tous les champs";
+                errorDiv.style.display = "block";
+                return;
+            }
+
+            // Vérifie côté client s'il existe déjà ce compte pour ce site
+            const duplicate = currentPasswords.find(
+                item => item.site === siteLink && item.account === accountUsername
+            );
+            if (duplicate) {
+                errorDiv.textContent = "Un compte avec cet identifiant existe déjà pour ce site.";
+                errorDiv.style.display = "block";
+                return;
+            }
 
             fetch("http://localhost:8000/add", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ user, site, password })
+                body: JSON.stringify({ user, site: siteLink, account: accountUsername, password })
             })
             .then(res => res.json())
             .then(data => {
                 alert(data.message);
                 displayPasswords();
             })
-            .catch(err => alert("Erreur ajout : " + err.message));
+            .catch(err => {
+                errorDiv.textContent = "Erreur ajout : " + err.message;
+                errorDiv.style.display = "block";
+            });
         }
 
+        // Affiche la liste des mots de passe dans un tableau
         function displayPasswords() {
             const user = localStorage.getItem("currentUser");
             fetch(`http://localhost:8000/list?user=${user}`)
@@ -270,40 +425,64 @@
                     const list = document.getElementById("password-list");
                     list.innerHTML = "";
 
-                    if (!data.passwords || !Array.isArray(data.passwords)) {
+                    if (!data.passwords || !Array.isArray(data.passwords) || data.passwords.length === 0) {
                         list.innerHTML = "<p>Aucun mot de passe trouvé ou erreur de chargement.</p>";
+                        currentPasswords = [];
                         return;
                     }
 
+                    currentPasswords = data.passwords;
+
+                    // Table header
+                    let html = `<table>
+                        <thead>
+                            <tr>
+                                <th style="width:30%;">Site</th>
+                                <th style="width:30%;">Identifiant</th>
+                                <th style="width:25%;">Mot de passe</th>
+                                <th style="width:15%;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+
                     data.passwords.forEach((item, index) => {
-                        const div = document.createElement("div");
-                        div.classList.add("password-item");
-                        div.innerHTML = `
-                            <span class="password-label">${item.site}:</span>
-                            <span id="pwd-${index}">*****</span>
-                            <button onclick="togglePassword(${index}, '${item.password}')">Voir</button>
-                            <button onclick="deletePassword('${item.site}')">Supprimer</button>
+                        html += `
+                            <tr>
+                                <td>${item.site}</td>
+                                <td>${item.account}</td>
+                                <td>
+                                    <span id="pwd-${index}">*****</span>
+                                </td>
+                                <td>
+                                    <button style="width:auto;padding:4px 10px;font-size:0.97em;" onclick="togglePassword(${index}, '${item.password}')">Voir</button>
+                                    <button style="width:auto;padding:4px 10px;font-size:0.97em;background:#ef4444;margin-left:6px;" onclick="deletePassword('${item.site}','${item.account}')">Supprimer</button>
+                                </td>
+                            </tr>
                         `;
-                        list.appendChild(div);
                     });
+
+                    html += "</tbody></table>";
+                    list.innerHTML = html;
                 })
                 .catch(err => {
                     console.error("Erreur lors du chargement des mots de passe :", err);
                 });
         }
 
+        // Affiche ou masque le mot de passe
         function togglePassword(index, password) {
             const span = document.getElementById(`pwd-${index}`);
             span.textContent = span.textContent === "*****" ? password : "*****";
         }
 
-        function deletePassword(site) {
+        // Supprime un mot de passe pour un site/compte
+        function deletePassword(site, account) {
             const user = localStorage.getItem("currentUser");
 
             fetch("http://localhost:8000/delete", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ user, site })
+                body: JSON.stringify({ user, site, account })
             })
             .then(res => res.json())
             .then(data => {
@@ -313,6 +492,24 @@
             .catch(err => alert("Erreur suppression : " + err.message));
         }
 
+        // Supprime tous les mots de passe de l'utilisateur
+        function deleteAllPasswords() {
+            if (!confirm("Êtes-vous sûr de vouloir supprimer tous vos mots de passe ?")) return;
+            const user = localStorage.getItem("currentUser");
+            fetch("http://localhost:8000/delete_all", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ user })
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message);
+                displayPasswords();
+            })
+            .catch(err => alert("Erreur suppression : " + err.message));
+        }
+
+        // Déconnexion utilisateur
         function logout() {
             localStorage.removeItem("currentUser");
             document.getElementById("app").style.display = "none";

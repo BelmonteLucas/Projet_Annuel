@@ -72,15 +72,18 @@ Une fois les conteneurs démarrés :
 
 
 ## Pour faire les commits
-1. Créez une nouvelle branche ex. :
+1. Changer de branche ex. :
 git checkout -b le-nom-de-notre-branche
 
 2. Faites vos modifications
 
 3. Faites un commit avec un message explicite ex. :
+git add le-nom-de-l'element
+git commit -m "Mise à jour du README.md"
+
+4. Faites un push pour envoyer vos modifications sur le serveur distant :
 git push -u origin le-nom-de-la-branche
 
-- Faites un push pour envoyer vos modifications sur le serveur distant
 - Créez une Pull Request pour que les autres puissent voir vos modifications et les valider
 - Une fois que la Pull Request a été validée, vous pouvez supprimer la branche d
 
@@ -88,25 +91,3 @@ git push -u origin le-nom-de-la-branche
 - Pour supprimer la branche, vous pouvez utiliser la commande suivante : `git branch
 
 - Pour eviter que le git nous modifie wait-for-it.sh , nous allons utiliser la commande suivante : "git config --global core.autocrlf input" def
-
-## Mettre à jour le README.md dans la branche main
-
-1. **Assurez-vous d'être sur la branche main :**
-   ```sh
-   git checkout main
-   ```
-
-2. **Modifiez le fichier `README.md` avec vos changements.**
-
-3. **Ajoutez et validez vos modifications :**
-   ```sh
-   git add README.md
-   git commit -m "Mise à jour du README.md"
-   ```
-
-4. **Poussez les modifications sur le dépôt distant :**
-   ```sh
-   git push origin main
-   ```
-
-> Si vous travaillez sur une branche différente, faites d'abord un merge ou une pull request vers `main`.
