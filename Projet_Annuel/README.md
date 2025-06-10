@@ -18,10 +18,10 @@
 ### 3. Lancer le projet avec Docker
 
 1. Ouvrez un terminal.
-2. Placez-vous dans le dossier contenant `docker-compose.yml` :
+2. **Placez-vous dans le dossier racine du projet, là où se trouve le fichier `docker-compose.yml`** :
 
    ```sh
-   cd "c:\chemin_vers_le_dossier\Projet_Annuel"
+   cd Projet_Annuel
    ```
 
 3. Lancez la commande :
@@ -29,15 +29,6 @@
    ```sh
    docker-compose up -d
    ```
-
-> ℹ️ **Remarque :**  
-> Si votre structure est :
-> ```
-> Projet_Annuel/
-> ├─ docker-compose.yml
-> └─ ...
-> ```
-> placez-vous dans `Projet_Annuel` pour lancer la commande.
 
 ## Accéder à l'application
 

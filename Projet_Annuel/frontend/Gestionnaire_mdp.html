@@ -181,6 +181,19 @@
         #password-list tr:nth-child(even) {
             background: #f9fafb;
         }
+        /* Boutons "Voir" et "Supprimer" même taille */
+        .table-action-btn {
+            width: 90px;
+            height: 36px;
+            min-width: 90px;
+            max-width: 90px;
+            padding: 0;
+            margin: 0 4px 0 0;
+            font-size: 0.97em;
+            border-radius: 6px;
+            display: inline-block;
+            vertical-align: middle;
+        }
     </style>
 </head>
 <body>
@@ -454,8 +467,8 @@
                                     <span id="pwd-${index}">*****</span>
                                 </td>
                                 <td>
-                                    <button style="width:auto;padding:4px 10px;font-size:0.97em;" onclick="togglePassword(${index}, '${item.password}')">Voir</button>
-                                    <button style="width:auto;padding:4px 10px;font-size:0.97em;background:#ef4444;margin-left:6px;" onclick="deletePassword('${item.site}','${item.account}')">Supprimer</button>
+                                    <button class="table-action-btn" onclick="togglePassword(${index}, '${item.password}')">Voir</button>
+                                    <button class="table-action-btn" style="background:#ef4444;color:#fff;" onclick="deletePassword('${item.site}','${item.account}')">Supprimer</button>
                                 </td>
                             </tr>
                         `;
