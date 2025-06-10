@@ -1,12 +1,27 @@
 # Projet_Annuel
 
-## Lancer le projet avec Docker
+## Installation et mise en place de l'application
+
+### 1. Télécharger le projet
+
+- Cliquez sur le bouton **"Code"** de la page GitHub du projet, puis **Download ZIP**.
+- Décompressez l'archive ZIP sur votre ordinateur.
+- Ou bien, clonez le dépôt avec :
+  ```sh
+  git clone https://github.com/BelmonteLucas/Projet_Annuel.git
+  ```
+
+### 2. Prérequis
+
+- [Docker](https://www.docker.com/products/docker-desktop) et [Docker Compose](https://docs.docker.com/compose/) installés sur votre machine.
+
+### 3. Lancer le projet avec Docker
 
 1. Ouvrez un terminal.
 2. Placez-vous dans le dossier contenant `docker-compose.yml` :
 
    ```sh
-   cd "c:\chemin_vers_le_dossier\Projet_Annuel\Projet_Annuel"
+   cd "c:\chemin_vers_le_dossier\Projet_Annuel"
    ```
 
 3. Lancez la commande :
@@ -20,11 +35,9 @@
 > ```
 > Projet_Annuel/
 > ├─ docker-compose.yml
-> └─ Projet_Annuel/
->     └─ ...
+> └─ ...
 > ```
-> placez-vous dans `Projet_Annuel` pour lancer la commande.  
-> Si le fichier est dans `Projet_Annuel\Projet_Annuel`, placez-vous dans ce dossier.
+> placez-vous dans `Projet_Annuel` pour lancer la commande.
 
 ## Accéder à l'application
 
@@ -69,25 +82,43 @@ Une fois les conteneurs démarrés :
 
 3. Dans l'interface web :
    - Créez un compte, connectez-vous, ajoutez un mot de passe, vérifiez que la liste s'affiche et que la suppression fonctionne.
-
+   - Vous pouvez gérer plusieurs comptes pour un même site (identifiant + site + mot de passe).
+   - Les mots de passe doivent être complexes (voir l'interface pour les critères).
+   - Les boutons et champs sont alignés pour une meilleure lisibilité.
+   - Vous pouvez supprimer tous les mots de passe d'un coup.
 
 ## Pour faire les commits
-1. Changer de branche ex. :
-git checkout -b le-nom-de-notre-branche
 
-2. Faites vos modifications
+1. Créez une nouvelle branche :
+   ```sh
+   git checkout -b le-nom-de-notre-branche
+   ```
 
-3. Faites un commit avec un message explicite ex. :
-git add "le-nom-de-l'element" / "." pour tout ajouter
-git commit -m "Mise à jour du README.md"
+2. Faites vos modifications.
 
-4. Faites un push pour envoyer vos modifications sur le serveur distant vers le main :
-git push origin main
+3. Ajoutez et validez vos modifications :
+   ```sh
+   git add .
+   git commit -m "Votre message de commit"
+   ```
 
-- Créez une Pull Request pour que les autres puissent voir vos modifications et les valider
-- Une fois que la Pull Request a été validée, vous pouvez supprimer la branche d
+4. Poussez vos modifications sur le serveur distant :
+   ```sh
+   git push origin le-nom-de-notre-branche
+   ```
 
+5. Créez une Pull Request pour que les autres puissent voir vos modifications et les valider.
 
-- Pour supprimer la branche, vous pouvez utiliser la commande suivante : `git branch
+6. Une fois la Pull Request validée, vous pouvez supprimer la branche distante si besoin :
+   ```sh
+   git push origin --delete le-nom-de-notre-branche
+   ```
 
-- Pour eviter que le git nous modifie wait-for-it.sh , nous allons utiliser la commande suivante : "git config --global core.autocrlf input" def
+- Pour éviter que git modifie les fins de ligne de `wait-for-it.sh` :
+   ```sh
+   git config --global core.autocrlf input
+   ```
+
+---
+
+> Pour toute question technique ou problème de démarrage, consultez la documentation du projet ou contactez les mainteneurs.
