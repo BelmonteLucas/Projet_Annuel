@@ -10,7 +10,18 @@ import base64
 from passlib.context import CryptContext
 from fastapi.middleware.cors import CORSMiddleware
 
-DATABASE_URL = os.getenv("DATABASE_URL")
+# --- NEW: Read DB password from secrets file and build DATABASE_URL ---
+def get_db_password():
+    with open(os.path.join(os.path.dirname(__file__), '../../secrets/db_password.txt'), 'r') as f:
+        return f.read().strip()
+
+DB_USER = os.getenv("DB_USER", "postgres")
+DB_HOST = os.getenv("DB_HOST", "db")
+DB_PORT = os.getenv("DB_PORT", "5432")
+DB_NAME = os.getenv("DB_NAME", "postgres")
+DB_PASSWORD = get_db_password()
+DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+# --- END NEW ---
 
 engine = create_engine(DATABASE_URL)
 Session = sessionmaker(bind=engine)

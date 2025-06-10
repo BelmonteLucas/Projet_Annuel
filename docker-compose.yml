@@ -6,12 +6,14 @@ services:
     container_name: postgres
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: example
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
       POSTGRES_DB: postgres
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    secrets:
+      - db_password
 
   backend:
     build: ./backend
@@ -54,3 +56,7 @@ services:
 volumes:
   pgdata:
   pgadmin-data:
+
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt
