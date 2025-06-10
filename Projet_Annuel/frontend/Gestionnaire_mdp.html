@@ -6,117 +6,209 @@
     <title>Gestionnaire de Mots de Passe</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 20px;
-            background-color: #f4f4f4;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #e0e7ff 0%, #f4f4f4 100%);
+            margin: 0;
+            min-height: 100vh;
         }
-        #password-list, #auth-container, #app, #setup-container {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-            max-width: 400px;
-            margin: auto;
+        .topbar {
+            background: #3b82f6;
+            color: #fff;
+            padding: 18px 0 18px 0;
+            text-align: center;
+            font-size: 1.7em;
+            font-weight: bold;
+            letter-spacing: 1px;
+            box-shadow: 0 2px 8px rgba(59,130,246,0.07);
+            position: relative;
+        }
+        .logout-btn {
+            position: absolute;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #ef4444;
+            color: #fff;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background 0.2s;
+            width: auto;
+            min-width: 0;
+            box-shadow: none;
+            margin: 0;
+            display: inline-block;
+        }
+        .logout-btn:hover {
+            background: #b91c1c;
+        }
+        .card {
+            background: #fff;
+            margin: 40px auto 0 auto;
+            padding: 32px 28px 28px 28px;
+            border-radius: 18px;
+            box-shadow: 0 6px 32px rgba(59,130,246,0.10), 0 1.5px 4px rgba(0,0,0,0.04);
+            max-width: 410px;
+            min-width: 320px;
+            transition: box-shadow 0.2s;
+            display: none;
+        }
+        #auth-choice.card {
+            display: block;
+        }
+        .card h2 {
+            margin-bottom: 18px;
+            color: #3b82f6;
+            font-weight: 600;
         }
         input {
-            width: 90%;
-            padding: 10px;
-            margin: 10px 5px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0 18px 0;
+            border: 1.5px solid #d1d5db;
+            border-radius: 7px;
+            font-size: 1em;
+            transition: border 0.2s;
+        }
+        input:focus {
+            border: 1.5px solid #3b82f6;
+            outline: none;
         }
         button {
-            background: #007BFF;
+            background: #3b82f6;
             color: white;
             border: none;
-            padding: 10px;
-            border-radius: 5px;
+            padding: 12px 0;
+            border-radius: 7px;
             cursor: pointer;
             width: 100%;
-            margin-top: 10px;
+            margin-top: 8px;
+            font-size: 1.08em;
+            font-weight: 500;
+            transition: background 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px rgba(59,130,246,0.07);
         }
         button:hover {
-            background: #0056b3;
+            background: #2563eb;
         }
         .password-item {
             display: flex;
+            align-items: center;
             justify-content: space-between;
-            background: #eee;
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 5px;
+            background: #f1f5f9;
+            padding: 12px 14px;
+            border-radius: 7px;
+            margin-top: 8px;
+            font-size: 1em;
+            box-shadow: 0 1px 4px rgba(59,130,246,0.04);
         }
-        img {
-            width: 400px;
-            height: 400px;
-            margin: 10px 0;
+        .password-item button {
+            width: auto;
+            margin: 0 0 0 8px;
+            padding: 6px 12px;
+            font-size: 0.98em;
+            background: #6366f1;
+            border-radius: 5px;
+        }
+        .password-item button:hover {
+            background: #4338ca;
+        }
+        .password-label {
+            font-weight: 500;
+            color: #334155;
+        }
+        .logo-img {
+            width: 120px;
+            height: 120px;
+            margin: 18px 0 10px 0;
+            border-radius: 50%;
+            box-shadow: 0 2px 12px rgba(59,130,246,0.10);
+        }
+        @media (max-width: 500px) {
+            .card { min-width: unset; width: 98vw; padding: 18px 4vw; }
+            .topbar { font-size: 1.2em; }
         }
     </style>
 </head>
 <body>
-    <div id="auth-choice">
+    <div class="topbar">
+        Gestionnaire de Mots de Passe
+        <button id="logout-btn" class="logout-btn" style="display:none;" onclick="logout()">Déconnexion</button>
+    </div>
+
+    <div id="auth-choice" class="card" style="display:block;">
         <h2>Bienvenue</h2>
-        <img src="images/HoneyPot.png" alt="Logo">
+        <img src="images/HoneyPot.png" alt="Logo" class="logo-img" style="display:block;margin-left:auto;margin-right:auto;">
         <button onclick="showSignup()">Créer un compte</button>
         <button onclick="showLogin()">Se connecter</button>
     </div>
 
-    <div id="setup-container" style="display: none;">
+    <div id="setup-container" class="card">
         <h2>Créer un compte</h2>
+        <input type="text" id="new-username" placeholder="Identifiant">
         <input type="password" id="new-master-password" placeholder="Nouveau mot de passe ">
         <button onclick="setMasterPassword()">Enregistrer</button>
     </div>
 
-    <div id="auth-container" style="display: none;">
+    <div id="auth-container" class="card">
         <h2>Connexion</h2>
+        <input type="text" id="login-username" placeholder="Identifiant">
         <input type="password" id="master-password" placeholder="Mot de passe ">
         <button onclick="authenticate()">Se connecter</button>
     </div>
 
-    <div id="app" style="display: none;">
-        <h2>Gestionnaire de Mots de Passe</h2>
+    <div id="app" class="card">
+        <h2 style="margin-top:0;">Vos mots de passe</h2>
         <input type="text" id="site" placeholder="Nom du site">
         <input type="password" id="password" placeholder="Mot de passe">
         <button onclick="generatePassword()">Générer un mot de passe</button>
         <button onclick="addPassword()">Ajouter</button>
-        <div id="password-list"></div>
+        <div id="password-list" style="margin-top:18px;"></div>
     </div>
 
     <script>
+        // Affiche uniquement le conteneur demandé, cache les autres
+        function showOnly(id) {
+            ["auth-choice", "setup-container", "auth-container", "app"].forEach(function(div) {
+                document.getElementById(div).style.display = (div === id) ? "block" : "none";
+            });
+            document.getElementById("logout-btn").style.display = (id === "app") ? "inline-block" : "none";
+        }
+
         function showSignup() {
-            document.getElementById("auth-choice").style.display = "none";
-            document.getElementById("setup-container").style.display = "block";
+            showOnly("setup-container");
         }
 
         function showLogin() {
-            if (localStorage.getItem("masterPassword")) {
-                document.getElementById("auth-choice").style.display = "none";
-                document.getElementById("auth-container").style.display = "block";
+            if (localStorage.getItem("masterPassword") && localStorage.getItem("username")) {
+                showOnly("auth-container");
             } else {
                 alert("Aucun compte trouvé, veuillez créer un compte.");
             }
         }
 
         function setMasterPassword() {
+            const newUsername = document.getElementById("new-username").value;
             const newPassword = document.getElementById("new-master-password").value;
-            if (!newPassword) return alert("Veuillez saisir un mot de passe");
+            if (!newUsername || !newPassword) return alert("Veuillez saisir un identifiant et un mot de passe");
 
-            const hashedKey = btoa(newPassword);
-            localStorage.setItem("masterPassword", hashedKey);
+            const hashedKey = btoa(newUsername + ":" + newPassword);
+            localStorage.setItem("masterPassword", btoa(newPassword));
+            localStorage.setItem("username", newUsername);
             localStorage.setItem("currentUser", hashedKey);
 
             fetch("http://localhost:8000/register", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username: hashedKey, password: newPassword })
+                body: JSON.stringify({ username: newUsername, password: newPassword })
             })
             .then(res => res.json())
             .then(data => {
                 if (data.message === "Utilisateur créé avec succès") {
                     alert("Compte créé !");
-                    document.getElementById("setup-container").style.display = "none";
-                    document.getElementById("auth-container").style.display = "block";
+                    showOnly("auth-container");
                 } else {
                     alert("Erreur : " + (data.detail || JSON.stringify(data)));
                 }
@@ -125,17 +217,22 @@
         }
 
         function authenticate() {
+            const enteredUsername = document.getElementById("login-username").value;
             const enteredPassword = document.getElementById("master-password").value;
-            const hashedKey = btoa(enteredPassword);
+            const savedUsername = localStorage.getItem("username");
             const savedPassword = localStorage.getItem("masterPassword");
 
-            if (hashedKey === savedPassword) {
-                localStorage.setItem("currentUser", hashedKey);
-                document.getElementById("auth-container").style.display = "none";
-                document.getElementById("app").style.display = "block";
+            if (!enteredUsername || !enteredPassword) {
+                alert("Veuillez saisir l'identifiant et le mot de passe");
+                return;
+            }
+
+            if (enteredUsername === savedUsername && btoa(enteredPassword) === savedPassword) {
+                localStorage.setItem("currentUser", btoa(enteredUsername + ":" + enteredPassword));
+                showOnly("app");
                 displayPasswords();
             } else {
-                alert("Mot de passe incorrect");
+                alert("Identifiant ou mot de passe incorrect");
             }
         }
 
@@ -182,7 +279,8 @@
                         const div = document.createElement("div");
                         div.classList.add("password-item");
                         div.innerHTML = `
-                            ${item.site}: <span id="pwd-${index}">*****</span>
+                            <span class="password-label">${item.site}:</span>
+                            <span id="pwd-${index}">*****</span>
                             <button onclick="togglePassword(${index}, '${item.password}')">Voir</button>
                             <button onclick="deletePassword('${item.site}')">Supprimer</button>
                         `;
@@ -214,7 +312,13 @@
             })
             .catch(err => alert("Erreur suppression : " + err.message));
         }
+
+        function logout() {
+            localStorage.removeItem("currentUser");
+            document.getElementById("app").style.display = "none";
+            document.getElementById("auth-choice").style.display = "block";
+            document.getElementById("logout-btn").style.display = "none";
+        }
     </script>
 </body>
 </html>
-
