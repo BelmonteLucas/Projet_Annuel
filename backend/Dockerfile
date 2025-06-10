@@ -5,10 +5,13 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+# Copie uniquement le contenu du dossier backend dans /app
+COPY . /app
 
-# Ajout du script wait-for-it.sh
-COPY wait-for-it.sh .
-RUN chmod +x wait-for-it.sh
+# Copie le dossier secrets dans /app/secrets
+COPY ../secrets /app/secrets
+
+COPY wait-for-it.sh /app/wait-for-it.sh
+RUN chmod +x /app/wait-for-it.sh
 
 CMD ["./wait-for-it.sh", "db:5432", "--", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

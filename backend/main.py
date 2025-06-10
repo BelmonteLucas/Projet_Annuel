@@ -12,8 +12,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 # --- NEW: Read DB password from secrets file and build DATABASE_URL ---
 def get_db_password():
-    with open(os.path.join(os.path.dirname(__file__), '../../secrets/db_password.txt'), 'r') as f:
-        return f.read().strip()
+    # Chemin absolu dans le conteneur Docker
+    return open("/app/secrets/db_password.txt", "r").read().strip()
 
 DB_USER = os.getenv("DB_USER", "postgres")
 DB_HOST = os.getenv("DB_HOST", "db")
