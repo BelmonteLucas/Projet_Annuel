@@ -8,7 +8,7 @@
 - Décompressez l'archive ZIP sur votre ordinateur.
 - Ou bien, clonez le dépôt avec :
   ```sh
-  git clone https://github.com/votre-utilisateur/votre-repo.git
+  git clone https://github.com/BelmonteLucas/Projet_Annuel.git
   ```
 
 ### 2. Prérequis
@@ -21,7 +21,7 @@
 2. Placez-vous dans le dossier contenant `docker-compose.yml` :
 
    ```sh
-   cd "c:\chemin_vers_le_dossier\Projet_Annuel\Projet_Annuel"
+   cd "c:\chemin_vers_le_dossier\Projet_Annuel"
    ```
 
 3. Lancez la commande :
@@ -35,11 +35,9 @@
 > ```
 > Projet_Annuel/
 > ├─ docker-compose.yml
-> └─ Projet_Annuel/
->     └─ ...
+> └─ ...
 > ```
-> placez-vous dans `Projet_Annuel` pour lancer la commande.  
-> Si le fichier est dans `Projet_Annuel\Projet_Annuel`, placez-vous dans ce dossier.
+> placez-vous dans `Projet_Annuel` pour lancer la commande.
 
 ## Accéder à l'application
 
