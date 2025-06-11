@@ -37,17 +37,34 @@ cd Projet_Annuel
 
 ### 3. Configuration du mot de passe de la base de données
 
-Un fichier d’exemple est déjà présent :  
-`/secrets/db_password.txt`
+Le mot de passe de la base de données est **centralisé et sécurisé** dans le fichier :  
+`secrets/db_password.txt`
 
-**Avant de lancer l’application, modifiez ce fichier et mettez-y un mot de passe fort de votre choix.**
+- **Écrivez le mot de passe souhaité sur la première ligne du fichier** (pas de commentaire sur la première ligne).
+- Ce mot de passe sera utilisé automatiquement par :
+  - **PostgreSQL** (service `db`)
+  - **Le backend** (service `backend`)
+  - **pgAdmin** (service `pgadmin`, accès sans saisie manuelle du mot de passe)
 
-1. Ouvrez `secrets/db_password.txt`
-2. Remplacez le contenu par votre mot de passe (ex : `MonMotDePasseSecurise2024!`)
-3. Ce fichier est ignoré par git après le clonage, vos modifications restent privées.
-4. Utilisez ce mot de passe pour accéder à la base PostgreSQL via pgAdmin.
+**Exemple :**
+```
+monSuperMotDePasse2024!
+# Ceci est un commentaire (optionnel, ignoré)
+```
 
-> ⚠️ Si vous changez ce mot de passe, supprimez les volumes Docker pour réinitialiser la base, puis relancez les conteneurs.
+Pour changer le mot de passe :
+1. Modifiez la première ligne de `secrets/db_password.txt`.
+2. Supprimez les volumes pour réinitialiser la base :
+   ```sh
+   docker-compose down -v
+   ```
+3. Relancez l’application :
+   ```sh
+   docker-compose up -d
+   ```
+
+> **Astuce :**  
+> pgAdmin est déjà préconfiguré pour se connecter à la base sans avoir à saisir le mot de passe, grâce à la génération dynamique du fichier `.pgpass`.
 
 ---
 

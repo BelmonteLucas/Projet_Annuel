@@ -3,60 +3,79 @@ version: '3.8'
 services:
   db:
     image: postgres:13
-    container_name: postgres
+    container_name: postgres_db_service # Nom de conteneur plus descriptif
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password # PostgreSQL lira le mdp depuis ce fichier secret
       POSTGRES_DB: postgres
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     secrets:
-      - db_password
+      - db_password # Rendre le secret 'db_password' disponible pour ce service
+    healthcheck: # Ajout d'un healthcheck pour s'assurer que la DB est prête
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   backend:
     build: ./backend
-    container_name: backend
+    container_name: backend_api_service # Nom de conteneur plus descriptif
     depends_on:
-      - db
+      db: # S'assurer que 'db' est démarré et sain avant 'backend'
+        condition: service_healthy
     ports:
       - "8000:8000"
     environment:
-      DATABASE_URL: postgresql://postgres:example@db:5432/postgres
+      # Ces variables sont utilisées par main.py pour construire DATABASE_URL
+      DB_USER: postgres
+      DB_HOST: db # Le nom du service de base de données
+      DB_PORT: 5432
+      DB_NAME: postgres
+      # PAS DE DATABASE_URL ici, elle est construite dans main.py avec le secret
+    secrets:
+      - db_password # Rendre le secret 'db_password' disponible pour le backend (lu dans /run/secrets/db_password)
 
   pgadmin:
     image: dpage/pgadmin4
-    container_name: pgadmin
+    container_name: pgadmin_service 
     depends_on:
-      - db
+      db: 
+        condition: service_healthy
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_DEFAULT_PASSWORD: admin 
       PGADMIN_CONFIG_SERVER_MODE: 'False'
     ports:
       - "5050:80"
     volumes:
       - pgadmin-data:/var/lib/pgadmin
-      - ./pgadmin-config/servers.json:/pgadmin4/servers.json
-      - ./pgadmin-config/pgpass:/pgpassfile
+      - ./pgadmin-config/servers.json:/pgadmin4/servers.json # Toujours nécessaire
+      - ./pgadmin-config/entrypoint-pgadmin.sh:/custom-entrypoint.sh # Montez votre script personnalisé
+      # La ligne suivante pour monter pgadmin-config/pgpass est supprimée ou commentée :
+      # - ./pgadmin-config/pgpass:/pgpassfile 
+    secrets:
+      - db_password # Le service pgAdmin a besoin d'accéder à ce secret
+    entrypoint: ["/bin/sh", "/custom-entrypoint.sh"] # Définissez le script personnalisé comme point d'entrée
 
   frontend:
-    image: python:3.10-slim
-    container_name: frontend
+    image: python:3.10-slim # Utilisation d'une image slim pour réduire la taille
+    container_name: frontend_service # Nom de conteneur plus descriptif
     working_dir: /app
     volumes:
-      - ./frontend:/app
-    command: python3 -m http.server 5500
+      - ./frontend:/app # Monte le dossier frontend local dans le conteneur
+    command: python3 -m http.server 5500 --directory /app # Spécifier le répertoire à servir
     ports:
       - "5500:5500"
     depends_on:
-      - backend
+      - backend # Le frontend dépend du backend
 
 volumes:
-  pgdata:
-  pgadmin-data:
+  pgdata: # Volume pour la persistance des données PostgreSQL
+  pgadmin-data: # Volume pour la persistance des données pgAdmin
 
 secrets:
   db_password:
-    file: ./secrets/db_password.txt
+    file: ./secrets/db_password.txt # Chemin vers le fichier contenant le mot de passe de la DB
