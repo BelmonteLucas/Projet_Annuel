@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestionnaire de Mots de Passe</title>
+    <title>Gestionnaire de Mot de Passe</title>
     <style>
         /* --- Styles généraux et mise en page --- */
         body {
@@ -17,7 +17,7 @@
             color: #fff;
             padding: 18px 0 18px 0;
             text-align: center;
-            font-size: 1.7em;
+            font-size: 2.3em;
             font-weight: bold;
             letter-spacing: 1px;
             box-shadow: 0 2px 8px rgba(59,130,246,0.07);
@@ -64,6 +64,15 @@
             color: #3b82f6;
             font-weight: 600;
         }
+
+        .card h1 {
+            margin-top: 1px;
+            color: #000000;
+            font-weight: 700;       /* plus gras que 600 */
+            font-size: 40px;        /* augmente la taille */
+            text-align: center;     /* si tu veux centrer aussi */
+        }
+
         /* --- Styles des champs de saisie et boutons --- */
         input {
             width: 100%;
@@ -221,13 +230,13 @@
 <body>
     <!-- Barre supérieure avec le titre et le bouton déconnexion -->
     <div class="topbar">
-        Gestionnaire de Mots de Passe
+        Gestionnaire de Mot de Passe
         <button id="logout-btn" class="logout-btn" style="display:none;" onclick="logout()">Déconnexion</button>
     </div>
 
     <!-- Page d'accueil : choix connexion ou création de compte -->
     <div id="auth-choice" class="card" style="display:block;">
-        <h2>Bienvenue</h2>
+        <h1>Bienvenue</h1>
         <img src="images/HoneyPot.png" alt="Logo" class="logo-img" style="display:block;margin-left:auto;margin-right:auto;">
         <button onclick="showSignup()">Créer un compte</button>
         <button onclick="showLogin()">Se connecter</button>
@@ -235,7 +244,7 @@
 
     <!-- Formulaire de création de compte -->
     <div id="setup-container" class="card" style="display: none;">
-        <h2>Créer un compte</h2>
+        <h1>Créer un compte</h1>
         <input type="text" id="new-username" placeholder="Identifiant">
         <input type="password" id="new-master-password" placeholder="Nouveau mot de passe " oninput="updatePasswordHint()">
         <div id="password-hint" style="font-size:0.98em;display:none;margin-bottom:10px;text-align:left;"></div>
@@ -247,7 +256,7 @@
 
     <!-- Formulaire de connexion -->
     <div id="auth-container" class="card">
-        <h2>Connexion</h2>
+        <h1>Connexion</h1>
         <input type="text" id="login-username" placeholder="Identifiant">
         <input type="password" id="master-password" placeholder="Mot de passe ">
         <button onclick="authenticate()">Se connecter</button>
@@ -258,7 +267,7 @@
 
     <!-- Gestionnaire de mots de passe (après connexion) -->
     <div id="app" class="card">
-        <h2 style="margin-top:0;">Vos mots de passe</h2>
+        <h1>Vos mots de passe</h1>
         <!-- Champs de saisie empilés -->
         <input type="text" id="account-username" placeholder="Identifiant du compte">
         <div style="position:relative;">
@@ -550,6 +559,11 @@
         // Déconnexion utilisateur
         function logout() {
             localStorage.removeItem("currentUser");
+
+            document.getElementById("account-username").value = "";
+            document.getElementById("site-link").value = "";
+            document.getElementById("password").value = "";
+
             document.getElementById("app").style.display = "none";
             document.getElementById("auth-choice").style.display = "block";
             document.getElementById("logout-btn").style.display = "none";
