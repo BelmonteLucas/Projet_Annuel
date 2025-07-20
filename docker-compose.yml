@@ -110,6 +110,7 @@ services:
     cap_add:
       - NET_ADMIN                                          # Privilèges réseau pour capturer le trafic
     network_mode: host                                     # Accès direct au réseau de l'hôte
+    command: ["monitor"]                                   # Mode monitoring pour tests et développement
     volumes:
       - ./snort/rules:/etc/snort/rules:ro                 # Règles de détection personnalisées
       - ./snort/snort.conf:/etc/snort/snort.conf:ro       # Configuration Snort
@@ -150,6 +151,12 @@ services:
     ports:
       - "9200:9200"                                        # API REST Elasticsearch
       - "9300:9300"                                        # Port de communication inter-nœuds
+    healthcheck:                                           # Vérification de l'état de santé d'Elasticsearch
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=1s || exit 1"]
+      interval: 30s                                        # Vérification toutes les 30s
+      timeout: 10s                                         # Timeout de 10s par vérification
+      retries: 5                                           # 5 tentatives avant échec
+      start_period: 40s                                    # Délai initial avant première vérification
     networks:
       - backend_network
 
