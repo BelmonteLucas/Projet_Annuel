@@ -1,4 +1,4 @@
-print("✅ main.py is running")
+print("INFO: main.py is running")
 
 from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
