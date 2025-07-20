@@ -8,8 +8,6 @@
 # - Stack ELK pour l'analyse des logs et la visualisation
 # =============================================================================
 
-version: '3.8'
-
 services:
   # ==========================================================================
   # BASE DE DONNÉES - PostgreSQL
@@ -117,24 +115,42 @@ services:
       - snort_logs:/var/log/snort                         # Stockage des logs de détection
 
   # ==========================================================================
-  # WAZUH HIDS - Système de détection d'intrusion basé sur l'hôte
+  # WAZUH HIDS - Surveillance d'intégrité des fichiers
   # ==========================================================================
-  # Wazuh pour surveillance des fichiers système et détection d'anomalies
-  # Complément de Snort pour une sécurité multicouche
-  wazuh:
-    build: ./wazuh                                         # Construction depuis le Dockerfile Wazuh local
+  # Version simplifiée de Wazuh pour les tests de sécurité
+  wazuh_manager:
+    image: wazuh/wazuh-manager:4.7.5
     container_name: wazuh_manager
+    hostname: wazuh-manager
+    restart: unless-stopped
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 655360
+        hard: 655360
     ports:
-      - "1514:1514/tcp"                                    # Port pour agents Wazuh
-      - "55000:55000/tcp"                                  # API Wazuh pour communication
+      - "1515:1515"                                      # Communication des agents Wazuh
+      - "1514:1514/udp"                                  # Réception des logs syslog
+      - "55000:55000"                                    # API RESTful Wazuh
+    environment:
+      - WAZUH_MANAGER_SERVICE=wazuh-manager
+      - WAZUH_API_SERVICE=wazuh-api
+      - FILEBEAT_SERVICE=filebeat
+      - INDEXER_URL=https://elasticsearch:9200
+      - INDEXER_USERNAME=""
+      - INDEXER_PASSWORD=""
+      - FILEBEAT_SSL_VERIFICATION_MODE=none
     volumes:
-      - wazuh_data:/var/ossec                              # Données Wazuh persistantes
-      - ./wazuh/config/ossec.conf:/var/ossec/etc/ossec.conf:ro    # Configuration OSSEC/Wazuh
-      - wazuh_logs:/var/log/wazuh                          # Logs Wazuh
+      - wazuh_data:/var/ossec/data
+      - wazuh_logs:/var/ossec/logs
+      - ./backend:/host_files:ro                         # Surveillance des fichiers backend
+    depends_on:
+      elasticsearch:
+        condition: service_healthy                       # Attendre qu'Elasticsearch soit prêt
     networks:
-      - backend_network                                    # Réseau interne sécurisé
-
-  # ==========================================================================
+      - backend_network  # ==========================================================================
   # ELASTICSEARCH - Moteur de recherche et d'analyse
   # ==========================================================================
   # Base de données NoSQL pour indexation et recherche des logs
@@ -156,7 +172,6 @@ services:
       interval: 30s                                        # Vérification toutes les 30s
       timeout: 10s                                         # Timeout de 10s par vérification
       retries: 5                                           # 5 tentatives avant échec
-      start_period: 40s                                    # Délai initial avant première vérification
     networks:
       - backend_network
 

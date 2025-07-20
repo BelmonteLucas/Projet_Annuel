@@ -13,6 +13,19 @@ SNORT_CONFIG="/etc/snort/snort.conf"
 LOG_DIR="/var/log/snort"
 ALERT_MODE="fast"
 
+# Créer les répertoires nécessaires et définir les permissions
+echo "Configuration des répertoires et permissions..."
+mkdir -p $LOG_DIR
+
+# Changer temporairement vers l'utilisateur root pour les permissions si nécessaire
+if [ "$(id -u)" != "0" ]; then
+    echo "Démarrage en tant qu'utilisateur non-root, création des répertoires sans chown"
+else
+    chown -R snort:snort $LOG_DIR 2>/dev/null || echo "Warning: cannot change ownership, continuing..."
+fi
+
+chmod 755 $LOG_DIR 2>/dev/null || echo "Warning: cannot change permissions, continuing..."
+
 # Fonction d'aide
 show_help() {
     echo "Snort IDS Container - Options disponibles:"

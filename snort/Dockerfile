@@ -53,9 +53,6 @@ EXPOSE 8080
 # Test de configuration (non-bloquant)
 RUN snort -T -c /etc/snort/snort.conf -q 2>/dev/null || echo "Config test done"
 
-# Utilisateur non-privilégié pour l'exécution
-USER ${SNORT_USER}
-
 # Script d'entrée intelligent
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
