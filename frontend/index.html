@@ -3,68 +3,1158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestionnaire de Mots de Passe</title>
-    <link rel="stylesheet" href="style.css">
+    <title>SecureVault Pro Max - Gestionnaire de mots de passe</title>
+    <style>
+        /* --- Import Google Fonts --- */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        /* --- Variables CSS pour la cohérence --- */
+        :root {
+            --primary-color: #667eea;
+            --primary-dark: #5a67d8;
+            --secondary-color: #764ba2;
+            --accent-color: #f093fb;
+            --success-color: #48bb78;
+            --error-color: #f56565;
+            --warning-color: #ed8936;
+            --dark-color: #2d3748;
+            --light-color: #f7fafc;
+            --border-color: #e2e8f0;
+            --text-primary: #2d3748;
+            --text-secondary: #718096;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04);
+        }
+
+        /* --- Reset et styles généraux --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.6;
+            position: relative;
+        }
+
+        /* --- Effet de particules en arrière-plan --- */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(120, 119, 198, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* --- Barre supérieure moderne --- */
+        .topbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-primary);
+            padding: 20px 30px;
+            font-size: 1.8em;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            box-shadow: var(--shadow-md);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .topbar .title {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+        }
+
+        .topbar .title .emoji {
+            background: none !important;
+            background-clip: unset !important;
+            -webkit-background-clip: unset !important;
+            -webkit-text-fill-color: unset !important;
+            color: #f39c12 !important;
+            filter: none !important;
+            display: inline-block !important;
+        }
+
+        .logout-btn {
+            background: linear-gradient(135deg, var(--error-color), #e53e3e);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.85em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-sm);
+            min-width: 160px;
+            max-width: 220px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .logout-btn:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        /* --- Cartes modernes avec glassmorphism --- */
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin: 30px auto;
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: var(--shadow-xl);
+            max-width: 500px;
+            min-width: 320px;
+            transition: all 0.3s ease;
+            display: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color), var(--secondary-color));
+            border-radius: 24px 24px 0 0;
+        }
+
+        #auth-choice.card {
+            display: block;
+            max-width: 400px;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .card h1 {
+            margin-bottom: 30px;
+            color: var(--text-primary);
+            font-weight: 700;
+            font-size: 2.2em;
+            text-align: center;
+            letter-spacing: -0.025em;
+        }
+
+        .card h2 {
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 1.5em;
+        }
+
+        /* --- Logo avec animation --- */
+        .logo-img {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 30px auto;
+            border-radius: 50%;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
+            display: block;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .logo-img:hover {
+            transform: scale(1.05) rotate(5deg);
+            box-shadow: var(--shadow-xl);
+        }
+
+        /* --- Champs de saisie modernes --- */
+        input {
+            width: 100%;
+            padding: 16px 20px;
+            margin: 12px 0 20px 0;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: 400;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+            color: var(--text-primary);
+        }
+
+        input:focus {
+            border: 2px solid var(--primary-color);
+            outline: none;
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        input::placeholder {
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        /* --- Boutons modernes avec gradients --- */
+        button {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            border: none;
+            padding: 16px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 12px;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-md);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: all 0.5s ease;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        /* --- Boutons spécialisés --- */
+        .btn-danger {
+            background: linear-gradient(135deg, var(--error-color), #e53e3e);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success-color), #38a169);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--text-secondary), #4a5568);
+        }
+
+        /* --- Gestionnaire principal avec layout amélioré --- */
+        #app.card {
+            max-width: 900px;
+            padding: 50px;
+        }
+
+        #app h1 {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 40px;
+        }
+
+        /* --- Formulaire en grid moderne --- */
+        .form-grid {
+            display: grid;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-primary);
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* --- Actions en grille responsive --- */
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .actions-grid button {
+            margin: 0;
+            padding: 14px 20px;
+            font-size: 0.95em;
+        }
+
+        /* --- Container pour champs mot de passe amélioré --- */
+        .password-container {
+            position: relative;
+            display: block;
+            width: 100%;
+        }
+        
+        .password-container input {
+            padding-right: 50px;
+            width: 100%;
+        }
+        
+        .password-container input::-ms-reveal {
+            display: none;
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            cursor: pointer;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .password-toggle:hover {
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateY(-50%) scale(1.1);
+        }
+        
+        .password-toggle svg {
+            display: block;
+            width: 20px;
+            height: 20px;
+            fill: var(--text-secondary);
+            transition: fill 0.3s ease;
+        }
+        
+        .password-toggle:hover svg {
+            fill: var(--primary-color);
+        }
+
+        /* --- Tableau moderne avec style élégant --- */
+        #password-list {
+            margin-top: 40px;
+        }
+
+        #password-list table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+        }
+
+        #password-list th {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        #password-list td {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        #password-list tr:last-child td {
+            border-bottom: none;
+        }
+
+        #password-list tr:nth-child(even) {
+            background: rgba(102, 126, 234, 0.02);
+        }
+
+        #password-list tr:hover {
+            background: rgba(102, 126, 234, 0.05);
+            transform: scale(1.01);
+            transition: all 0.2s ease;
+        }
+
+        /* --- Boutons d'action du tableau --- */
+        .table-action-btn {
+            padding: 8px 16px;
+            margin: 0 4px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 500;
+            min-width: 80px;
+            transition: all 0.3s ease;
+        }
+
+        /* --- Suggestions améliorées --- */
+        #site-link-list {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            z-index: 10;
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+            margin-top: 4px;
+        }
+
+        #site-link-list div {
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        #site-link-list div:last-child {
+            border-bottom: none;
+        }
+
+        #site-link-list div:hover {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            transform: translateX(5px);
+        }
+
+        /* --- Indicateurs de complexité du mot de passe --- */
+        #password-hint {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 16px 0;
+            border-left: 4px solid var(--warning-color);
+            box-shadow: var(--shadow-sm);
+        }
+
+        #password-hint ul {
+            list-style: none;
+            margin: 8px 0 0 0;
+        }
+
+        #password-hint li {
+            padding: 4px 0;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+        }
+
+        #password-hint li::before {
+            content: '•';
+            margin-right: 8px;
+            font-size: 1.2em;
+        }
+
+        /* --- Messages d'erreur stylisés --- */
+        #add-error {
+            background: rgba(245, 101, 101, 0.1);
+            border: 1px solid rgba(245, 101, 101, 0.3);
+            color: var(--error-color);
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-top: 16px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        /* --- Liens stylisés --- */
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        a:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+
+        /* --- Responsive design amélioré --- */
+        @media (max-width: 768px) {
+            .card {
+                margin: 20px;
+                padding: 30px 25px;
+                max-width: none;
+            }
+
+            #app.card {
+                padding: 30px 25px;
+            }
+
+            .topbar {
+                font-size: 1.4em;
+                padding: 15px 20px;
+            }
+
+            .logout-btn {
+                padding: 8px 16px;
+                font-size: 0.8em;
+                min-width: 120px;
+                max-width: 150px;
+            }
+
+            .actions-grid {
+                grid-template-columns: 1fr;
+            }
+
+            #password-list table {
+                font-size: 0.85em;
+            }
+
+            .table-action-btn {
+                padding: 6px 12px;
+                font-size: 0.8em;
+                min-width: 70px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .card h1 {
+                font-size: 1.8em;
+            }
+
+            input, button {
+                padding: 14px 16px;
+            }
+
+            #password-list th, #password-list td {
+                padding: 12px 8px;
+            }
+
+            .topbar {
+                font-size: 1.2em;
+                padding: 12px 15px;
+            }
+
+            .topbar .title {
+                font-size: 1em;
+            }
+
+            .logout-btn {
+                padding: 6px 12px;
+                font-size: 0.75em;
+                min-width: 100px;
+                max-width: 130px;
+            }
+        }
+
+        /* --- Animations et transitions globales --- */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        /* --- États de chargement --- */
+        .loading {
+            position: relative;
+            pointer-events: none;
+        }
+
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--primary-color);
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            transform: translate(-50%, -50%);
+        }
+
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
-    <!-- Barre supérieure avec le titre et le bouton déconnexion -->
+    <!-- Barre supérieure moderne -->
     <div class="topbar">
-        Gestionnaire de Mots de Passe
-        <button id="logout-btn" class="logout-btn" style="display:none;" onclick="logout()">Déconnexion</button>
+        <div style="display: flex; align-items: center;">
+            <span style="color: #f39c12; margin-right: 8px; font-size: 1em;">🔐</span>
+            <span class="title">SecureVault Pro Max</span>
+        </div>
+        <button id="logout-btn" class="logout-btn" style="display:none;" onclick="logout()">
+            <span>🚪 Déconnexion</span>
+        </button>
     </div>
 
-    <!-- Page d'accueil : choix connexion ou création de compte -->
+    <!-- Page d'accueil moderne -->
     <div id="auth-choice" class="card" style="display:block;">
-        <h2>Bienvenue</h2>
-        <img src="images/HoneyPot.png" alt="Logo" class="logo-img" style="display:block;margin-left:auto;margin-right:auto;">
-        <button onclick="showSignup()">Créer un compte</button>
-        <button onclick="showLogin()">Se connecter</button>
+        <h1>✨ Bienvenue sur SecureVault</h1>
+        <img src="images/HoneyPot.png" alt="Logo SecureVault" class="logo-img">
+        <p style="text-align: center; color: var(--text-secondary); margin-bottom: 30px; font-size: 1.1em;">
+            Votre gestionnaire de mots de passe sécurisé et moderne
+        </p>
+        <button onclick="showSignup()" class="btn-success">
+            <span>🆕 Créer un compte</span>
+        </button>
+        <button onclick="showLogin()">
+            <span>🔑 Se connecter</span>
+        </button>
     </div>
 
-    <!-- Formulaire de création de compte -->
+    <!-- Formulaire de création de compte moderne -->
     <div id="setup-container" class="card" style="display: none;">
-        <h2>Créer un compte</h2>
-        <input type="text" id="new-username" placeholder="Identifiant">
-        <input type="password" id="new-master-password" placeholder="Nouveau mot de passe " oninput="updatePasswordHint()">
-        <div id="password-hint" style="font-size:0.98em;display:none;margin-bottom:10px;text-align:left;"></div>
-        <button onclick="setMasterPassword()">Enregistrer</button>
-        <div style="margin-top:10px;text-align:center;">
-            <a href="#" onclick="showLogin();return false;" style="color:#3b82f6;text-decoration:underline;font-size:0.98em;">Déjà un compte ? Se connecter</a>
+        <h1>📝 Créer votre compte</h1>
+        
+        <div class="form-group">
+            <label class="form-label">👤 Identifiant</label>
+            <input type="text" id="new-username" placeholder="Choisissez votre identifiant unique">
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">🔐 Mot de passe maître</label>
+            <div class="password-container">
+                <input type="password" id="new-master-password" placeholder="Créez un mot de passe sécurisé" oninput="updatePasswordHint()">
+                <span class="password-toggle" onclick="toggleNewPassword()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <path d="M12.015 7c4.751 0 8.063 3.012 9.504 4.636-1.401 1.837-4.713 5.364-9.504 5.364-4.42 0-7.93-3.536-9.478-5.407 1.493-1.647 4.817-4.593 9.478-4.593zm0-2c-7.569 0-12.015 6.551-12.015 6.551s4.835 7.449 12.015 7.449c7.733 0 11.985-7.449 11.985-7.449s-4.291-6.551-11.985-6.551zm-.015 3c-2.209 0-4 1.792-4 4 0 2.209 1.791 4 4s4-1.791 4-4c0-2.208-1.791-4-4-4z"/>
+                    </svg>
+                </span>
+            </div>
+        </div>
+        
+        <div id="password-hint" style="display:none;"></div>
+        
+        <button onclick="setMasterPassword()" class="btn-success">
+            <span>✅ Créer mon compte</span>
+        </button>
+        
+        <div style="margin-top:20px;text-align:center;">
+            <a href="#" onclick="showLogin();return false;">
+                <span>🔄 Déjà un compte ? Se connecter</span>
+            </a>
         </div>
     </div>
 
-    <!-- Formulaire de connexion -->
+    <!-- Formulaire de connexion moderne -->
     <div id="auth-container" class="card">
-        <h2>Connexion</h2>
-        <input type="text" id="login-username" placeholder="Identifiant">
-        <input type="password" id="master-password" placeholder="Mot de passe ">
-        <button onclick="authenticate()">Se connecter</button>
-        <div style="margin-top:10px;text-align:center;">
-            <a href="#" onclick="showSignup();return false;" style="color:#3b82f6;text-decoration:underline;font-size:0.98em;">Créer un compte</a>
+        <h1>🔐 Connexion</h1>
+        
+        <div class="form-group">
+            <label class="form-label">👤 Identifiant</label>
+            <input type="text" id="login-username" placeholder="Saisissez votre identifiant">
         </div>
-    </div>
-
-    <!-- Gestionnaire de mots de passe (après connexion) -->
+        
+        <div class="form-group">
+            <label class="form-label">🔑 Mot de passe</label>
+            <div class="password-container">
+                <input type="password" id="master-password" placeholder="Saisissez votre mot de passe">
+                <span class="password-toggle" onclick="toggleLoginPassword()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <path d="M12.015 7c4.751 0 8.063 3.012 9.504 4.636-1.401 1.837-4.713 5.364-9.504 5.364-4.42 0-7.93-3.536-9.478-5.407 1.493-1.647 4.817-4.593 9.478-4.593zm0-2c-7.569 0-12.015 6.551-12.015 6.551s4.835 7.449 12.015 7.449c7.733 0 11.985-7.449 11.985-7.449s-4.291-6.551-11.985-6.551zm-.015 3c-2.209 0-4 1.792-4 4 0 2.209 1.791 4 4s4-1.791 4-4c0-2.208-1.791-4-4-4z"/>
+                    </svg>
+                </span>
+            </div>
+        </div>
+        
+        <button onclick="authenticate()">
+            <span>🚪 Se connecter</span>
+        </button>
+        
+        <div style="margin-top:20px;text-align:center;">
+            <a href="#" onclick="showSignup();return false;">
+                <span>🆕 Créer un compte</span>
+            </a>
+        </div>
+    </div>    <!-- Gestionnaire de mots de passe moderne -->
     <div id="app" class="card">
-        <h2 style="margin-top:0;">Vos mots de passe</h2>
-        <!-- Champs de saisie empilés -->
-        <input type="text" id="account-username" placeholder="Identifiant du compte">
-        <div style="position:relative;">
-            <input type="text" id="site-link" placeholder="Lien du site (ex: https://example.com)" autocomplete="off" oninput="showSiteSuggestions()" onblur="hideSiteSuggestionsWithDelay()">
-            <div id="site-link-list"></div>
+        <h1>🔐 Vos mots de passe sécurisés</h1>
+        
+        <div class="form-grid">
+            <div class="form-group">
+                <label class="form-label">👤 Identifiant du compte</label>
+                <input type="text" id="account-username" placeholder="Ex: john.doe@gmail.com">
+            </div>
+            
+            <div class="form-group" style="position:relative;">
+                <label class="form-label">🌐 Site web</label>
+                <input type="text" id="site-link" placeholder="Ex: https://www.google.com" autocomplete="off" oninput="showSiteSuggestions()" onblur="hideSiteSuggestionsWithDelay()">
+                <div id="site-link-list"></div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">🔑 Mot de passe</label>
+                <div class="password-container">
+                    <input type="password" id="password" placeholder="Votre mot de passe sécurisé">
+                    <span class="password-toggle" onclick="toggleMainPassword()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                            <path d="M12.015 7c4.751 0 8.063 3.012 9.504 4.636-1.401 1.837-4.713 5.364-9.504 5.364-4.42 0-7.93-3.536-9.478-5.407 1.493-1.647 4.817-4.593 9.478-4.593zm0-2c-7.569 0-12.015 6.551-12.015 6.551s4.835 7.449 12.015 7.449c7.733 0 11.985-7.449 11.985-7.449s-4.291-6.551-11.985-6.551zm-.015 3c-2.209 0-4 1.792-4 4 0 2.209 1.791 4 4s4-1.791 4-4c0-2.208-1.791-4-4-4z"/>
+                        </svg>
+                    </span>
+                </div>
+            </div>
         </div>
-        <input type="password" id="password" placeholder="Mot de passe">
-        <!-- Boutons d'action alignés horizontalement -->
-        <div class="actions-row">
-            <button class="action-btn" onclick="generatePassword()">Générer un mot de passe</button>
-            <button class="action-btn" onclick="addPassword()">Ajouter</button>
-            <button class="action-btn" style="background:#ef4444;" onclick="deleteAllPasswords()">Supprimer tous les mots de passe</button>
+        
+        <div class="actions-grid">
+            <button onclick="generatePassword()">
+                <span>🎲 Générer un mot de passe</span>
+            </button>
+            <button onclick="addPassword()" class="btn-success">
+                <span>➕ Ajouter</span>
+            </button>
+            <button onclick="deleteAllPasswords()" class="btn-danger">
+                <span>🗑️ Supprimer tout</span>
+            </button>
         </div>
-        <div id="add-error" style="color:#ef4444;font-size:0.98em;display:none;margin-top:8px;"></div>
-        <!-- Tableau des mots de passe -->
-        <div id="password-list" style="margin-top:8px;"></div>
+        
+        <div id="add-error" style="display:none;"></div>
+        
+        <!-- Section des mots de passe sauvegardés -->
+        <div id="password-list"></div>
     </div>
 
-    <script src="app.js"></script>
+    <script>
+        // Affiche uniquement le conteneur demandé, cache les autres
+        function showOnly(id) {
+            ["auth-choice", "setup-container", "auth-container", "app"].forEach(function(div) {
+                document.getElementById(div).style.display = (div === id) ? "block" : "none";
+            });
+            document.getElementById("logout-btn").style.display = (id === "app") ? "block" : "none";
+        }
+
+        // Affiche le formulaire de création de compte
+        function showSignup() {
+            showOnly("setup-container");
+        }
+
+        // Affiche le formulaire de connexion
+        function showLogin() {
+            if (localStorage.getItem("masterPassword") && localStorage.getItem("username")) {
+                showOnly("auth-container");
+            } else {
+                alert("Aucun compte trouvé, veuillez créer un compte.");
+            }
+        }
+
+        // Vérifie la complexité du mot de passe
+        function checkPasswordComplexity(password) {
+            const minLength = 8;
+            const hasUpper = /[A-Z]/.test(password);
+            const hasLower = /[a-z]/.test(password);
+            const hasDigit = /\d/.test(password);
+            const hasSpecial = /[!@#$%^&*()_\-+=\[\]{};':"\\|,.<>\/?]/.test(password);
+            return {
+                minLength: password.length >= minLength,
+                hasUpper,
+                hasLower,
+                hasDigit,
+                hasSpecial
+            };
+        }
+
+        // Affiche les conseils de complexité du mot de passe
+        function updatePasswordHint() {
+            const password = document.getElementById("new-master-password").value;
+            const hintDiv = document.getElementById("password-hint");
+            const checks = checkPasswordComplexity(password);
+
+            let html = "Le mot de passe n'est pas assez complexe.<br>Il doit contenir au moins :<ul style='margin:4px 0 0 18px;padding:0;'>";
+            html += `<li style="color:${checks.minLength ? '#22c55e' : '#ef4444'}">8 caractères</li>`;
+            html += `<li style="color:${checks.hasUpper ? '#22c55e' : '#ef4444'}">une lettre majuscule</li>`;
+            html += `<li style="color:${checks.hasLower ? '#22c55e' : '#ef4444'}">une lettre minuscule</li>`;
+            html += `<li style="color:${checks.hasDigit ? '#22c55e' : '#ef4444'}">un chiffre</li>`;
+            html += `<li style="color:${checks.hasSpecial ? '#22c55e' : '#ef4444'}">un caractère spécial (ex: !@#$%^&amp;*)</li>`;
+            html += "</ul>";
+
+            // Affiche le hint si le champ n'est pas vide ou si tout n'est pas validé
+            if (password.length > 0 && Object.values(checks).some(v => !v)) {
+                hintDiv.innerHTML = html;
+                hintDiv.style.display = "block";
+            } else {
+                hintDiv.style.display = "none";
+            }
+        }
+
+        // Création de compte
+        function setMasterPassword() {
+            const newUsername = document.getElementById("new-username").value;
+            const newPassword = document.getElementById("new-master-password").value;
+            const hintDiv = document.getElementById("password-hint");
+            hintDiv.style.display = "none";
+            hintDiv.textContent = "";
+
+            if (!newUsername || !newPassword) {
+                hintDiv.textContent = "Veuillez saisir un identifiant et un mot de passe.";
+                hintDiv.style.display = "block";
+                return;
+            }
+
+            const checks = checkPasswordComplexity(newPassword);
+            if (!checks.minLength || !checks.hasUpper || !checks.hasLower || !checks.hasDigit || !checks.hasSpecial) {
+                updatePasswordHint();
+                return;
+            }
+
+            const hashedKey = btoa(newUsername + ":" + newPassword);
+            localStorage.setItem("masterPassword", btoa(newPassword));
+            localStorage.setItem("username", newUsername);
+            localStorage.setItem("currentUser", hashedKey);
+
+            fetch("/api/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username: newUsername, password: newPassword })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.message === "Utilisateur créé avec succès") {
+                    alert("Compte créé !");
+                    showOnly("auth-container");
+                } else {
+                    alert("Erreur : " + (data.detail || JSON.stringify(data)));
+                }
+            })
+            .catch(err => alert("Erreur API : " + err.message));
+        }
+
+        // Connexion utilisateur
+        function authenticate() {
+            const enteredUsername = document.getElementById("login-username").value;
+            const enteredPassword = document.getElementById("master-password").value;
+            const savedUsername = localStorage.getItem("username");
+            const savedPassword = localStorage.getItem("masterPassword");
+
+            if (!enteredUsername || !enteredPassword) {
+                alert("Veuillez saisir l'identifiant et le mot de passe");
+                return;
+            }
+
+            if (enteredUsername === savedUsername && btoa(enteredPassword) === savedPassword) {
+                localStorage.setItem("currentUser", btoa(enteredUsername + ":" + enteredPassword));
+                showOnly("app");
+                displayPasswords();
+            } else {
+                alert("Identifiant ou mot de passe incorrect");
+            }
+        }
+
+        // Génère un mot de passe aléatoire
+        function generatePassword() {
+            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
+            const password = Array.from({ length: 12 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+            const passwordInput = document.getElementById("password");
+            passwordInput.value = password;
+        }
+
+        // Fonctions pour afficher/masquer les mots de passe avec les icônes SVG
+        function toggleMainPassword() {
+            const passwordInput = document.getElementById("password");
+            const toggleIcon = passwordInput.parentElement.querySelector('.password-toggle svg');
+            
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                // Icône œil barré (mot de passe visible)
+                toggleIcon.innerHTML = '<path d="M11.83,9L15,12.16C15,12.11 15,12.05 15,12A3,3 0 0,0 12,9C11.94,9 11.89,9 11.83,9M7.53,9.8L9.08,11.35C9.03,11.56 9,11.77 9,12A3,3 0 0,0 12,15C12.22,15 12.44,14.97 12.65,14.92L14.2,16.47C13.53,16.8 12.79,17 12,17A5,5 0 0,1 7,12C7,11.21 7.2,10.47 7.53,9.8M2,4.27L4.28,6.55L4.73,7C3.08,8.3 1.78,10 1,12C2.73,16.39 7,19.5 12,19.5C13.55,19.5 15.03,19.2 16.38,18.66L16.81,19.08L19.73,22L21,20.73L3.27,3M12,7A5,5 0 0,1 17,12C17,12.64 16.87,13.26 16.64,13.82L19.57,16.75C21.07,15.5 22.27,13.86 23,12C21.27,7.61 17,4.5 12,4.5C10.6,4.5 9.26,4.75 8,5.2L10.17,7.35C10.76,7.13 11.37,7 12,7Z"/>';
+            } else {
+                passwordInput.type = "password";
+                // Icône œil normal (mot de passe masqué)
+                toggleIcon.innerHTML = '<path d="M12.015 7c4.751 0 8.063 3.012 9.504 4.636-1.401 1.837-4.713 5.364-9.504 5.364-4.42 0-7.93-3.536-9.478-5.407 1.493-1.647 4.817-4.593 9.478-4.593zm0-2c-7.569 0-12.015 6.551-12.015 6.551s4.835 7.449 12.015 7.449c7.733 0 11.985-7.449 11.985-7.449s-4.291-6.551-11.985-6.551zm-.015 3c-2.209 0-4 1.792-4 4 0 2.209 1.791 4 4s4-1.791 4-4c0-2.208-1.791-4-4-4z"/>';
+            }
+        }
+
+        function toggleNewPassword() {
+            const passwordInput = document.getElementById("new-master-password");
+            const toggleIcon = passwordInput.parentElement.querySelector('.password-toggle svg');
+            
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                // Icône œil barré (mot de passe visible)
+                toggleIcon.innerHTML = '<path d="M11.83,9L15,12.16C15,12.11 15,12.05 15,12A3,3 0 0,0 12,9C11.94,9 11.89,9 11.83,9M7.53,9.8L9.08,11.35C9.03,11.56 9,11.77 9,12A3,3 0 0,0 12,15C12.22,15 12.44,14.97 12.65,14.92L14.2,16.47C13.53,16.8 12.79,17 12,17A5,5 0 0,1 7,12C7,11.21 7.2,10.47 7.53,9.8M2,4.27L4.28,6.55L4.73,7C3.08,8.3 1.78,10 1,12C2.73,16.39 7,19.5 12,19.5C13.55,19.5 15.03,19.2 16.38,18.66L16.81,19.08L19.73,22L21,20.73L3.27,3M12,7A5,5 0 0,1 17,12C17,12.64 16.87,13.26 16.64,13.82L19.57,16.75C21.07,15.5 22.27,13.86 23,12C21.27,7.61 17,4.5 12,4.5C10.6,4.5 9.26,4.75 8,5.2L10.17,7.35C10.76,7.13 11.37,7 12,7Z"/>';
+            } else {
+                passwordInput.type = "password";
+                // Icône œil normal (mot de passe masqué)
+                toggleIcon.innerHTML = '<path d="M12.015 7c4.751 0 8.063 3.012 9.504 4.636-1.401 1.837-4.713 5.364-9.504 5.364-4.42 0-7.93-3.536-9.478-5.407 1.493-1.647 4.817-4.593 9.478-4.593zm0-2c-7.569 0-12.015 6.551-12.015 6.551s4.835 7.449 12.015 7.449c7.733 0 11.985-7.449 11.985-7.449s-4.291-6.551-11.985-6.551zm-.015 3c-2.209 0-4 1.792-4 4 0 2.209 1.791 4 4s4-1.791 4-4c0-2.208-1.791-4-4-4z"/>';
+            }
+        }
+
+        function toggleLoginPassword() {
+            const passwordInput = document.getElementById("master-password");
+            const toggleIcon = passwordInput.parentElement.querySelector('.password-toggle svg');
+            
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                // Icône œil barré (mot de passe visible)
+                toggleIcon.innerHTML = '<path d="M11.83,9L15,12.16C15,12.11 15,12.05 15,12A3,3 0 0,0 12,9C11.94,9 11.89,9 11.83,9M7.53,9.8L9.08,11.35C9.03,11.56 9,11.77 9,12A3,3 0 0,0 12,15C12.22,15 12.44,14.97 12.65,14.92L14.2,16.47C13.53,16.8 12.79,17 12,17A5,5 0 0,1 7,12C7,11.21 7.2,10.47 7.53,9.8M2,4.27L4.28,6.55L4.73,7C3.08,8.3 1.78,10 1,12C2.73,16.39 7,19.5 12,19.5C13.55,19.5 15.03,19.2 16.38,18.66L16.81,19.08L19.73,22L21,20.73L3.27,3M12,7A5,5 0 0,1 17,12C17,12.64 16.87,13.26 16.64,13.82L19.57,16.75C21.07,15.5 22.27,13.86 23,12C21.27,7.61 17,4.5 12,4.5C10.6,4.5 9.26,4.75 8,5.2L10.17,7.35C10.76,7.13 11.37,7 12,7Z"/>';
+            } else {
+                passwordInput.type = "password";
+                // Icône œil normal (mot de passe masqué)
+                toggleIcon.innerHTML = '<path d="M12.015 7c4.751 0 8.063 3.012 9.504 4.636-1.401 1.837-4.713 5.364-9.504 5.364-4.42 0-7.93-3.536-9.478-5.407 1.493-1.647 4.817-4.593 9.478-4.593zm0-2c-7.569 0-12.015 6.551-12.015 6.551s4.835 7.449 12.015 7.449c7.733 0 11.985-7.449 11.985-7.449s-4.291-6.551-11.985-6.551zm-.015 3c-2.209 0-4 1.792-4 4 0 2.209 1.791 4 4s4-1.791 4-4c0-2.208-1.791-4-4-4z"/>';
+            }
+        }
+
+        // Stocke les mots de passe récupérés pour vérifier les doublons côté client
+        let currentPasswords = [];
+
+        // Ajoute un mot de passe pour un site/compte
+        function addPassword() {
+            const accountUsername = document.getElementById("account-username").value.trim();
+            const siteLink = document.getElementById("site-link").value.trim();
+            const password = document.getElementById("password").value;
+            const user = localStorage.getItem("currentUser");
+            const errorDiv = document.getElementById("add-error");
+            errorDiv.style.display = "none";
+            errorDiv.textContent = "";
+
+            if (!accountUsername || !siteLink || !password) {
+                errorDiv.textContent = "Veuillez remplir tous les champs";
+                errorDiv.style.display = "block";
+                return;
+            }
+
+            // Vérifie côté client s'il existe déjà ce compte pour ce site
+            const duplicate = currentPasswords.find(
+                item => item.site === siteLink && item.account === accountUsername
+            );
+            if (duplicate) {
+                errorDiv.textContent = "Un compte avec cet identifiant existe déjà pour ce site.";
+                errorDiv.style.display = "block";
+                return;
+            }
+
+            fetch("/api/add", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ user, site: siteLink, account: accountUsername, password })
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message);
+                displayPasswords();
+            })
+            .catch(err => {
+                errorDiv.textContent = "Erreur ajout : " + err.message;
+                errorDiv.style.display = "block";
+            });
+        }
+
+        // Affiche la liste des mots de passe dans un tableau
+        function displayPasswords() {
+            const user = localStorage.getItem("currentUser");
+            fetch(`/api/list?user=${user}`)
+                .then(res => res.json())
+                .then(data => {
+                    const list = document.getElementById("password-list");
+                    list.innerHTML = "";
+
+                    if (!data.passwords || !Array.isArray(data.passwords) || data.passwords.length === 0) {
+                        list.innerHTML = "<p>Aucun mot de passe trouvé ou erreur de chargement.</p>";
+                        currentPasswords = [];
+                        return;
+                    }
+
+                    currentPasswords = data.passwords;
+
+                    // Table header
+                    let html = `<table>
+                        <thead>
+                            <tr>
+                                <th style="width:30%;">Site</th>
+                                <th style="width:30%;">Identifiant</th>
+                                <th style="width:25%;">Mot de passe</th>
+                                <th style="width:15%;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+
+                    data.passwords.forEach((item, index) => {
+                        html += `
+                            <tr>
+                                <td>${item.site}</td>
+                                <td>${item.account}</td>
+                                <td>
+                                    <span id="pwd-${index}">*****</span>
+                                </td>
+                                <td>
+                                    <button class="table-action-btn" onclick="togglePassword(${index}, '${item.password}')">Voir</button>
+                                    <button class="table-action-btn" style="background:#ef4444;color:#fff;" onclick="deletePassword('${item.site}','${item.account}')">Supprimer</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    html += "</tbody></table>";
+                    list.innerHTML = html;
+                })
+                .catch(err => {
+                    console.error("Erreur lors du chargement des mots de passe :", err);
+                });
+        }
+
+        // Affiche ou masque le mot de passe
+        function togglePassword(index, password) {
+            const span = document.getElementById(`pwd-${index}`);
+            span.textContent = span.textContent === "*****" ? password : "*****";
+        }
+
+        // Supprime un mot de passe pour un site/compte
+        function deletePassword(site, account) {
+            const user = localStorage.getItem("currentUser");
+
+            fetch("/api/delete", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ user, site, account })
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message);
+                displayPasswords();
+            })
+            .catch(err => alert("Erreur suppression : " + err.message));
+        }
+
+        // Supprime tous les mots de passe de l'utilisateur
+        function deleteAllPasswords() {
+            if (!confirm("Êtes-vous sûr de vouloir supprimer tous vos mots de passe ?")) return;
+            const user = localStorage.getItem("currentUser");
+            fetch("/api/delete_all", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ user })
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message);
+                displayPasswords();
+            })
+            .catch(err => alert("Erreur suppression : " + err.message));
+        }
+
+        // Déconnexion utilisateur
+        function logout() {
+            localStorage.removeItem("currentUser");
+
+            // Réinitialiser les champs
+            document.getElementById("account-username").value = "";
+            document.getElementById("site-link").value = "";
+            document.getElementById("password").value = "";
+
+            // Réinitialiser tous les champs mot de passe en mode masqué
+            const passwordInputs = ["password", "new-master-password", "master-password"];
+            passwordInputs.forEach(inputId => {
+                const input = document.getElementById(inputId);
+                if (input && input.parentElement.classList.contains('password-container')) {
+                    input.type = "password";
+                    const toggleIcon = input.parentElement.querySelector('.password-toggle svg');
+                    if (toggleIcon) {
+                        toggleIcon.innerHTML = '<path d="M12.015 7c4.751 0 8.063 3.012 9.504 4.636-1.401 1.837-4.713 5.364-9.504 5.364-4.42 0-7.93-3.536-9.478-5.407 1.493-1.647 4.817-4.593 9.478-4.593zm0-2c-7.569 0-12.015 6.551-12.015 6.551s4.835 7.449 12.015 7.449c7.733 0 11.985-7.449 11.985-7.449s-4.291-6.551-11.985-6.551zm-.015 3c-2.209 0-4 1.792-4 4 0 2.209 1.791 4 4s4-1.791 4-4c0-2.208-1.791-4-4-4z"/>';
+                    }
+                }
+            });
+
+            document.getElementById("app").style.display = "none";
+            document.getElementById("auth-choice").style.display = "block";
+            document.getElementById("logout-btn").style.display = "none";
+        }
+
+        // Suggestions de sites populaires
+        const popularSites = [
+            "https://www.google.com",
+            "https://www.facebook.com",
+            "https://www.youtube.com",
+            "https://www.twitter.com",
+            "https://www.instagram.com",
+            "https://www.linkedin.com",
+            "https://www.github.com",
+            "https://www.microsoft.com",
+            "https://www.amazon.com",
+            "https://www.reddit.com",
+            "https://www.wikipedia.org",
+            "https://www.yahoo.com"
+        ];
+
+        function showSiteSuggestions() {
+            const input = document.getElementById("site-link");
+            const listDiv = document.getElementById("site-link-list");
+            const value = input.value.trim().toLowerCase();
+            if (!value) {
+                listDiv.style.display = "none";
+                listDiv.innerHTML = "";
+                return;
+            }
+            // Suggestions à partir des sites populaires + ceux déjà enregistrés
+            const allSites = Array.from(new Set([
+                ...popularSites,
+                ...currentPasswords.map(item => item.site)
+            ]));
+            const filtered = allSites.filter(site => site.toLowerCase().includes(value));
+            if (filtered.length === 0) {
+                listDiv.style.display = "none";
+                listDiv.innerHTML = "";
+                return;
+            }
+            listDiv.innerHTML = filtered.map(site =>
+                `<div onclick="selectSiteSuggestion('${site.replace(/'/g, "\\'")}')">${site}</div>`
+            ).join("");
+            listDiv.style.display = "block";
+        }
+
+        function selectSiteSuggestion(site) {
+            document.getElementById("site-link").value = site;
+            document.getElementById("site-link-list").style.display = "none";
+        }
+
+        function hideSiteSuggestionsWithDelay() {
+            setTimeout(() => {
+                document.getElementById("site-link-list").style.display = "none";
+            }, 150);
+        }
+    </script>
 </body>
 </html>
