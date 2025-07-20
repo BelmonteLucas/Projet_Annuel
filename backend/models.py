@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, UniqueConstraint
+from sqlalchemy import create_engine, Column, Integer, String, UniqueConstraint, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -9,6 +9,8 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, index=True)
     password = Column(String)  # Utilise un mot de passe crypté ici dans une vraie application
+    mfa_secret = Column(String, nullable=True)  # Champ pour stocker la clé secrète MFA (chiffrée)
+    mfa_enabled = Column(Boolean, default=False) # Champ pour indiquer si le MFA est activé
 
 # Si tu veux qu’il soit créé à chaque fois que tu lances le projet
 # Base.metadata.create_all(bind=engine)

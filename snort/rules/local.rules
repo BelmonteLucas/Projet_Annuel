@@ -1,0 +1,31 @@
+# Local Snort Rules for HoneyPot Project
+# SSH Brute Force Detection
+alert tcp $EXTERNAL_NET any -> $HOME_NET $SSH_PORTS (msg:"SSH brute force attempt"; flow:to_server,established; content:"SSH"; threshold:type threshold, track by_src, count 3, seconds 60; sid:1000001; rev:1;)
+
+# Port Scan Detection
+alert icmp $EXTERNAL_NET any -> $HOME_NET any (msg:"ICMP Port Scan detected"; itype:8; threshold:type threshold, track by_src, count 10, seconds 60; sid:1000002; rev:1;)
+
+# Web Application Attack Detection
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"Web SQL Injection attempt"; flow:to_server,established; content:"union"; nocase; content:"select"; nocase; distance:0; within:100; sid:1000003; rev:1;)
+
+# Suspicious File Download
+alert tcp $HOME_NET any -> $EXTERNAL_NET any (msg:"Suspicious executable download"; flow:to_client,established; content:".exe"; nocase; sid:1000004; rev:1;)
+
+# DNS Tunneling Detection
+alert udp $HOME_NET any -> $EXTERNAL_NET $DNS_PORTS (msg:"Possible DNS tunneling"; content:"|01 00 00 01 00 00 00 00 00 00|"; depth:10; sid:1000005; rev:1;)
+
+# Malware Communication
+alert tcp $HOME_NET any -> $EXTERNAL_NET any (msg:"Possible malware beacon"; flow:to_server,established; dsize:<100; threshold:type threshold, track by_src, count 10, seconds 300; sid:1000006; rev:1;)
+
+# FTP Brute Force
+alert tcp $EXTERNAL_NET any -> $HOME_NET 21 (msg:"FTP brute force attempt"; flow:to_server,established; content:"USER"; threshold:type threshold, track by_src, count 5, seconds 60; sid:1000007; rev:1;)
+
+# Telnet Access Attempt
+alert tcp $EXTERNAL_NET any -> $HOME_NET $TELNET_PORTS (msg:"Telnet connection attempt"; flow:to_server,new; sid:1000008; rev:1;)
+
+# Large Data Exfiltration
+alert tcp $HOME_NET any -> $EXTERNAL_NET any (msg:"Large data transfer detected"; flow:to_client,established; dsize:>10000; threshold:type threshold, track by_src, count 5, seconds 60; sid:1000009; rev:1;)
+
+# Suspicious PowerShell Activity
+alert tcp any any -> any any (msg:"PowerShell download cradle detected"; flow:established; content:"powershell"; nocase; content:"downloadstring"; nocase; distance:0; within:200; sid:1000010; rev:1;)
+

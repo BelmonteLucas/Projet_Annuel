@@ -1,81 +1,224 @@
+# =============================================================================
+# DOCKER COMPOSE CONFIGURATION - PROJET ANNUEL ESGI
+# =============================================================================
+# Architecture multi-services incluant :
+# - Application web avec backend/frontend
+# - Base de données PostgreSQL avec interface d'administration
+# - Stack de sécurité (Snort IDS + Wazuh HIDS)
+# - Stack ELK pour l'analyse des logs et la visualisation
+# =============================================================================
+
 version: '3.8'
 
 services:
+  # ==========================================================================
+  # BASE DE DONNÉES - PostgreSQL
+  # ==========================================================================
+  # Service de base de données principal utilisant PostgreSQL 13
+  # Stocke les données de l'application avec authentification sécurisée
   db:
     image: postgres:13
-    container_name: postgres_db_service # Nom de conteneur plus descriptif
+    container_name: postgres_db_service
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD_FILE: /run/secrets/db_password # PostgreSQL lira le mdp depuis ce fichier secret
-      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres                              # Utilisateur par défaut
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password     # Mot de passe depuis un secret Docker
+      POSTGRES_DB: postgres                                # Base de données par défaut
     ports:
-      - "5432:5432"
+      - "5432:5432"                                        # Port PostgreSQL accessible depuis l'hôte
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data                    # Persistance des données DB
     secrets:
-      - db_password # Rendre le secret 'db_password' disponible pour ce service
-    healthcheck: # Ajout d'un healthcheck pour s'assurer que la DB est prête
+      - db_password                                        # Accès au secret du mot de passe
+    healthcheck:                                           # Vérification de l'état de santé
       test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      interval: 10s                                        # Vérification toutes les 10s
+      timeout: 5s                                          # Timeout de 5s par vérification
+      retries: 5                                           # 5 tentatives avant échec
 
+  # ==========================================================================
+  # BACKEND API - Application Python
+  # ==========================================================================
+  # Service API backend construit depuis le dossier ./backend
+  # Gère la logique métier et les interactions avec la base de données
   backend:
-    build: ./backend
-    container_name: backend_api_service # Nom de conteneur plus descriptif
-    depends_on:
-      db: # S'assurer que 'db' est démarré et sain avant 'backend'
-        condition: service_healthy
+    build: ./backend                                       # Construit l'image depuis le Dockerfile local
+    container_name: backend_api_service
+    depends_on:                                            # Attend que la DB soit prête
+      db:
+        condition: service_healthy                         # Attend le healthcheck de la DB
     ports:
-      - "8000:8000"
-    environment:
-      # Ces variables sont utilisées par main.py pour construire DATABASE_URL
+      - "8000:8000"                                        # API accessible sur le port 8000
+    environment:                                           # Variables d'environnement pour la connexion DB
       DB_USER: postgres
-      DB_HOST: db # Le nom du service de base de données
+      DB_HOST: db                                          # Nom du service DB (résolution DNS interne)
       DB_PORT: 5432
       DB_NAME: postgres
-      # PAS DE DATABASE_URL ici, elle est construite dans main.py avec le secret
     secrets:
-      - db_password # Rendre le secret 'db_password' disponible pour le backend (lu dans /run/secrets/db_password)
+      - db_password                                        # Accès au mot de passe DB
+      - mfa_encryption_key                                 # Clé de chiffrement pour l'authentification 2FA
 
+  # ==========================================================================
+  # PGADMIN - Interface d'administration PostgreSQL
+  # ==========================================================================
+  # Interface web pour administrer la base de données PostgreSQL
+  # Accessible via navigateur pour gérer les données et schémas
   pgadmin:
-    image: dpage/pgadmin4
-    container_name: pgadmin_service 
+    image: dpage/pgadmin4                                  # Interface d'administration PostgreSQL
+    container_name: pgadmin_service
     depends_on:
-      db: 
-        condition: service_healthy
+      db:
+        condition: service_healthy                         # Attend que la DB soit opérationnelle
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin 
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com               # Email de connexion par défaut
+      PGADMIN_DEFAULT_PASSWORD: admin                      # Mot de passe de connexion par défaut
+      PGADMIN_CONFIG_SERVER_MODE: 'False'                  # Mode standalone (non serveur)
     ports:
-      - "5050:80"
+      - "5050:80"                                          # Interface web accessible sur le port 5050
     volumes:
-      - pgadmin-data:/var/lib/pgadmin
-      - ./pgadmin-config/servers.json:/pgadmin4/servers.json # Toujours nécessaire
-      - ./pgadmin-config/entrypoint-pgadmin.sh:/custom-entrypoint.sh # Montez votre script personnalisé
-      # La ligne suivante pour monter pgadmin-config/pgpass est supprimée ou commentée :
-      # - ./pgadmin-config/pgpass:/pgpassfile 
+      - pgadmin-data:/var/lib/pgadmin                      # Persistance des données pgAdmin
+      - ./pgadmin-config/servers.json:/pgadmin4/servers.json              # Configuration serveurs pré-définis
+      - ./pgadmin-config/entrypoint-pgadmin.sh:/custom-entrypoint.sh      # Script de démarrage personnalisé
     secrets:
-      - db_password # Le service pgAdmin a besoin d'accéder à ce secret
-    entrypoint: ["/bin/sh", "/custom-entrypoint.sh"] # Définissez le script personnalisé comme point d'entrée
+      - db_password                                        # Accès au mot de passe DB
+    entrypoint: ["/bin/sh", "/custom-entrypoint.sh"]       # Point d'entrée personnalisé
 
+  # ==========================================================================
+  # FRONTEND WEB - Interface utilisateur
+  # ==========================================================================
+  # Serveur web NGINX servant l'interface utilisateur statique
+  # Configuré avec HTTPS et certificats SSL
   frontend:
-    image: python:3.10-slim # Utilisation d'une image slim pour réduire la taille
-    container_name: frontend_service # Nom de conteneur plus descriptif
-    working_dir: /app
-    volumes:
-      - ./frontend:/app # Monte le dossier frontend local dans le conteneur
-    command: python3 -m http.server 5500 --directory /app # Spécifier le répertoire à servir
+    image: nginx:alpine                                    # Serveur web léger basé sur Alpine Linux
     ports:
-      - "5500:5500"
+      - "9443:443"                                         # HTTPS accessible sur le port 9443
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro                # Fichiers statiques du frontend (lecture seule)
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro    # Configuration NGINX personnalisée
+      - ./nginx.crt:/etc/ssl/certs/nginx.crt:ro           # Certificat SSL
+      - ./nginx.key:/etc/ssl/private/nginx.key:ro         # Clé privée SSL
+    networks:
+      - backend_network                                    # Réseau interne pour communication sécurisée
+
+  # ==========================================================================
+  # SNORT IDS - Système de détection d'intrusion
+  # ==========================================================================
+  # Snort en mode IDS pour surveiller le trafic réseau
+  # Détecte les tentatives d'intrusion et activités suspectes
+  snort:
+    build: ./snort                                         # Construction depuis le Dockerfile Snort local
+    container_name: snort_ids
+    cap_add:
+      - NET_ADMIN                                          # Privilèges réseau pour capturer le trafic
+    network_mode: host                                     # Accès direct au réseau de l'hôte
+    volumes:
+      - ./snort/rules:/etc/snort/rules:ro                 # Règles de détection personnalisées
+      - ./snort/snort.conf:/etc/snort/snort.conf:ro       # Configuration Snort
+      - snort_logs:/var/log/snort                         # Stockage des logs de détection
+
+  # ==========================================================================
+  # WAZUH HIDS - Système de détection d'intrusion basé sur l'hôte
+  # ==========================================================================
+  # Wazuh pour surveillance des fichiers système et détection d'anomalies
+  # Complément de Snort pour une sécurité multicouche
+  wazuh:
+    build: ./wazuh                                         # Construction depuis le Dockerfile Wazuh local
+    container_name: wazuh_manager
+    ports:
+      - "1514:1514/tcp"                                    # Port pour agents Wazuh
+      - "55000:55000/tcp"                                  # API Wazuh pour communication
+    volumes:
+      - wazuh_data:/var/ossec                              # Données Wazuh persistantes
+      - ./wazuh/config/ossec.conf:/var/ossec/etc/ossec.conf:ro    # Configuration OSSEC/Wazuh
+      - wazuh_logs:/var/log/wazuh                          # Logs Wazuh
+    networks:
+      - backend_network                                    # Réseau interne sécurisé
+
+  # ==========================================================================
+  # ELASTICSEARCH - Moteur de recherche et d'analyse
+  # ==========================================================================
+  # Base de données NoSQL pour indexation et recherche des logs
+  # Cœur de la stack ELK pour l'analyse des données de sécurité
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.9    # Version stable d'Elasticsearch
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node                         # Configuration nœud unique (non-cluster)
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m                     # Allocation mémoire JVM (512MB min/max)
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data   # Persistance des index Elasticsearch
+      - ./elk/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+    ports:
+      - "9200:9200"                                        # API REST Elasticsearch
+      - "9300:9300"                                        # Port de communication inter-nœuds
+    networks:
+      - backend_network
+
+  # ==========================================================================
+  # LOGSTASH - Collecteur et transformateur de logs
+  # ==========================================================================
+  # Pipeline de traitement des logs : collecte, transformation, envoi vers Elasticsearch
+  # Traite les logs de Snort et Wazuh pour analyse unifiée
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.17.9     # Version compatible avec Elasticsearch
+    container_name: logstash
     depends_on:
-      - backend # Le frontend dépend du backend
+      elasticsearch:
+        condition: service_healthy                         # Attend qu'Elasticsearch soit prêt
+    volumes:
+      - ./elk/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro        # Config Logstash
+      - ./elk/logstash/pipeline/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro  # Pipeline de traitement
+      - snort_logs:/var/log/snort:ro                       # Accès aux logs Snort (lecture seule)
+      - wazuh_logs:/var/log/wazuh:ro                       # Accès aux logs Wazuh (lecture seule)
+    ports:
+      - "5044:5044"                                        # Port d'entrée pour les beats
+    networks:
+      - backend_network
 
+  # ==========================================================================
+  # KIBANA - Interface de visualisation et analyse
+  # ==========================================================================
+  # Dashboard web pour visualiser et analyser les données Elasticsearch
+  # Interface principale pour le monitoring de sécurité
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.9         # Interface de visualisation compatible
+    container_name: kibana
+    depends_on:
+      elasticsearch:
+        condition: service_healthy                         # Attend qu'Elasticsearch soit disponible
+    volumes:
+      - ./elk/kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro    # Configuration Kibana
+    ports:
+      - "5601:5601"                                        # Interface web Kibana
+    networks:
+      - backend_network
+
+# =============================================================================
+# VOLUMES DOCKER - Persistance des données
+# =============================================================================
+# Volumes nommés pour garantir la persistance des données entre redémarrages
 volumes:
-  pgdata: # Volume pour la persistance des données PostgreSQL
-  pgadmin-data: # Volume pour la persistance des données pgAdmin
+  pgdata:                                                  # Données PostgreSQL
+  pgadmin-data:                                            # Configuration et données pgAdmin
+  snort_logs:                                              # Logs du système de détection Snort
+  wazuh_data:                                              # Données et configuration Wazuh
+  wazuh_logs:                                              # Logs Wazuh
+  elasticsearch_data:                                      # Index et données Elasticsearch
 
+# =============================================================================
+# SECRETS DOCKER - Gestion sécurisée des secrets
+# =============================================================================
+# Secrets pour protéger les informations sensibles (mots de passe, clés)
 secrets:
-  db_password:
-    file: ./secrets/db_password.txt # Chemin vers le fichier contenant le mot de passe de la DB
+  db_password:                                             # Mot de passe de la base de données
+    file: ./secrets/db_password.txt
+  mfa_encryption_key:                                      # Clé de chiffrement pour l'authentification 2FA
+    file: ./secrets/mfa_encryption_key.txt
+
+# =============================================================================
+# RÉSEAUX DOCKER - Isolation et sécurité réseau
+# =============================================================================
+# Réseau interne pour sécuriser les communications entre services
+networks:
+  backend_network:
+    internal: true                                         # Réseau isolé de l'extérieur (pas d'accès Internet direct)
+

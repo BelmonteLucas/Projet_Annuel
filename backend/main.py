@@ -1,6 +1,6 @@
 print("✅ main.py is running")
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -9,13 +9,42 @@ import os
 import base64
 from passlib.context import CryptContext
 from fastapi.middleware.cors import CORSMiddleware
+import pyotp 
+from typing import Optional
+from cryptography.fernet import Fernet # Ajout pour le chiffrement
+
+# --- Configuration du chiffrement MFA ---
+def get_mfa_encryption_key():
+    docker_secret_path = "/run/secrets/mfa_encryption_key"
+    local_secret_path = "/app/secrets/mfa_encryption_key.txt" # Assurez-vous que ce chemin est correct
+
+    if os.path.exists(docker_secret_path):
+        print(f"Reading MFA encryption key from Docker secret: {docker_secret_path}")
+        return open(docker_secret_path, "r").read().strip().encode() # La clé Fernet doit être en bytes
+    elif os.path.exists(local_secret_path):
+        print(f"Reading MFA encryption key from local file: {local_secret_path}")
+        return open(local_secret_path, "r").read().strip().encode() # La clé Fernet doit être en bytes
+    else:
+        mfa_key_env = os.getenv("MFA_ENCRYPTION_KEY")
+        if mfa_key_env:
+            print("Reading MFA encryption key from environment variable MFA_ENCRYPTION_KEY")
+            return mfa_key_env.encode()
+        print(f"ERROR: MFA encryption key file not found at {docker_secret_path} or {local_secret_path}, and MFA_ENCRYPTION_KEY env var not set.")
+        raise Exception("MFA_ENCRYPTION_KEY not found.")
+
+try:
+    MFA_KEY = get_mfa_encryption_key()
+    FERNET_INSTANCE = Fernet(MFA_KEY)
+    print("MFA encryption engine initialized.")
+except Exception as e:
+    print(f"Failed to initialize MFA encryption: {e}")
+    # Pour une application de production, il est préférable de ne pas démarrer si la clé n'est pas disponible.
+    raise
 
 # --- CORRECTED: Read DB password from Docker secret or fallback ---
 def get_db_password():
-    # Priorité au secret Docker
     docker_secret_path = "/run/secrets/db_password"
-    # Fallback pour dev local (non Dockerisé) ou si le secret n'est pas monté
-    local_secret_path = "/app/secrets/db_password.txt" # Assurez-vous que ce chemin est correct si vous l'utilisez en dev
+    local_secret_path = "/app/secrets/db_password.txt" 
 
     if os.path.exists(docker_secret_path):
         print(f"Reading DB password from Docker secret: {docker_secret_path}")
@@ -24,9 +53,6 @@ def get_db_password():
         print(f"Reading DB password from local file: {local_secret_path}")
         return open(local_secret_path, "r").read().strip()
     else:
-        # Essayer de lire à partir de la variable d'environnement comme dernier recours (moins sécurisé)
-        # ou lever une exception si aucun mot de passe n'est trouvé.
-        # Pour ce projet, nous allons lever une exception si aucun fichier n'est trouvé.
         print(f"ERROR: DB password file not found at {docker_secret_path} or {local_secret_path}")
         raise Exception(f"DB password file not found. Searched in {docker_secret_path} and {local_secret_path}")
 
@@ -39,13 +65,10 @@ try:
     DB_PASSWORD = get_db_password()
 except Exception as e:
     print(f"Failed to get DB_PASSWORD: {e}")
-    # Gérer l'erreur de manière appropriée, par exemple, en quittant ou en utilisant une valeur par défaut si cela a du sens
-    # Pour une application de production, il est préférable de ne pas démarrer si le mot de passe n'est pas disponible.
-    raise  # Renvoyer l'exception pour arrêter le démarrage si le mot de passe n'est pas trouvé
+    raise
 
 DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 print(f"Connecting to database with URL: postgresql://{DB_USER}:********@{DB_HOST}:{DB_PORT}/{DB_NAME}")
-# --- END CORRECTED ---
 
 engine = create_engine(DATABASE_URL)
 Session = sessionmaker(bind=engine)
@@ -54,7 +77,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5500"], # Ou l'URL de votre frontend
+    allow_origins=["http://localhost:5500"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -73,25 +96,49 @@ try:
     print("Database tables created/verified.")
 except Exception as e:
     print(f"Error creating database tables: {e}")
-    # Gérer l'erreur, par exemple, si la base de données n'est pas accessible
 
-class UserEntry(BaseModel):
+class UserEntry(BaseModel): 
     username: str
     password: str
 
 class PasswordEntry(BaseModel):
-    user: str # Devrait être l'identifiant de l'utilisateur, pas le currentUser encodé en base64
+    user: str 
     site: str
-    account: str # Nom du compte pour le site
-    password: str # Mot de passe pour le site/compte
+    account: str 
+    password: str 
 
 class DeleteEntry(BaseModel):
-    user: str # Identifiant de l'utilisateur
+    user: str 
     site: str
     account: str
 
 class DeleteAllEntry(BaseModel):
-    user: str # Identifiant de l'utilisateur
+    user: str
+
+class MfaSetupRequest(BaseModel):
+    user: str
+
+class MfaVerifyRequest(BaseModel):
+    user: str 
+    otp_code: str
+
+class LoginResponse(BaseModel):
+    message: str
+    mfa_required: bool
+    username: Optional[str] = None
+    user_b64_token: Optional[str] = None
+
+class MfaLoginOtpRequest(BaseModel):
+    username: str
+    otp_code: str
+
+def get_username_from_b64(user_b64: str) -> str:
+    try:
+        decoded_str = base64.b64decode(user_b64).decode("utf-8")
+        username = decoded_str.split(":")[0]
+        return username
+    except Exception:
+        raise HTTPException(status_code=400, detail="Format d'utilisateur invalide (base64)")
 
 @app.get("/")
 def read_root():
@@ -100,97 +147,202 @@ def read_root():
 @app.post("/register")
 def register_user(entry: UserEntry):
     db = Session()
-    existing_user = db.query(User).filter_by(username=entry.username).first()
-    if existing_user:
-        db.close()
-        raise HTTPException(status_code=400, detail="Utilisateur déjà existant")
-    
-    hashed_password = get_password_hash(entry.password)
-    user = User(username=entry.username, password=hashed_password)
-    
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-    db.close()
-    return {"message": "Utilisateur créé avec succès", "user_id": user.id}
-
-# Note: La gestion du 'user' en base64 dans les routes suivantes est une faiblesse de sécurité.
-# Idéalement, l'authentification devrait être gérée par des tokens (ex: JWT)
-# et l'ID de l'utilisateur extrait du token.
-# Pour l'instant, on garde le fonctionnement tel quel mais c'est un point d'amélioration.
-
-def get_username_from_b64(user_b64: str) -> str:
-    """Décode le nom d'utilisateur de base64. Lève une HTTPException en cas d'erreur."""
     try:
-        # Le frontend envoie "username:password" encodé en b64. Nous n'avons besoin que du username ici.
-        decoded_str = base64.b64decode(user_b64).decode("utf-8")
-        username = decoded_str.split(":")[0] # Extrait le username avant le ':'
-        return username
-    except Exception:
-        raise HTTPException(status_code=400, detail="Format d'utilisateur invalide (base64)")
+        existing_user = db.query(User).filter_by(username=entry.username).first()
+        if existing_user:
+            raise HTTPException(status_code=400, detail="Utilisateur déjà existant")
+        
+        hashed_password = get_password_hash(entry.password)
+        user = User(username=entry.username, password=hashed_password)
+        
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+        return {"message": "Utilisateur créé avec succès", "user_id": user.id}
+    finally:
+        db.close()
+
+@app.post("/login", response_model=LoginResponse)
+def login_user(entry: UserEntry):
+    db = Session()
+    try:
+        user_from_db = db.query(User).filter_by(username=entry.username).first()
+
+        if not user_from_db:
+            raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+
+        if not verify_password(entry.password, user_from_db.password):
+            raise HTTPException(status_code=401, detail="Mot de passe incorrect")
+
+        if user_from_db.mfa_enabled:
+            return LoginResponse(
+                message="MFA OTP requis", 
+                mfa_required=True, 
+                username=user_from_db.username
+            )
+        else:
+            user_b64_token_str = f"{entry.username}:{entry.password}"
+            user_b64_token = base64.b64encode(user_b64_token_str.encode("utf-8")).decode("utf-8")
+            return LoginResponse(
+                message="Connexion réussie", 
+                mfa_required=False, 
+                username=user_from_db.username,
+                user_b64_token=user_b64_token
+            )
+    finally:
+        db.close()
+
+@app.post("/login/otp")
+def login_otp_verify(request_data: MfaLoginOtpRequest):
+    db = Session()
+    try:
+        user = db.query(User).filter_by(username=request_data.username).first()
+
+        if not user:
+            raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+
+        if not user.mfa_enabled or not user.mfa_secret:
+            raise HTTPException(status_code=400, detail="MFA non activé ou non configuré pour cet utilisateur.")
+        
+        try:
+            decrypted_mfa_secret = FERNET_INSTANCE.decrypt(user.mfa_secret.encode()).decode()
+        except Exception: # Inclut InvalidToken de Fernet
+            # Potentiellement logguer l'erreur ici pour investiguer
+            raise HTTPException(status_code=500, detail="Erreur lors du déchiffrement du secret MFA.")
+
+        totp = pyotp.TOTP(decrypted_mfa_secret)
+        if totp.verify(request_data.otp_code):
+            return {"message": "Vérification OTP réussie. Connexion autorisée."}
+        else:
+            raise HTTPException(status_code=401, detail="Code OTP invalide.")
+    finally:
+        db.close()
 
 @app.post("/add")
 def add_password(entry: PasswordEntry):
     db = Session()
-    # Le champ 'user' de PasswordEntry est supposé être la chaîne encodée en base64
-    # provenant du localStorage 'currentUser'
-    username_for_db = get_username_from_b64(entry.user)
+    try:
+        username_for_db = get_username_from_b64(entry.user)
+        existing = db.query(Password).filter_by(user=username_for_db, site=entry.site, account=entry.account).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="Ce compte existe déjà pour ce site.")
 
-    # Vérifie l'unicité (user, site, account)
-    existing = db.query(Password).filter_by(user=username_for_db, site=entry.site, account=entry.account).first()
-    if existing:
+        pwd = Password(user=username_for_db, site=entry.site, account=entry.account, password=entry.password)
+        db.add(pwd)
+        db.commit()
+        db.refresh(pwd)
+        return {"message": "Mot de passe ajouté", "id": pwd.id}
+    finally:
         db.close()
-        raise HTTPException(status_code=400, detail="Ce compte existe déjà pour ce site.")
-
-    pwd = Password(user=username_for_db, site=entry.site, account=entry.account, password=entry.password)
-    db.add(pwd)
-    db.commit()
-    db.refresh(pwd)
-    db.close()
-    return {"message": "Mot de passe ajouté", "id": pwd.id}
 
 @app.get("/list")
-def get_passwords(user: str): # user est la chaîne encodée en base64
+def get_passwords(user: str):
     db = Session()
-    username_for_db = get_username_from_b64(user)
+    try:
+        username_for_db = get_username_from_b64(user)
+        entries = db.query(Password).filter_by(user=username_for_db).all()
+        return {"passwords": [{"site": e.site, "account": e.account, "password": e.password} for e in entries]}
+    finally:
+        db.close()
     
-    entries = db.query(Password).filter_by(user=username_for_db).all()
-    db.close()
-    return {"passwords": [{"site": e.site, "account": e.account, "password": e.password} for e in entries]}
-
 @app.post("/delete")
 def delete_password(entry: DeleteEntry):
     db = Session()
-    username_for_db = get_username_from_b64(entry.user)
-
-    pwd = db.query(Password).filter_by(user=username_for_db, site=entry.site, account=entry.account).first()
-    if pwd:
-        db.delete(pwd)
-        db.commit()
+    try:
+        username_for_db = get_username_from_b64(entry.user)
+        pwd = db.query(Password).filter_by(user=username_for_db, site=entry.site, account=entry.account).first()
+        if pwd:
+            db.delete(pwd)
+            db.commit()
+            return {"message": "Mot de passe supprimé"}
+        raise HTTPException(status_code=404, detail="Mot de passe non trouvé")
+    finally:
         db.close()
-        return {"message": "Mot de passe supprimé"}
-    db.close()
-    raise HTTPException(status_code=404, detail="Mot de passe non trouvé")
 
 @app.post("/delete_all")
 def delete_all_passwords(entry: DeleteAllEntry):
     db = Session()
-    username_for_db = get_username_from_b64(entry.user)
+    try:
+        username_for_db = get_username_from_b64(entry.user)
+        deleted_count = db.query(Password).filter_by(user=username_for_db).delete()
+        db.commit()
+        return {"message": f"{deleted_count} mot(s) de passe supprimé(s)"}
+    finally:
+        db.close()
 
-    deleted_count = db.query(Password).filter_by(user=username_for_db).delete()
-    db.commit()
-    db.close()
-    return {"message": f"{deleted_count} mot(s) de passe supprimé(s)"}
+@app.post("/mfa/setup")
+def mfa_setup(request_data: MfaSetupRequest):
+    db = Session()
+    try:
+        username = get_username_from_b64(request_data.user)
+        user = db.query(User).filter_by(username=username).first()
 
-# Ajout pour s'assurer que les sessions DB sont fermées
-from fastapi import Request
+        if not user:
+            raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+
+        if user.mfa_enabled:
+            raise HTTPException(status_code=400, detail="Le MFA est déjà activé pour cet utilisateur.")
+
+        plain_mfa_secret = pyotp.random_base32()
+        encrypted_mfa_secret = FERNET_INSTANCE.encrypt(plain_mfa_secret.encode()).decode() # Chiffrer et stocker en string
+
+        user.mfa_secret = encrypted_mfa_secret # Stocker le secret chiffré
+        db.commit()
+        db.refresh(user)
+
+        # L'URI de provisioning utilise le secret en clair, NON chiffré
+        totp = pyotp.TOTP(plain_mfa_secret) 
+        provisioning_uri = totp.provisioning_uri(
+            name=user.username, 
+            issuer_name="ProjetAnnuelESGI" 
+        )
+        return {"provisioning_uri": provisioning_uri, "message": "Scannez le QR code avec votre application MFA et vérifiez."}
+    finally:
+        db.close()
+
+@app.post("/mfa/verify")
+def mfa_verify(request_data: MfaVerifyRequest):
+    db = Session()
+    try:
+        username = get_username_from_b64(request_data.user)
+        user = db.query(User).filter_by(username=username).first()
+
+        if not user:
+            raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+
+        if not user.mfa_secret: # Le secret stocké est chiffré
+            raise HTTPException(status_code=400, detail="MFA non initialisé pour cet utilisateur. Veuillez d'abord utiliser /mfa/setup.")
+
+        try:
+            decrypted_mfa_secret = FERNET_INSTANCE.decrypt(user.mfa_secret.encode()).decode()
+        except Exception: # Inclut InvalidToken de Fernet
+             # Potentiellement logguer l'erreur ici pour investiguer
+            raise HTTPException(status_code=500, detail="Erreur lors du déchiffrement du secret MFA pour la vérification.")
+
+        totp = pyotp.TOTP(decrypted_mfa_secret)
+        if totp.verify(request_data.otp_code):
+            if not user.mfa_enabled:
+                user.mfa_enabled = True
+                db.commit()
+                db.refresh(user)
+            return {"message": "Code OTP valide. MFA activé avec succès."}
+        else:
+            raise HTTPException(status_code=400, detail="Code OTP invalide.")
+    finally:
+        db.close()
+
 @app.middleware("http")
 async def db_session_middleware(request: Request, call_next):
     response = None
+    # Si vous décidez de gérer les sessions via middleware, vous initialiseriez et fermeriez la session ici.
+    # Pour l'instant, les routes gèrent explicitement leurs sessions.
+    # Ce middleware peut être utilisé pour d'autres logiques transversales si besoin.
+    # Pour éviter des conflits avec la gestion manuelle dans les routes, on le laisse simple.
+    # request.state.db = Session() # Exemple si on voulait injecter
     try:
-        request.state.db = Session()
         response = await call_next(request)
     finally:
-        if hasattr(request.state, "db"):
-            request.state.db.close()
+        # if hasattr(request.state, "db"): # Exemple si on voulait fermer la session injectée
+        #    request.state.db.close()
+        pass # Laisser les routes gérer leur session
     return response
