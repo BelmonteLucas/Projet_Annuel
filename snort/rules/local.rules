@@ -1,12 +1,87 @@
-# Local Snort Rules for HoneyPot Project
-# SSH Brute Force Detection
-alert tcp $EXTERNAL_NET any -> $HOME_NET $SSH_PORTS (msg:"SSH brute force attempt"; flow:to_server,established; content:"SSH"; threshold:type threshold, track by_src, count 3, seconds 60; sid:1000001; rev:1;)
+# =============================================================================
+# RÈGLES SNORT PERSONNALISÉES - HoneyPot Security Suite
+# =============================================================================
+# Règles spécifiques pour détecter les attaques sur notre gestionnaire de mots de passe
+# Compatible avec les scénarios de test du README
 
-# Port Scan Detection
-alert icmp $EXTERNAL_NET any -> $HOME_NET any (msg:"ICMP Port Scan detected"; itype:8; threshold:type threshold, track by_src, count 10, seconds 60; sid:1000002; rev:1;)
+# =============================================================================
+# DÉTECTION D'ATTAQUES PAR FORCE BRUTE
+# =============================================================================
 
-# Web Application Attack Detection
-alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"Web SQL Injection attempt"; flow:to_server,established; content:"union"; nocase; content:"select"; nocase; distance:0; within:100; sid:1000003; rev:1;)
+# Force brute sur login HTTP
+alert tcp $EXTERNAL_NET any -> $HOME_NET [9080,9443] (msg:"HTTP Login Brute Force Attack Detected"; flow:to_server,established; content:"POST"; http_method; content:"/api/login"; http_uri; threshold:type threshold, track by_src, count 10, seconds 60; sid:1000001; rev:2;)
+
+# Force brute SSH (si activé)
+alert tcp $EXTERNAL_NET any -> $HOME_NET $SSH_PORTS (msg:"SSH brute force attempt"; flow:to_server,established; content:"SSH"; threshold:type threshold, track by_src, count 3, seconds 60; sid:1000002; rev:1;)
+
+# =============================================================================
+# DÉTECTION D'INJECTION SQL
+# =============================================================================
+
+# Injection SQL basique
+alert tcp $EXTERNAL_NET any -> $HOME_NET [9080,9443] (msg:"SQL Injection Attack - Union Select"; flow:to_server,established; content:"POST"; http_method; content:"union"; nocase; content:"select"; nocase; distance:0; within:100; sid:1000003; rev:2;)
+
+# Injection SQL avec OR 1=1
+alert tcp $EXTERNAL_NET any -> $HOME_NET [9080,9443] (msg:"SQL Injection Attack - OR 1=1"; flow:to_server,established; content:"POST"; http_method; content:"OR"; nocase; content:"1=1"; nocase; distance:0; within:50; sid:1000004; rev:1;)
+
+# Injection SQL avec apostrophes
+alert tcp $EXTERNAL_NET any -> $HOME_NET [9080,9443] (msg:"SQL Injection Attack - Quote Injection"; flow:to_server,established; content:"POST"; http_method; content:"'"; content:"OR"; nocase; distance:0; within:20; sid:1000005; rev:1;)
+
+# Time-based SQL injection
+alert tcp $EXTERNAL_NET any -> $HOME_NET [9080,9443] (msg:"SQL Injection Attack - Time Based"; flow:to_server,established; content:"POST"; http_method; content:"WAITFOR"; nocase; content:"DELAY"; nocase; distance:0; within:50; sid:1000006; rev:1;)
+
+# =============================================================================
+# DÉTECTION DE RECONNAISSANCE RÉSEAU
+# =============================================================================
+
+# Port scan détection (ICMP)
+alert icmp $EXTERNAL_NET any -> $HOME_NET any (msg:"ICMP Port Scan detected"; itype:8; threshold:type threshold, track by_src, count 10, seconds 60; sid:1000007; rev:1;)
+
+# Port scan détection (TCP SYN)
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"TCP Port Scan detected"; flags:S; threshold:type threshold, track by_src, count 20, seconds 60; sid:1000008; rev:1;)
+
+# Nmap OS fingerprinting
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"Nmap OS Fingerprint Attempt"; flags:FPU; sid:1000009; rev:1;)
+
+# =============================================================================
+# DÉTECTION D'ATTAQUES SPÉCIFIQUES À L'APPLICATION
+# =============================================================================
+
+# Tentative d'accès direct aux endpoints sensibles
+alert tcp $EXTERNAL_NET any -> $HOME_NET [9080,9443] (msg:"Direct API Access Attempt"; flow:to_server,established; content:"GET"; http_method; content:"/api/list"; http_uri; sid:1000010; rev:1;)
+
+# Tentative de contournement MFA
+alert tcp $EXTERNAL_NET any -> $HOME_NET [9080,9443] (msg:"MFA Bypass Attempt"; flow:to_server,established; content:"POST"; http_method; content:"/api/mfa"; http_uri; content:"000000"; sid:1000011; rev:1;)
+
+# Codes MFA suspects (patterns communs)
+alert tcp $EXTERNAL_NET any -> $HOME_NET [9080,9443] (msg:"Suspicious MFA Code Pattern"; flow:to_server,established; content:"POST"; http_method; content:"123456"; sid:1000012; rev:1;)
+
+# =============================================================================
+# DÉTECTION D'ATTAQUES XSS
+# =============================================================================
+
+# Cross-Site Scripting basique
+alert tcp $EXTERNAL_NET any -> $HOME_NET [9080,9443] (msg:"XSS Attack Detected"; flow:to_server,established; content:"<script"; nocase; content:">"; distance:0; within:50; sid:1000013; rev:1;)
+
+# XSS avec javascript:
+alert tcp $EXTERNAL_NET any -> $HOME_NET [9080,9443] (msg:"XSS Javascript Injection"; flow:to_server,established; content:"javascript:"; nocase; sid:1000014; rev:1;)
+
+# =============================================================================
+# DÉTECTION D'ATTAQUES DDOS
+# =============================================================================
+
+# Flood HTTP requests
+alert tcp $EXTERNAL_NET any -> $HOME_NET [9080,9443] (msg:"HTTP Request Flood"; flow:to_server,established; content:"GET"; http_method; threshold:type threshold, track by_src, count 100, seconds 10; sid:1000015; rev:1;)
+
+# =============================================================================
+# DÉTECTION D'EXPLOITATION DE VULNÉRABILITÉS
+# =============================================================================
+
+# Directory traversal
+alert tcp $EXTERNAL_NET any -> $HOME_NET [9080,9443] (msg:"Directory Traversal Attack"; flow:to_server,established; content:"../"; sid:1000016; rev:1;)
+
+# Command injection attempt
+alert tcp $EXTERNAL_NET any -> $HOME_NET [9080,9443] (msg:"Command Injection Attempt"; flow:to_server,established; content:";"; content:"cat"; nocase; distance:0; within:20; sid:1000017; rev:1;)
 
 # Suspicious File Download
 alert tcp $HOME_NET any -> $EXTERNAL_NET any (msg:"Suspicious executable download"; flow:to_client,established; content:".exe"; nocase; sid:1000004; rev:1;)

@@ -1,2 +1,0 @@
-cryptography
-# Ajoutez ici d'autres dépendances de développement si nécessaire à l'avenir (ex: linters, outils de test)

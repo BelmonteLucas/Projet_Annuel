@@ -1,0 +1,46 @@
+# =============================================================================
+# REQUIREMENTS DE DÉVELOPPEMENT - HoneyPot Security Suite
+# =============================================================================
+# Dépendances nécessaires pour le script de configuration et les outils de dev
+# Installation: pip install -r requirements-dev.txt
+
+# Cryptographie pour la génération des clés MFA
+cryptography>=41.0.0
+
+# Outils de test et validation
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+requests>=2.31.0
+
+# Outils de linting et formatage
+flake8>=6.0.0
+black>=23.0.0
+isort>=5.12.0
+
+# Outils de sécurité
+bandit>=1.7.5          # Analyse de sécurité du code Python
+safety>=2.3.0          # Vérification des vulnérabilités des dépendances
+
+# Outils de documentation
+mkdocs>=1.5.0          # Génération de documentation
+mkdocs-material>=9.1.0 # Thème Material pour MkDocs
+
+# Utilitaires de développement
+python-dotenv>=1.0.0   # Gestion des variables d'environnement
+click>=8.1.0           # Interface en ligne de commande
+colorama>=0.4.6        # Couleurs dans le terminal (Windows)
+
+# Outils d'analyse de logs (optionnel pour développement avancé)
+pandas>=2.0.0          # Analyse de données
+matplotlib>=3.7.0      # Visualisation de données
+
+# =============================================================================
+# NOTES D'INSTALLATION
+# =============================================================================
+# 
+# Pour un environnement de développement complet :
+# 1. Créer un environnement virtuel : python -m venv venv
+# 2. Activer l'environnement : venv\Scripts\activate (Windows) ou source venv/bin/activate (Linux/Mac)
+# 3. Installer les dépendances : pip install -r requirements-dev.txt
+# 4. Exécuter le script de setup : python setup_dev_environment.py
+# 5. Lancer l'environnement : docker compose up -d --build

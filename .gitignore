@@ -1,1 +1,35 @@
 /secrets/
+# Secrets et fichiers sensibles
+*.key
+*.crt
+.env
+
+# Reports temporaires générés par les scripts de validation
+*_report.json
+validation_report.json
+security_test_report.json
+readme_compliance_report.json
+fresh_install_test_report.json
+file_audit_report.json
+
+# Cache Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Logs
+*.log
+
+# Environnements virtuels
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
