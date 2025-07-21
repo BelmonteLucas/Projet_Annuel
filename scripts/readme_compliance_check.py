@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Rapport de Conformité README - HoneyPot Security Suite
+Rapport de Conformité README - HoneyPot Pro Max
 =====================================================
 
 Compare l'état réel du projet avec ce qui est décrit dans le README.
@@ -41,7 +41,7 @@ class ReadmeComplianceChecker:
             "snort/": {"exists": Path("snort").exists(), "description": "Configuration Snort IDS"},
             "wazuh/": {"exists": Path("wazuh").exists(), "description": "Configuration Wazuh HIDS"},
             "backend/main.py": {"exists": Path("backend/main.py").exists(), "description": "API FastAPI"},
-            "frontend/index.html": {"exists": Path("frontend/index.html").exists(), "description": "Interface SecureVault"}
+            "frontend/index.html": {"exists": Path("frontend/index.html").exists(), "description": "Interface HoneyPot Pro Max"}
         }
         
         implemented = 0
@@ -120,7 +120,7 @@ class ReadmeComplianceChecker:
         if Path("frontend/index.html").exists():
             with open("frontend/index.html", "r", encoding="utf-8") as f:
                 content = f.read()
-                return "securevault" in content.lower() and "password" in content.lower()
+                return "honeypot" in content.lower() and "password" in content.lower()
         return False
 
     def check_ssl_implementation(self):
@@ -155,8 +155,8 @@ class ReadmeComplianceChecker:
         print("\n🌐 Vérification des URLs du README...")
         
         urls = {
-            "SecureVault HTTP": "http://localhost:9080",
-            "SecureVault HTTPS": "https://localhost:9443",
+            "HoneyPot HTTP": "http://localhost:9080",
+            "HoneyPot HTTPS": "https://localhost:9443",
             "API Documentation": "http://localhost:8000/docs",
             "Kibana": "http://localhost:5601",
             "pgAdmin": "http://localhost:5050"
@@ -237,7 +237,7 @@ class ReadmeComplianceChecker:
         recommendations = []
         
         # Recommandations basées sur les éléments manquants
-        if "URL: SecureVault HTTP" in [item for item in self.compliance_report["missing_elements"] if "URL:" in item]:
+        if "URL: HoneyPot HTTP" in [item for item in self.compliance_report["missing_elements"] if "URL:" in item]:
             recommendations.append("🚀 Démarrer l'application: docker compose up -d")
         
         if "Architecture: secrets/" in self.compliance_report["missing_elements"]:
@@ -261,7 +261,7 @@ class ReadmeComplianceChecker:
         print("""
 📋 VÉRIFICATION DE CONFORMITÉ README
 ===================================
-🛡️ HoneyPot Security Suite
+🛡️ HoneyPot Pro Max
 📊 Comparaison projet réel vs documentation
         """)
         

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Audit des Fichiers - HoneyPot Security Suite
+Audit des Fichiers - HoneyPot Pro Max
 ============================================
 
 Script d'audit pour identifier les fichiers inutilisés, redondants 
@@ -50,7 +50,7 @@ class ProjectAuditor:
         print("""
 🔍 AUDIT DES FICHIERS DU PROJET
 ===============================
-🛡️  HoneyPot Security Suite
+🛡️  HoneyPot Pro Max
 📋 Analyse des fichiers inutilisés et redondants
         """)
 

@@ -1,50 +1,108 @@
+"""
+API Backend - HoneyPot Pro Max
+==============================
+
+Service API principal du gestionnaire de mots de passe sécurisé.
+Implémente l'authentification MFA, le chiffrement des données et la gestion des mots de passe.
+
+Fonctionnalités principales :
+- Authentification utilisateur avec hashage bcrypt
+- Authentification à double facteur (TOTP)
+- Chiffrement des secrets MFA avec Fernet
+- Gestion sécurisée des mots de passe utilisateurs
+- API RESTful pour l'interface frontend
+
+Auteur: Équipe ESGI 2024-2025
+"""
+
 print("INFO: main.py is running")
 
-from fastapi import FastAPI, HTTPException, Request
-from pydantic import BaseModel
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from models import Base, User, Password
-import os
-import base64
-from passlib.context import CryptContext
-from fastapi.middleware.cors import CORSMiddleware
-import pyotp 
-from typing import Optional
-from cryptography.fernet import Fernet # Ajout pour le chiffrement
+# =============================================================================
+# IMPORTS ET DÉPENDANCES
+# =============================================================================
+from fastapi import FastAPI, HTTPException, Request              # Framework API moderne
+from pydantic import BaseModel                                   # Validation des données
+from sqlalchemy import create_engine                             # ORM pour PostgreSQL
+from sqlalchemy.orm import sessionmaker                          # Sessions de base de données
+from models import Base, User, Password                          # Modèles de données
+import os                                                        # Variables d'environnement
+import base64                                                    # Encodage des données
+from passlib.context import CryptContext                        # Hashage sécurisé des mots de passe
+from fastapi.middleware.cors import CORSMiddleware              # Gestion CORS pour le frontend
+import pyotp                                                     # Génération/validation TOTP (MFA)
+from typing import Optional                                      # Types optionnels
+from cryptography.fernet import Fernet                          # Chiffrement symétrique des secrets MFA
 
-# --- Configuration du chiffrement MFA ---
+# =============================================================================
+# CONFIGURATION DU CHIFFREMENT MFA
+# =============================================================================
+# Gestion sécurisée de la clé de chiffrement pour les secrets MFA
+# Priorité : Docker secrets > fichiers locaux > variables d'environnement
+
 def get_mfa_encryption_key():
-    docker_secret_path = "/run/secrets/mfa_encryption_key"
-    local_secret_path = "/app/secrets/mfa_encryption_key.txt" # Assurez-vous que ce chemin est correct
+    """
+    Récupère la clé de chiffrement MFA depuis différentes sources sécurisées.
+    
+    Ordre de priorité :
+    1. Docker secret (/run/secrets/mfa_encryption_key)
+    2. Fichier local pour développement
+    3. Variable d'environnement (fallback)
+    
+    Returns:
+        bytes: Clé de chiffrement Fernet valide
+        
+    Raises:
+        Exception: Si aucune clé n'est trouvée
+    """
+    docker_secret_path = "/run/secrets/mfa_encryption_key"        # Production Docker
+    local_secret_path = "/app/secrets/mfa_encryption_key.txt"     # Développement local
 
     if os.path.exists(docker_secret_path):
         print(f"Reading MFA encryption key from Docker secret: {docker_secret_path}")
-        return open(docker_secret_path, "r").read().strip().encode() # La clé Fernet doit être en bytes
+        return open(docker_secret_path, "r").read().strip().encode() # Conversion en bytes pour Fernet
     elif os.path.exists(local_secret_path):
         print(f"Reading MFA encryption key from local file: {local_secret_path}")
-        return open(local_secret_path, "r").read().strip().encode() # La clé Fernet doit être en bytes
+        return open(local_secret_path, "r").read().strip().encode() # Conversion en bytes pour Fernet
     else:
         mfa_key_env = os.getenv("MFA_ENCRYPTION_KEY")
         if mfa_key_env:
             print("Reading MFA encryption key from environment variable MFA_ENCRYPTION_KEY")
             return mfa_key_env.encode()
+            return mfa_key_env.encode()
         print(f"ERROR: MFA encryption key file not found at {docker_secret_path} or {local_secret_path}, and MFA_ENCRYPTION_KEY env var not set.")
         raise Exception("MFA_ENCRYPTION_KEY not found.")
 
+# Initialisation du moteur de chiffrement MFA
 try:
-    MFA_KEY = get_mfa_encryption_key()
-    FERNET_INSTANCE = Fernet(MFA_KEY)
+    MFA_KEY = get_mfa_encryption_key()                            # Récupération de la clé de chiffrement
+    FERNET_INSTANCE = Fernet(MFA_KEY)                             # Instance Fernet pour chiffrement/déchiffrement
     print("MFA encryption engine initialized.")
 except Exception as e:
     print(f"Failed to initialize MFA encryption: {e}")
-    # Pour une application de production, il est préférable de ne pas démarrer si la clé n'est pas disponible.
+    # SÉCURITÉ : Arrêt de l'application si le chiffrement MFA ne peut pas être initialisé
     raise
 
-# --- CORRECTED: Read DB password from Docker secret or fallback ---
+# =============================================================================
+# CONFIGURATION DE LA BASE DE DONNÉES
+# =============================================================================
+# Gestion sécurisée du mot de passe de base de données PostgreSQL
+
 def get_db_password():
-    docker_secret_path = "/run/secrets/db_password"
-    local_secret_path = "/app/secrets/db_password.txt" 
+    """
+    Récupère le mot de passe de la base de données depuis des sources sécurisées.
+    
+    Ordre de priorité :
+    1. Docker secret (/run/secrets/db_password) - Production
+    2. Fichier local pour développement
+    
+    Returns:
+        str: Mot de passe de la base de données
+        
+    Raises:
+        Exception: Si aucun mot de passe n'est trouvé
+    """
+    docker_secret_path = "/run/secrets/db_password"               # Chemin Docker secret (production)
+    local_secret_path = "/app/secrets/db_password.txt"            # Fichier local (développement)
 
     if os.path.exists(docker_secret_path):
         print(f"Reading DB password from Docker secret: {docker_secret_path}")
@@ -56,9 +114,10 @@ def get_db_password():
         print(f"ERROR: DB password file not found at {docker_secret_path} or {local_secret_path}")
         raise Exception(f"DB password file not found. Searched in {docker_secret_path} and {local_secret_path}")
 
-DB_USER = os.getenv("DB_USER", "postgres")
-DB_HOST = os.getenv("DB_HOST", "db")
-DB_PORT = os.getenv("DB_PORT", "5432")
+# Configuration des paramètres de connexion PostgreSQL
+DB_USER = os.getenv("DB_USER", "postgres")                       # Utilisateur PostgreSQL (défaut: postgres)
+DB_HOST = os.getenv("DB_HOST", "db")                             # Hôte PostgreSQL (service Docker: db)
+DB_PORT = os.getenv("DB_PORT", "5432")                           # Port PostgreSQL (défaut: 5432)
 DB_NAME = os.getenv("DB_NAME", "postgres")
 
 try:

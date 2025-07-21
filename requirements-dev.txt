@@ -1,5 +1,5 @@
 # =============================================================================
-# REQUIREMENTS DE DÉVELOPPEMENT - HoneyPot Security Suite
+# REQUIREMENTS DE DÉVELOPPEMENT - HoneyPot Pro Max
 # =============================================================================
 # Dépendances nécessaires pour le script de configuration et les outils de dev
 # Installation: pip install -r requirements-dev.txt

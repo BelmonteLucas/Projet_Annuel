@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Tests de Sécurité Automatisés - HoneyPot Security Suite
+Tests de Sécurité Automatisés - HoneyPot Pro Max
 ========================================================
 
 Script d'automatisation des tests d'intrusion mentionnés dans le README.
@@ -39,7 +39,7 @@ class SecurityTester:
 🔴 TESTS DE SÉCURITÉ AUTOMATISÉS
 ==================================
 ⚠️  ATTENTION: Tests d'intrusion en cours
-🎯 Cible: HoneyPot Security Suite
+🎯 Cible: HoneyPot Pro Max
 📊 Monitoring: Vérifiez Kibana pour les alertes
         """)
 

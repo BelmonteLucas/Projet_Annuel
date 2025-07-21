@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test d'Installation Fraîche - HoneyPot Security Suite
+Test d'Installation Fraîche - HoneyPot Pro Max
 =====================================================
 
 Script de test qui simule une installation complètement fraîche
@@ -38,7 +38,7 @@ class FreshInstallTester:
         print("""
 🧪 TEST D'INSTALLATION FRAÎCHE
 ===============================
-🛡️  HoneyPot Security Suite
+🛡️  HoneyPot Pro Max
 📋 Simulation d'installation de zéro suivant le README
         """)
 

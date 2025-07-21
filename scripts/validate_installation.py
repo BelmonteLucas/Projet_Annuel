@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Validation de l'Installation - HoneyPot Security Suite
+Validation de l'Installation - HoneyPot Pro Max
 ======================================================
 
 Script de validation automatique de l'installation complète.
@@ -34,7 +34,7 @@ class InstallationValidator:
         print("""
 🔍 VALIDATION DE L'INSTALLATION
 ===============================
-🛡️  HoneyPot Security Suite
+🛡️  HoneyPot Pro Max
 📋 Vérification de tous les composants
         """)
 
@@ -123,8 +123,8 @@ class InstallationValidator:
         print("\n🌐 Vérification des interfaces web...")
         
         endpoints = {
-            "SecureVault HTTP": "http://localhost:9080",
-            "SecureVault HTTPS": "https://localhost:9443", 
+            "HoneyPot HTTP": "http://localhost:9080",
+            "HoneyPot HTTPS": "https://localhost:9443", 
             "API Documentation": "http://localhost:8000/docs",
             "Kibana": "http://localhost:5601",
             "pgAdmin": "http://localhost:5050"

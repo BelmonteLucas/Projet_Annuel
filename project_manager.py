@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Gestionnaire du Projet - HoneyPot Security Suite
+Gestionnaire du Projet - HoneyPot Pro Max
 ===============================================
 
 Script utilitaire pour gérer facilement le projet.
@@ -38,7 +38,7 @@ class ProjectManager:
     def print_banner(self):
         """Affiche le banner du gestionnaire"""
         print("""
-🛡️  HoneyPot Security Suite - Project Manager
+🛡️  HoneyPot Pro Max - Project Manager
 ==============================================
 🎓 Projet Annuel ESGI 2024-2025
 ⚙️  Gestionnaire centralisé du projet
@@ -178,8 +178,8 @@ class ProjectManager:
         print("""
 🌐 URLS D'ACCÈS:
 ===============
-🎯 SecureVault HTTP  : http://localhost:9080
-🔐 SecureVault HTTPS : https://localhost:9443
+🎯 HoneyPot HTTP  : http://localhost:9080
+🔐 HoneyPot HTTPS : https://localhost:9443
 📊 Kibana           : http://localhost:5601
 🗄️  pgAdmin          : http://localhost:5050
 🔌 API Docs         : http://localhost:8000/docs
@@ -231,7 +231,7 @@ python project_manager.py validate                  # Validation complète
 
 def main():
     """Fonction principale"""
-    parser = argparse.ArgumentParser(description="Gestionnaire du projet HoneyPot Security Suite")
+    parser = argparse.ArgumentParser(description="Gestionnaire du projet HoneyPot Pro Max")
     parser.add_argument("command", 
                        choices=["setup", "start", "stop", "restart", "status", "validate", "test", "logs", "clean", "help"],
                        help="Commande à exécuter")

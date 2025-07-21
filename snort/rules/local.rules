@@ -1,5 +1,5 @@
 # =============================================================================
-# RÈGLES SNORT PERSONNALISÉES - HoneyPot Security Suite
+# RÈGLES SNORT PERSONNALISÉES - HoneyPot Pro Max
 # =============================================================================
 # Règles spécifiques pour détecter les attaques sur notre gestionnaire de mots de passe
 # Compatible avec les scénarios de test du README

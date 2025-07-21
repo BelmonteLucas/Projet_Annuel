@@ -49,8 +49,8 @@ services:
     environment:                                           # Variables d'environnement pour la connexion DB
       DB_USER: postgres
       DB_HOST: db                                          # Nom du service DB (résolution DNS interne)
-      DB_PORT: 5432
-      DB_NAME: postgres
+      DB_PORT: 5432                                        # Port de connexion PostgreSQL
+      DB_NAME: postgres                                    # Nom de la base de données
     secrets:
       - db_password                                        # Accès au mot de passe DB
       - mfa_encryption_key                                 # Clé de chiffrement pour l'authentification 2FA
@@ -93,8 +93,8 @@ services:
     volumes:
       - ./frontend:/usr/share/nginx/html:ro                # Fichiers statiques du frontend (lecture seule)
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro    # Configuration NGINX personnalisée
-      - ./nginx.crt:/etc/ssl/certs/nginx.crt:ro           # Certificat SSL
-      - ./nginx.key:/etc/ssl/private/nginx.key:ro         # Clé privée SSL
+      - ./secrets/nginx.crt:/etc/ssl/certs/nginx.crt:ro   # Certificat SSL (depuis secrets/)
+      - ./secrets/nginx.key:/etc/ssl/private/nginx.key:ro # Clé privée SSL (depuis secrets/)
     # Retiré networks pour permettre l'accès externe
 
   # ==========================================================================
@@ -135,22 +135,24 @@ services:
       - "1514:1514/udp"                                  # Réception des logs syslog
       - "55000:55000"                                    # API RESTful Wazuh
     environment:
-      - WAZUH_MANAGER_SERVICE=wazuh-manager
-      - WAZUH_API_SERVICE=wazuh-api
-      - FILEBEAT_SERVICE=filebeat
-      - INDEXER_URL=https://elasticsearch:9200
-      - INDEXER_USERNAME=""
-      - INDEXER_PASSWORD=""
-      - FILEBEAT_SSL_VERIFICATION_MODE=none
+      - WAZUH_MANAGER_SERVICE=wazuh-manager               # Service principal Wazuh
+      - WAZUH_API_SERVICE=wazuh-api                        # Service API Wazuh
+      - FILEBEAT_SERVICE=filebeat                          # Service de transport des logs
+      - INDEXER_URL=https://elasticsearch:9200             # URL d'Elasticsearch pour l'indexation
+      - INDEXER_USERNAME=""                                # Authentification Elasticsearch (vide pour test)
+      - INDEXER_PASSWORD=""                                # Mot de passe Elasticsearch (vide pour test)
+      - FILEBEAT_SSL_VERIFICATION_MODE=none                # Désactivation SSL pour dev/test
     volumes:
-      - wazuh_data:/var/ossec/data
-      - wazuh_logs:/var/ossec/logs
-      - ./backend:/host_files:ro                         # Surveillance des fichiers backend
+      - wazuh_data:/var/ossec/data                         # Données et configuration Wazuh
+      - wazuh_logs:/var/ossec/logs                         # Logs générés par Wazuh
+      - ./backend:/host_files:ro                           # Surveillance des fichiers backend
     depends_on:
       elasticsearch:
         condition: service_healthy                       # Attendre qu'Elasticsearch soit prêt
     networks:
-      - backend_network  # ==========================================================================
+      - backend_network
+
+  # ==========================================================================
   # ELASTICSEARCH - Moteur de recherche et d'analyse
   # ==========================================================================
   # Base de données NoSQL pour indexation et recherche des logs

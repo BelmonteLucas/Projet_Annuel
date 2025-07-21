@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Setup Development Environment - HoneyPot Security Suite
+Setup Development Environment - HoneyPot Pro Max
 ======================================================
 
 Script d'initialisation automatique pour le projet ESGI.
@@ -22,7 +22,7 @@ import string
 def print_banner():
     """Affiche le banner du projet"""
     print("""
-HoneyPot Security Suite - Setup Environment
+HoneyPot Pro Max - Setup Environment
 ============================================
 Projet Annuel ESGI 2024-2025
 Configuration automatique de l'environnement de developpement
@@ -78,17 +78,71 @@ def generate_db_password():
     else:
         print("[INFO] Mot de passe DB existe deja")
 
-def check_ssl_certificates():
-    """Verifie la presence des certificats SSL"""
-    cert_files = ["nginx.crt", "nginx.key"]
+def migrate_existing_certificates():
+    """Migre les certificats existants vers secrets/"""
+    old_cert = Path("nginx.crt")
+    old_key = Path("nginx.key")
+    new_cert = Path("secrets/nginx.crt")
+    new_key = Path("secrets/nginx.key")
     
-    for cert_file in cert_files:
-        if not Path(cert_file).exists():
-            print(f"[WARNING] Certificat SSL manquant: {cert_file}")
-            print("          Generez les certificats ou utilisez ceux fournis")
+    moved_files = []
+    
+    if old_cert.exists() and not new_cert.exists():
+        old_cert.rename(new_cert)
+        new_cert.chmod(0o644)
+        moved_files.append("nginx.crt")
+    
+    if old_key.exists() and not new_key.exists():
+        old_key.rename(new_key)
+        new_key.chmod(0o600)
+        moved_files.append("nginx.key")
+    
+    if moved_files:
+        print(f"[OK] Certificats migres vers secrets/: {', '.join(moved_files)}")
+        return True
+    
+    return False
+
+def generate_ssl_certificates():
+    """Genere les certificats SSL auto-signes dans secrets/"""
+    cert_path = Path("secrets/nginx.crt")
+    key_path = Path("secrets/nginx.key")
+    
+    if not cert_path.exists() or not key_path.exists():
+        try:
+            import subprocess
+            print("[INFO] Generation des certificats SSL...")
+            
+            # Commande OpenSSL pour generer certificat auto-signe
+            cmd = [
+                "openssl", "req", "-x509", "-newkey", "rsa:4096",
+                "-keyout", str(key_path),
+                "-out", str(cert_path),
+                "-days", "365", "-nodes",
+                "-subj", "/C=FR/ST=IDF/L=Paris/O=ESGI/OU=Security/CN=localhost"
+            ]
+            
+            subprocess.run(cmd, check=True, capture_output=True)
+            
+            # Permissions restrictives
+            cert_path.chmod(0o644)
+            key_path.chmod(0o600)
+            
+            print("[OK] Certificats SSL generes dans secrets/")
+            print(f"     Certificat: {cert_path}")
+            print(f"     Cle privee: {key_path}")
+            
+        except subprocess.CalledProcessError as e:
+            print(f"[ERROR] Echec generation SSL: {e}")
+            print("        Installez OpenSSL ou copiez manuellement les certificats")
             return False
+        except FileNotFoundError:
+            print("[WARNING] OpenSSL non trouve")
+            print("          Copiez manuellement nginx.crt et nginx.key dans secrets/")
+            return False
+    else:
+        print("[INFO] Certificats SSL existent deja dans secrets/")
     
-    print("[OK] Certificats SSL presents")
     return True
 
 def check_docker():
@@ -119,7 +173,8 @@ def validate_environment():
         ("Secrets", Path("secrets").exists()),
         ("Cle MFA", Path("secrets/mfa_encryption_key.txt").exists()),
         ("Mot de passe DB", Path("secrets/db_password.txt").exists()),
-        ("Certificat SSL", Path("nginx.crt").exists()),
+        ("Certificat SSL", Path("secrets/nginx.crt").exists()),
+        ("Cle privee SSL", Path("secrets/nginx.key").exists()),
         ("Docker Compose", Path("docker-compose.yml").exists())
     ]
     
@@ -189,7 +244,7 @@ def print_next_steps():
 2. Attendez 2-3 minutes pour le demarrage complet
 3. Verifiez l'installation: python scripts/validate_installation.py
 4. Acces web:
-   - SecureVault HTTPS: https://localhost:9443
+   - HoneyPot HTTPS: https://localhost:9443
    - API Docs: http://localhost:8000/docs
    - Kibana: http://localhost:5601
    - pgAdmin: http://localhost:5050
@@ -212,8 +267,9 @@ def main():
     # Etape 3: Generer le mot de passe DB
     generate_db_password()
     
-    # Etape 4: Verifier les certificats SSL
-    check_ssl_certificates()
+    # Etape 4: Migrer et generer les certificats SSL
+    migrate_existing_certificates()
+    generate_ssl_certificates()
     
     # Etape 5: Verifier Docker
     docker_ok = check_docker()

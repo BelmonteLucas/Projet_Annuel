@@ -1,8 +1,8 @@
-# HoneyPot Security Suite – Projet Annuel ESGI
+# HoneyPot Pro Max – Projet Annuel ESGI
 
-**Un gestionnaire de mots de passe mis à l'épreuve dans un environnement hostile**
+**Un gestionnaire de mots de passe sécurisé mis à l'épreuve dans un environnement hostile**
 
-Ce projet ESGI démontre la création d'une **application sécurisée** (gestionnaire de mots de passe avec MFA) et son **test en conditions réelles** dans un environnement de sécurité simulant des attaques externes. L'objectif ? Valider la robustesse de notre solution et observer les tentatives d'intrusion en temps réel.
+Ce projet ESGI démontre la création d'**HoneyPot Pro Max** (une application sécurisée de gestion de mots de passe avec MFA) et son **test en conditions réelles** dans un environnement de sécurité simulant des attaques externes. L'objectif ? Valider la robustesse de notre solution et observer les tentatives d'intrusion en temps réel.
 
 ---
 
@@ -10,7 +10,7 @@ Ce projet ESGI démontre la création d'une **application sécurisée** (gestion
 
 1. [Vision du projet](#vision)
 2. [Architecture de test](#architecture)
-3. [Le gestionnaire SecureVault](#gestionnaire)
+3. [Le gestionnaire HoneyPot](#gestionnaire)
 4. [Environnement de détection](#detection)
 5. [Installation rapide](#installation)
 6. [Monitoring et analyse](#monitoring)
@@ -21,6 +21,7 @@ Ce projet ESGI démontre la création d'une **application sécurisée** (gestion
 11. [Documentation technique](#documentation)
 12. [Dépannage](#depannage)
 13. [Équipe](#equipe)
+14. [Guide de démonstration](#guide-de-demonstration)
 
 ---
 
@@ -31,7 +32,7 @@ Ce projet ESGI démontre la création d'une **application sécurisée** (gestion
 
 Dans le monde réel, développer une application "sécurisée" ne suffit pas. Il faut la **tester face à de vraies menaces**. Ce projet ESGI simule cette réalité :
 
-1. **Phase 1 - Développement** : Création d'un gestionnaire de mots de passe moderne avec authentification à deux facteurs
+1. **Phase 1 - Développement** : Création d'HoneyPot Pro Max, une application moderne de gestion de mots de passe avec authentification à deux facteurs
 2. **Phase 2 - Fortification** : Mise en place d'un environnement de monitoring et détection d'intrusion  
 3. **Phase 3 - Test en conditions hostiles** : Exposition contrôlée à des attaques pour valider la sécurité
 
@@ -56,7 +57,7 @@ Dans le monde réel, développer une application "sécurisée" ne suffit pas. Il
 
 ### **Le concept : Un laboratoire de sécurité**
 
-Notre infrastructure simule un **environnement de production vulnérable** pour tester la résilience de notre gestionnaire de mots de passe. Voici comment nous avons conçu ce laboratoire :
+Notre infrastructure simule un **environnement de production vulnérable** pour tester la résilience d'HoneyPot Pro Max. Voici comment nous avons conçu ce laboratoire :
 
 ```
 🌍 INTERNET HOSTILE                                     🏢 INFRASTRUCTURE CIBLE  
@@ -130,11 +131,11 @@ Notre infrastructure simule un **environnement de production vulnérable** pour 
 - **Monitoring** : Analyse en temps réel, alertes automatiques, forensique
 
 <a name="gestionnaire"></a>
-## 3. 🔐 Le gestionnaire SecureVault
+## 3. 🔐 Le gestionnaire HoneyPot
 
-### **Notre application cible : Un gestionnaire de mots de passe moderne**
+### **Notre application cible : HoneyPot Pro Max**
 
-SecureVault Pro Max est volontairement **exposé aux attaques** pour tester sa résistance. Voici pourquoi nous avons fait ces choix de conception :
+HoneyPot Pro Max est volontairement **exposé aux attaques** pour tester sa résistance. Voici pourquoi nous avons fait ces choix de conception :
 
 #### **🎨 Interface utilisateur moderne**
 ```
@@ -216,7 +217,7 @@ L'objectif n'est pas seulement de créer une application sécurisée, mais de **
 
 **Pourquoi Snort ?**
 - **Standard industriel** : Utilisé par 80% des entreprises pour la détection réseau
-- **Règles personnalisables** : Nous avons configuré des règles spécifiques pour détecter les attaques sur notre gestionnaire de mots de passe
+- **Règles personnalisables** : Nous avons configuré des règles spécifiques pour détecter les attaques sur HoneyPot Pro Max
 - **Temps réel** : Analyse instantanée du trafic, pas de délai de détection
 
 #### **🛡️ Wazuh HIDS : Le gardien du système**
@@ -308,9 +309,10 @@ docker compose up -d --build
 **Ce que fait le script de configuration :**
 1. ✅ Crée le répertoire `secrets/` sécurisé
 2. ✅ Génère une clé de chiffrement MFA unique (256 bits)
-3. ✅ Configure les certificats SSL pour HTTPS
-4. ✅ Initialise les bases de données
-5. ✅ Prépare l'environnement de monitoring
+3. ✅ Génère un mot de passe PostgreSQL sécurisé (32 caractères)
+4. ✅ Génère ou migre les certificats SSL dans `secrets/`
+5. ✅ Initialise les bases de données
+6. ✅ Prépare l'environnement de monitoring
 
 #### **⏱️ Temps d'installation estimé**
 - **Première installation** : 5-8 minutes (téléchargement des images Docker)
@@ -355,6 +357,9 @@ python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().d
 
 # Définir le mot de passe de la base de données
 echo "VotreMotDePasseSecurise123!" > secrets/db_password.txt
+
+# Générer les certificats SSL auto-signés (optionnel si vous en avez déjà)
+openssl req -x509 -newkey rsa:4096 -keyout secrets/nginx.key -out secrets/nginx.crt -days 365 -nodes -subj "/C=FR/ST=IDF/L=Paris/O=ESGI/OU=Security/CN=localhost"
 ```
 
 #### **2. Lancement sélectif des services**
@@ -363,8 +368,7 @@ echo "VotreMotDePasseSecurise123!" > secrets/db_password.txt
 docker compose up -d frontend backend postgres pgadmin
 
 # Ajouter le monitoring progressivement
-docker compose up -d elasticsearch logstash kibana
-docker compose up -d snort wazuh
+docker compose up -d elasticsearch logstash kibana snort wazuh
 ```
 
 ---
@@ -472,10 +476,6 @@ grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}' docker logs | s
 docker exec postgres_db_service psql -U admin -d honeypot_db -c "SELECT COUNT(*) FROM users;"
 docker exec postgres_db_service psql -U admin -d honeypot_db -c "SELECT * FROM users WHERE created_at > NOW() - INTERVAL '1 hour';"
 ```
-```
-docker compose up -d elasticsearch logstash kibana
-docker compose up -d snort wazuh
-```
 
 <a name="acces"></a>
 ## 7. 🌐 Accès aux services
@@ -488,8 +488,8 @@ Une fois l'installation terminée, voici comment accéder à chaque composant de
 
 | 🌐 Service           | URL d'accès                                              | Description                       | Pourquoi l'utiliser ?                                 |
 |-----------------------|----------------------------------------------------------|-----------------------------------|------------------------------------------------------|
-| **SecureVault**       | [http://localhost:9080](http://localhost:9080)           | Interface HTTP (non sécurisée)    | ⚡ **Tester les attaques man-in-the-middle**         |
-| **SecureVault SSL**   | [https://localhost:9443](https://localhost:9443)         | Interface HTTPS (sécurisée)       | 🔐 **Tester la résistance des connexions chiffrées** |
+| **HoneyPot Pro Max**  | [http://localhost:9080](http://localhost:9080)           | Interface HTTP (non sécurisée)    | ⚡ **Tester les attaques man-in-the-middle**         |
+| **HoneyPot SSL**      | [https://localhost:9443](https://localhost:9443)         | Interface HTTPS (sécurisée)       | 🔐 **Tester la résistance des connexions chiffrées** |
 | **API Documentation** | [http://localhost:8000/docs](http://localhost:8000/docs) | Documentation Swagger interactive | 🔍 **Explorer les endpoints pour tests d'intrusion** |
 | **API Backend**       | [http://localhost:8000](http://localhost:8000)           | API FastAPI directe               | ⚠️ **Tests d'injection et bypassing du proxy**       |
 
@@ -513,7 +513,7 @@ Une fois l'installation terminée, voici comment accéder à chaque composant de
 ### **🎯 Scénario d'utilisation typique**
 
 1. **🔍 Commencer par explorer** : Ouvrez [Kibana](http://localhost:5601) pour voir le dashboard vide
-2. **🎯 Attaquer votre application** : Testez [SecureVault HTTP](http://localhost:9080) et [HTTPS](https://localhost:9443)
+2. **🎯 Attaquer votre application** : Testez [HoneyPot HTTP](http://localhost:9080) et [HTTPS](https://localhost:9443)
 3. **📊 Observer les résultats** : Retournez sur Kibana pour voir les alertes générées
 4. **🔧 Analyser en profondeur** : Utilisez [pgAdmin](http://localhost:5050) pour voir l'impact sur les données
 
@@ -549,7 +549,7 @@ docker compose down && docker compose up -d
 
 ### **Votre laboratoire d'attaque : Comment mettre à l'épreuve votre gestionnaire**
 
-L'objectif de ce projet est de **tester en conditions réelles** la sécurité de notre gestionnaire de mots de passe. Voici les scénarios que vous pouvez exécuter :
+L'objectif de ce projet est de **tester en conditions réelles** la sécurité d'HoneyPot Pro Max. Voici les scénarios que vous pouvez exécuter :
 
 ### **🎯 Niveau 1 : Tests fonctionnels de base**
 
@@ -641,7 +641,7 @@ done
 
 1. S'authentifier normalement (username + password)
 2. Intercepter la session avant validation MFA
-3. Essayer d'accéder directement au gestionnaire de mots de passe
+3. Essayer d'accéder directement à HoneyPot Pro Max
 4. Tenter des codes MFA invalides ou expirés
 5. Essayer de désactiver la MFA sans autorisation
 ```
@@ -734,8 +734,7 @@ Projet_Annuel/
 │   ├── models.py                       # Modèles de données
 │   └── requirements.txt                # Dépendances Python
 ├── frontend/                       # Interface web moderne
-│   ├── index.html                      # Interface SecureVault Pro Max complète (CSS/JS intégrés)
-│   ├── style.css                       # Feuilles de style principales
+│   ├── index.html                      # Interface HoneyPot Pro Max complète (CSS/JS intégrés)
 │   └── images/                         # Images et assets
 │       └── HoneyPot.png                    # Logo de l'application
 ├── scripts/                        # Outils de validation et test
@@ -759,7 +758,9 @@ Projet_Annuel/
 ├── wazuh/                          # Configuration Wazuh HIDS
 └── secrets/                        # Fichiers sensibles (gitignore)
     ├── db_password.txt                 # Mot de passe PostgreSQL
-    └── mfa_encryption_key.txt          # Clé de chiffrement MFA
+    ├── mfa_encryption_key.txt          # Clé de chiffrement MFA
+    ├── nginx.crt                       # Certificat SSL
+    └── nginx.key                       # Clé privée SSL
 ```
 
 ### **🔄 Workflow de développement**
@@ -785,9 +786,9 @@ docker exec -it [container_name] /bin/bash
 ## 10. 🆕 Dernières améliorations
 
 ### **🎨 Interface utilisateur modernisée**
-- **Design glassmorphism** : Interface "SecureVault Pro Max" avec effets visuels modernes
+- **Design glassmorphism** : Interface "HoneyPot Pro Max" avec effets visuels modernes
 - **Police Inter** : Typographie professionnelle Google Fonts
-- **Variables CSS** : Système de couleurs cohérent et maintenable dans `style.css`
+- **CSS intégré** : Système de couleurs cohérent directement dans `index.html`
 - **Animations fluides** : Transitions et effets visuels sophistiqués
 - **Responsive design** : Optimisation mobile et desktop parfaite
 - **Architecture monolithique** : CSS et JavaScript intégrés dans `index.html` pour simplicité
@@ -1044,7 +1045,7 @@ Ce projet démontre l'expertise en **sécurité informatique** acquise durant no
 
 **🔐 Lucas BELMONTE** - *Développeur sécurité et MFA*  
 - **Spécialité** : Développement sécurisé et authentification
-- **Contributions** : Gestionnaire de mots de passe, système MFA/2FA complet, chiffrement Fernet, interface utilisateur moderne
+- **Contributions** : HoneyPot Pro Max (gestionnaire de mots de passe), système MFA/2FA complet, chiffrement Fernet, interface utilisateur moderne
 - **Expertise** : FastAPI, cryptographie, TOTP/OTP, sécurité applicative, frontend moderne
 
 **🏗️ Evan RATSIMANOHATRA** - *Architecte infrastructure et DevOps*
@@ -1084,6 +1085,151 @@ Ce projet ouvre la voie à plusieurs extensions :
 - **Threat Intelligence** : Intégration de feeds de menaces
 - **Automation** : Réponse automatique aux incidents
 - **Scale** : Déploiement multi-serveurs avec Kubernetes
+
+---
+
+## 14. 🎬 Guide de Démonstration
+
+### **🎯 Scripts de Démonstration pour Présentation**
+
+Ce guide présente les scripts utiles pour démontrer le fonctionnement et la robustesse de votre solution lors de la présentation.
+
+#### **📋 Scripts Disponibles**
+
+### **1. 🔒 Tests de Sécurité Automatisés**
+**Fichier :** `scripts/security_tests.py`
+
+**Utilité pour la présentation :**
+- Démontre la résistance aux attaques
+- Prouve l'efficacité des mesures de sécurité
+- Tests automatisés professionnels
+
+**Commandes de démonstration :**
+```bash
+# Test complet de sécurité
+python scripts/security_tests.py --scenario all
+
+# Test spécifique d'attaque par force brute
+python scripts/security_tests.py --scenario brute_force
+
+# Test d'injection SQL
+python scripts/security_tests.py --scenario sql_injection
+```
+
+**Points forts à mentionner :**
+- ✅ Détection automatique des tentatives d'intrusion
+- ✅ Logs générés dans Kibana en temps réel
+- ✅ Résistance prouvée aux attaques courantes
+
+### **2. ✅ Validation d'Installation**
+**Fichier :** `scripts/validate_installation.py`
+
+**Utilité pour la présentation :**
+- Prouve que tous les composants fonctionnent
+- Vérification automatique de l'architecture
+- Démonstration de la robustesse du déploiement
+
+**Commande de démonstration :**
+```bash
+python scripts/validate_installation.py
+```
+
+**Points forts à mentionner :**
+- ✅ Vérification de tous les services (DB, API, ELK, Sécurité)
+- ✅ Tests de connectivité automatisés
+- ✅ Rapport de santé complet du système
+
+### **3. 🆕 Test d'Installation Fraîche**
+**Fichier :** `scripts/test_fresh_install.py`
+
+**Utilité pour la présentation :**
+- Démontre la reproductibilité du projet
+- Prouve la qualité de la documentation
+- Installation automatisée
+
+**Commande de démonstration :**
+```bash
+python scripts/test_fresh_install.py
+```
+
+**Points forts à mentionner :**
+- ✅ Installation from scratch automatisée
+- ✅ Suivi exact du README
+- ✅ Reproductibilité garantie
+
+### **4. 📊 Audit des Fichiers**
+**Fichier :** `scripts/audit_files.py`
+
+**Utilité pour la présentation :**
+- Montre la surveillance des fichiers critiques
+- Démonstration de Wazuh HIDS
+- Intégrité du système
+
+### **🎬 Scénario de Démonstration Recommandé**
+
+#### **Phase 1 : Validation du Système (2-3 minutes)**
+```bash
+# 1. Vérifier que tout fonctionne
+python scripts/validate_installation.py
+
+# 2. Montrer l'état des services
+docker ps
+```
+
+#### **Phase 2 : Démonstration de Sécurité (5-7 minutes)**
+```bash
+# 1. Interface utilisateur
+# Ouvrir http://localhost:9080 dans le navigateur
+# Créer un compte, activer MFA, ajouter des mots de passe
+
+# 2. Tests de sécurité en live
+python scripts/security_tests.py --scenario brute_force
+
+# 3. Montrer les logs dans Kibana
+# Ouvrir http://localhost:5601
+# Afficher les alertes de sécurité en temps réel
+```
+
+#### **Phase 3 : Monitoring et Analyse (3-5 minutes)**
+```bash
+# 1. Audit des fichiers
+python scripts/audit_files.py
+
+# 2. Architecture complète
+# Montrer le README avec schéma
+# Expliquer l'architecture DMZ
+```
+
+### **💡 Messages Clés pour la Présentation**
+
+#### **🔒 Sécurité**
+- "Notre solution résiste aux attaques courantes"
+- "Monitoring temps réel avec alertes automatiques"
+- "Authentification MFA obligatoire"
+
+#### **🏗️ Architecture**
+- "Architecture microservices avec Docker"
+- "Stack ELK pour l'analyse des logs"
+- "Isolation réseau et chiffrement bout en bout"
+
+#### **🚀 Automatisation**
+- "Déploiement en une commande"
+- "Tests de sécurité automatisés"
+- "Validation d'installation complète"
+
+#### **📊 Professionnalisme**
+- "Documentation complète et testée"
+- "Code commenté selon standards industriels"
+- "Scripts de maintenance et monitoring"
+
+### **🎯 Points d'Impact Maximum**
+
+1. **Démonstration live des tests de sécurité** → Prouve la robustesse
+2. **Interface Kibana avec logs temps réel** → Montre le monitoring
+3. **Création de compte avec MFA** → Démontre l'UX sécurisée
+4. **Scripts de validation** → Prouve la qualité technique
+
+Ces scripts transforment votre projet en une démonstration interactive et convaincante ! 🎪
 
 ---
 

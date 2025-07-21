@@ -1,98 +1,140 @@
+<!--
+=============================================================================
+FRONTEND - HoneyPot Pro Max
+=============================================================================
+Interface utilisateur pour le gestionnaire de mots de passe sécurisé
+- Authentification MFA avec TOTP
+- Gestion sécurisée des mots de passe
+- Interface moderne et responsive
+- Intégration avec l'API backend FastAPI
+
+Fonctionnalités principales :
+- Connexion utilisateur avec double authentification
+- Création et gestion de comptes utilisateurs
+- Stockage et récupération de mots de passe chiffrés
+- Interface moderne avec design system cohérent
+
+Auteur: Équipe ESGI 2024-2025
+=============================================================================
+-->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SecureVault Pro Max - Gestionnaire de mots de passe</title>
+    <!-- =================================================================== -->
+    <!-- MÉTADONNÉES ET CONFIGURATION -->
+    <!-- =================================================================== -->
+    <meta charset="UTF-8">                                           <!-- Encodage UTF-8 pour les caractères français -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  <!-- Responsive design pour mobile -->
+    <title>HoneyPot Pro Max - Gestionnaire de mots de passe</title>      <!-- Titre de l'application -->
+    
     <style>
-        /* --- Import Google Fonts --- */
+        /* =================================================================== */
+        /* IMPORTS ET POLICES */
+        /* =================================================================== */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        /* Police moderne Inter pour une meilleure lisibilité */
         
-        /* --- Variables CSS pour la cohérence --- */
+        /* =================================================================== */
+        /* VARIABLES CSS - DESIGN SYSTEM */
+        /* =================================================================== */
+        /* Palette de couleurs cohérente pour toute l'application */
         :root {
-            --primary-color: #667eea;
-            --primary-dark: #5a67d8;
-            --secondary-color: #764ba2;
-            --accent-color: #f093fb;
-            --success-color: #48bb78;
-            --error-color: #f56565;
-            --warning-color: #ed8936;
-            --dark-color: #2d3748;
-            --light-color: #f7fafc;
-            --border-color: #e2e8f0;
-            --text-primary: #2d3748;
-            --text-secondary: #718096;
+            --primary-color: #667eea;          /* Bleu principal pour les éléments interactifs */
+            --primary-dark: #5a67d8;           /* Variation foncée pour les états hover */
+            --secondary-color: #764ba2;        /* Violet secondaire pour les accents */
+            --accent-color: #f093fb;           /* Rose pour les highlights */
+            --success-color: #48bb78;          /* Vert pour les messages de succès */
+            --error-color: #f56565;            /* Rouge pour les erreurs */
+            --warning-color: #ed8936;          /* Orange pour les avertissements */
+            --dark-color: #2d3748;             /* Gris foncé pour le texte principal */
+            --light-color: #f7fafc;            /* Gris très clair pour les fonds */
+            --border-color: #e2e8f0;           /* Gris clair pour les bordures */
+            --text-primary: #2d3748;           /* Couleur du texte principal */
+            --text-secondary: #718096;         /* Couleur du texte secondaire */
+            
+            /* Système d'ombres cohérent */
             --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
             --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
             --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
             --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04);
         }
 
-        /* --- Reset et styles généraux --- */
+        /* =================================================================== */
+        /* RESET CSS ET STYLES DE BASE */
+        /* =================================================================== */
         * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+            margin: 0;                          /* Supprime les marges par défaut */
+            padding: 0;                         /* Supprime les paddings par défaut */
+            box-sizing: border-box;             /* Inclut padding et border dans la taille */
         }
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: var(--text-primary);
-            line-height: 1.6;
-            position: relative;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);     /* Dégradé de fond */
+            min-height: 100vh;                  /* Hauteur minimale plein écran */
+            color: var(--text-primary);         /* Couleur du texte */
+            line-height: 1.6;                   /* Interlignage pour la lisibilité */
+            position: relative;                 /* Position pour les pseudo-éléments */
         }
 
-        /* --- Effet de particules en arrière-plan --- */
+        /* =================================================================== */
+        /* EFFETS VISUELS DE FOND */
+        /* =================================================================== */
+        /* Effet de particules/bulles en arrière-plan pour l'esthétique */
         body::before {
             content: '';
-            position: fixed;
+            position: fixed;                    /* Position fixe pour rester en place lors du scroll */
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
+            /* Dégradés radiaux pour créer un effet de profondeur */
             background: 
                 radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
                 radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
                 radial-gradient(circle at 40% 80%, rgba(120, 119, 198, 0.2) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: -1;
+            pointer-events: none;               /* N'interfère pas avec les interactions */
+            z-index: -1;                        /* Reste en arrière-plan */
         }
 
-        /* --- Barre supérieure moderne --- */
+        /* =================================================================== */
+        /* BARRE SUPÉRIEURE MODERNE */
+        /* =================================================================== */
+        /* Header principal avec effet de transparence et blur */
         .topbar {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.95);     /* Fond semi-transparent */
+            backdrop-filter: blur(20px);               /* Effet de flou moderne */
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
             color: var(--text-primary);
             padding: 20px 30px;
             font-size: 1.8em;
             font-weight: 700;
-            letter-spacing: -0.025em;
+            letter-spacing: -0.025em;           /* Espacement des lettres ajusté */
             box-shadow: var(--shadow-md);
-            position: sticky;
+            position: sticky;                   /* Reste visible lors du scroll */
             top: 0;
-            z-index: 100;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            z-index: 100;                       /* Au-dessus des autres éléments */
+            display: flex;                      /* Layout flexbox */
+            justify-content: space-between;     /* Espacement entre les éléments */
+            align-items: center;                /* Centrage vertical */
         }
 
+        /* Titre avec effet de dégradé */
         .topbar .title {
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            background-clip: text;
+            background-clip: text;              /* Applique le dégradé au texte */
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             display: inline-block;
         }
 
+        /* Exception pour l'emoji dans le titre */
         .topbar .title .emoji {
-            background: none !important;
+            background: none !important;       /* Annule le dégradé pour l'emoji */
             background-clip: unset !important;
             -webkit-background-clip: unset !important;
             -webkit-text-fill-color: unset !important;
-            color: #f39c12 !important;
+            color: #f39c12 !important;         /* Couleur dorée pour l'emoji */
             filter: none !important;
             display: inline-block !important;
         }
@@ -635,7 +677,7 @@
     <div class="topbar">
         <div style="display: flex; align-items: center;">
             <span style="color: #f39c12; margin-right: 8px; font-size: 1em;">🔐</span>
-            <span class="title">SecureVault Pro Max</span>
+            <span class="title">HoneyPot Pro Max</span>
         </div>
         <button id="logout-btn" class="logout-btn" style="display:none;" onclick="logout()">
             <span>🚪 Déconnexion</span>
@@ -644,8 +686,8 @@
 
     <!-- Page d'accueil moderne -->
     <div id="auth-choice" class="card" style="display:block;">
-        <h1>✨ Bienvenue sur SecureVault</h1>
-        <img src="images/HoneyPot.png" alt="Logo SecureVault" class="logo-img">
+        <h1>✨ Bienvenue sur HoneyPot Pro Max</h1>
+        <img src="images/HoneyPot.png" alt="Logo HoneyPot Pro Max" class="logo-img">
         <p style="text-align: center; color: var(--text-secondary); margin-bottom: 30px; font-size: 1.1em;">
             Votre gestionnaire de mots de passe sécurisé et moderne
         </p>
