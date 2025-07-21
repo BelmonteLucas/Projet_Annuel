@@ -308,6 +308,8 @@ docker compose up -d --build
 
 > **🪟 Note Windows :** Un popup "Docker File Sharing" peut apparaître - cliquez **"Allow"** pour autoriser Docker à accéder aux fichiers du projet. C'est normal et nécessaire.
 
+> **⏱️ Première installation :** Le téléchargement des images Docker prend 5-8 minutes. Vous verrez des barres de progression avec des caractères spéciaux - c'est normal ! Attendez que toutes les images soient téléchargées avant de tester les accès web.
+
 **Ce que fait le script de configuration :**
 1. ✅ Crée le répertoire `secrets/` sécurisé
 2. ✅ Génère une clé de chiffrement MFA unique (256 bits)
