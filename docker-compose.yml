@@ -213,6 +213,7 @@ services:
       - "5601:5601"                                        # Interface web Kibana
     networks:
       - backend_network
+    # Retiré l'isolation réseau pour permettre l'accès externe à Kibana
 
 # =============================================================================
 # VOLUMES DOCKER - Persistance des données
@@ -239,8 +240,9 @@ secrets:
 # =============================================================================
 # RÉSEAUX DOCKER - Isolation et sécurité réseau
 # =============================================================================
-# Réseau interne pour sécuriser les communications entre services
+# Réseau backend pour les communications entre services
+# Modifié pour permettre l'accès externe à Kibana tout en gardant les autres services protégés
 networks:
   backend_network:
-    internal: true                                         # Réseau isolé de l'extérieur (pas d'accès Internet direct)
+    # Retiré internal: true pour permettre l'accès à Kibana depuis l'extérieur
 

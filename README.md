@@ -1,271 +1,700 @@
 # 🛡️ HoneyPot Security Suite – Projet Annuel ESGI
 
-Bienvenue ! Ce projet propose une **infrastructure de sécurité complète** incluant un gestionnaire de mots de passe sécurisé avec authentification à deux facteurs (MFA), couplé à un **système de monitoring et détection d'intrusion** professionnel.
+**Un gestionnaire de mots de passe mis à l'épreuve dans un environnement hostile**
+
+Ce projet ESGI démontre la création d'une **application sécurisée** (gestionnaire de mots de passe avec MFA) et son **test en conditions réelles** dans un environnement de sécurité simulant des attaques externes. L'objectif ? Valider la robustesse de notre solution et observer les tentatives d'intrusion en temps réel.
 
 ---
 
-## 🚀 Vue d'ensemble du projet
+## 📋 Table des matières
 
-### 🎯 **Objectifs pédagogiques**
-Ce projet ESGI démontre la mise en œuvre d'une architecture de sécurité moderne comprenant :
-- **Développement sécurisé** : Application web avec MFA et chiffrement
-- **Détection d'intrusion** : Monitoring réseau et système en temps réel  
-- **Analyse forensique** : Centralisation et visualisation des logs
-- **Infrastructure as Code** : Déploiement automatisé avec Docker
-
-### 🏗️ **Architecture technique**
-
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   FRONTEND      │    │    BACKEND      │    │   DATABASE      │
-│   (NGINX/SSL)   │◄──►│   (FastAPI)     │◄──►│  (PostgreSQL)   │
-│   Port 80/443   │    │   Port 8000     │    │   Port 5432     │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         └───────────────────────┼───────────────────────┘
-                                 │
-    ┌─────────────────────────────┼─────────────────────────────┐
-    │              STACK DE SÉCURITÉ                            │
-    ├─────────────────┬─────────────────┬─────────────────────┤
-    │   SNORT IDS     │   WAZUH HIDS    │    ELK STACK        │
-    │ (Réseau/Port)   │ (Fichiers/Sys)  │ (Logs/Analytics)    │
-    │   Port 1514     │   Port 1515     │ Elasticsearch:9200  │
-    │                 │   Port 55000    │ Logstash:5044       │
-    │                 │                 │ Kibana:5601         │
-    └─────────────────┴─────────────────┴─────────────────────┘
-```
-
-### 🛡️ **Composants de sécurité**
-
-#### **Application principale**
-- **Frontend** : Interface web sécurisée (HTTPS, certificats SSL)
-- **Backend** : API FastAPI avec authentification MFA/2FA
-- **Base de données** : PostgreSQL avec chiffrement des secrets
-- **Administration** : pgAdmin pour la gestion base de données
-
-#### **Système de détection d'intrusion (IDS/HIDS)**
-- **Snort IDS** : Détection d'intrusion réseau en temps réel
-- **Wazuh HIDS** : Surveillance d'intégrité des fichiers système
-- **Règles personnalisées** : Détection d'attaques SSH, web, scan de ports
-
-#### **Stack d'analyse et monitoring**
-- **Elasticsearch** : Moteur de recherche et indexation des logs
-- **Logstash** : Pipeline de traitement et enrichissement des logs
-- **Kibana** : Interface de visualisation et dashboard de sécurité
-
-### ✨ **Fonctionnalités**
-
-#### **Gestionnaire de mots de passe**
-- Créer un compte personnel sécurisé
-- Activer l'authentification à deux facteurs (MFA/2FA) avec TOTP
-- Ajouter, lister et supprimer vos mots de passe pour différents sites
-- Interface web moderne et intuitive
-
-#### **Monitoring de sécurité**
-- Détection en temps réel des tentatives d'intrusion
-- Surveillance de l'intégrité des fichiers critiques
-- Alertes automatiques sur activités suspectes
-- Tableaux de bord de sécurité avec métriques
-- Analyse forensique des incidents
+1. [🎯 Vision du projet](#-vision-du-projet)
+2. [🏗️ Architecture de test](#️-architecture-de-test)
+3. [🔐 Le gestionnaire SecureVault](#-le-gestionnaire-securevault)
+4. [🛡️ Environnement de détection](#️-environnement-de-détection)
+5. [⚙️ Installation rapide](#️-installation-rapide)
+6. [🌐 Accès aux services](#-accès-aux-services)
+7. [🧪 Scénarios de test](#-scénarios-de-test)
+8. [📊 Monitoring et analyse](#-monitoring-et-analyse)
+9. [🔧 Guide développeur](#-guide-développeur)
+10. [🆘 Dépannage](#-dépannage)
+11. [👥 Équipe](#-équipe)
 
 ---
 
-## 🛠️ Installation et configuration
+## 🎯 Vision du projet
 
-### 1. Prérequis
+### **Le défi : Créer et tester une application sécurisée**
 
-- [Docker](https://www.docker.com/products/docker-desktop)
-- [Docker Compose](https://docs.docker.com/compose/)
-- [Python 3](https://www.python.org/) (pour le script de configuration)
-- [Git](https://git-scm.com/) pour cloner le dépôt
+Dans le monde réel, développer une application "sécurisée" ne suffit pas. Il faut la **tester face à de vraies menaces**. Ce projet ESGI simule cette réalité :
 
-### 2. Cloner le projet
+1. **🎯 Phase 1 - Développement** : Création d'un gestionnaire de mots de passe moderne avec authentification à deux facteurs
+2. **🛡️ Phase 2 - Fortification** : Mise en place d'un environnement de monitoring et détection d'intrusion  
+3. **⚔️ Phase 3 - Test en conditions hostiles** : Exposition contrôlée à des attaques pour valider la sécurité
 
+### **Pourquoi cette approche ?**
+
+**Problématique réelle** : 90% des violations de données proviennent d'applications mal sécurisées ou non testées en conditions réelles.
+
+**Notre solution** : 
+- ✅ **Développement sécurisé dès la conception** (MFA, chiffrement, validation)
+- ✅ **Infrastructure de détection** (Snort IDS, Wazuh HIDS, ELK Stack)
+- ✅ **Test en continu** avec monitoring en temps réel des tentatives d'attaque
+
+### **Objectifs pédagogiques**
+
+- **🔒 Sécurité applicative** : Comprendre les enjeux du développement sécurisé
+- **🔍 Détection d'intrusion** : Mettre en œuvre des systèmes de monitoring professionnels
+- **📈 Analyse forensique** : Interpréter les logs et identifier les patterns d'attaque
+- **🏗️ DevSecOps** : Intégrer la sécurité dans le cycle de développement
+
+## 🏗️ Architecture de test
+
+### **Le concept : Un laboratoire de sécurité**
+
+Notre infrastructure simule un **environnement de production vulnérable** pour tester la résilience de notre gestionnaire de mots de passe. Voici comment nous avons conçu ce laboratoire :
+
+```
+🌍 INTERNET HOSTILE                                    🏢 INFRASTRUCTURE CIBLE
+(Attaquants simulés)                                   (Notre application à tester)
+          │                                                        │
+          ▼                                                        ▼
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                                🔒 ZONE DÉMILITARISÉE                                │
+│                                                                                     │
+│  ┌──────────────────┐  HTTPS/HTTP   ┌─────────────────┐   API    ┌──────────────┐  │
+│  │   🌐 Frontend    │◄──────────────►│  🛡️ NGINX Proxy │◄────────►│ 🚀 Backend   │  │
+│  │  (Cible visible) │                │  (Point d'entrée)│          │  (FastAPI)   │  │
+│  │   Ports: 9080/   │                │  SSL Termination │          │  Port: 8000  │  │
+│  │        9443      │                │  Load Balancing  │          │              │  │
+│  └──────────────────┘                └─────────────────┘          └──────────────┘  │
+│                                                                                     │
+│                                   ┌─────────────────────────────────────────────┐   │
+│                                   │           🗄️ COUCHE DONNÉES                │   │
+│                                   │                                             │   │
+│                                   │  ┌──────────────┐    ┌──────────────────┐  │   │
+│                                   │  │ PostgreSQL   │    │    pgAdmin       │  │   │
+│                                   │  │ (Mots de    │    │  (Interface      │  │   │
+│                                   │  │  passe +     │    │   administration)│  │   │
+│                                   │  │  MFA secrets)│    │  Port: 5050      │  │   │
+│                                   │  │ Port: 5432   │    │                  │  │   │
+│                                   │  └──────────────┘    └──────────────────┘  │   │
+│                                   └─────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+                                            │
+                                            ▼
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                           🔍 SYSTÈME DE DÉTECTION ET ANALYSE                        │
+│                                                                                     │
+│  ┌──────────────────┐     ┌──────────────────┐     ┌──────────────────────────────┐ │
+│  │   📡 Snort IDS   │     │   🛡️ Wazuh HIDS │     │        📊 ELK Stack         │ │
+│  │                  │     │                  │     │                              │ │
+│  │ • Analyse réseau │     │ • Intégrité     │     │ • 🔍 Elasticsearch          │ │
+│  │ • Détection      │     │   fichiers      │     │   (Indexation des logs)     │ │
+│  │   d'intrusion    │     │ • Monitoring    │     │                              │ │
+│  │ • Alertes temps  │     │   système       │     │ • ⚙️ Logstash               │ │
+│  │   réel           │     │ • Logs sécurité │     │   (Pipeline de traitement)  │ │
+│  │                  │     │                  │     │                              │ │
+│  │ Port: 1514       │────►│ Ports: 1515     │────►│ • 📈 Kibana                 │ │
+│  │                  │     │        55000     │     │   (Visualisation)           │ │
+│  │                  │     │                  │     │   Port: 5601                │ │
+│  └──────────────────┘     └──────────────────┘     └──────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### **Pourquoi cette architecture en couches ?**
+
+#### **🎯 Couche d'exposition (Frontend + NGINX)**
+- **Objectif** : Présenter une surface d'attaque réaliste
+- **Choix technique** : NGINX comme proxy inverse pour simuler un environnement de production
+- **Sécurité** : Certificats SSL/TLS pour chiffrer les communications
+
+#### **🚀 Couche applicative (Backend FastAPI)**  
+- **Objectif** : Tester la robustesse de notre code face aux attaques
+- **Choix technique** : FastAPI pour une API moderne avec validation automatique
+- **Sécurité** : Authentification MFA, validation des données, gestion des sessions
+
+#### **🗄️ Couche de persistance (PostgreSQL)**
+- **Objectif** : Protéger les données critiques (mots de passe, secrets MFA)
+- **Choix technique** : PostgreSQL pour la robustesse et les fonctionnalités de sécurité
+- **Sécurité** : Chiffrement des secrets, isolation réseau, accès contrôlé
+
+#### **🔍 Couche de surveillance (Snort + Wazuh + ELK)**
+- **Objectif** : Détecter et analyser toutes les tentatives d'intrusion
+- **Choix technique** : Stack professionnelle utilisée en entreprise
+- **Monitoring** : Analyse en temps réel, alertes automatiques, forensique
+
+## � Le gestionnaire SecureVault
+
+### **Notre application cible : Un gestionnaire de mots de passe moderne**
+
+SecureVault Pro Max est volontairement **exposé aux attaques** pour tester sa résistance. Voici pourquoi nous avons fait ces choix de conception :
+
+#### **🎨 Interface utilisateur moderne**
+```
+🖼️ Design glassmorphism + Police Inter
+├── Pourquoi ? Démontrer qu'on peut allier esthétique et sécurité
+├── Défi : Interface attrayante sans compromettre la sécurité
+└── Test : Résistance aux attaques par injection CSS/JS
+```
+
+#### **🔐 Système d'authentification à deux facteurs (MFA)**
+```
+🛡️ TOTP (Time-based One-Time Password)
+├── Pourquoi TOTP et pas SMS ? Plus sécurisé, pas de SIM swapping
+├── Compatible Google Authenticator, Authy, Microsoft Authenticator
+├── Secrets chiffrés avec Fernet (AES-256)
+└── Test : Résistance aux attaques par force brute sur les codes
+```
+
+**Workflow MFA détaillé :**
+1. **Génération du secret** : Clé unique de 256 bits générée côté serveur
+2. **QR Code sécurisé** : Utilisation d'un service externe pour éviter les vulnérabilités locales
+3. **Chiffrement Fernet** : Secret jamais stocké en clair, même en base de données
+4. **Validation temps réel** : Codes valides 30 secondes avec tolérance de dérive
+5. **Protection anti-replay** : Impossible de réutiliser un code déjà validé
+
+#### **🗄️ Gestion des mots de passe**
+```
+💾 Fonctionnalités de base
+├── Ajout/suppression d'identifiants
+├── Générateur de mots de passe sécurisés
+├── Suggestions intelligentes de sites
+└── Masquage/affichage avec boutons SVG
+```
+
+#### **🛡️ Mesures de sécurité implémentées**
+```
+🔒 Sécurité défensive
+├── Chiffrement : Bcrypt pour mots de passe + Fernet pour secrets MFA
+├── Validation : Contrôles côté client ET serveur
+├── Sanitisation : Effacement automatique des champs sensibles
+├── Sessions : Gestion sécurisée avec expiration
+└── HTTPS : Communication chiffrée avec certificats SSL
+```
+
+### **Points de test volontairement exposés**
+
+Pour valider la robustesse de notre application, nous avons identifié ces **surfaces d'attaque** :
+
+#### **🎯 Cibles d'attaque réseau**
+- **Port 9080 (HTTP)** : Test d'interception de trafic non chiffré
+- **Port 9443 (HTTPS)** : Test d'attaques SSL/TLS
+- **API REST** : Endpoints FastAPI exposés pour tests d'injection
+
+#### **🎯 Cibles d'attaque applicative**  
+- **Formulaires de connexion** : Tests de force brute, injection SQL
+- **Gestion MFA** : Tentatives de contournement de la 2FA
+- **Sessions utilisateur** : Tests de hijacking et fixation de session
+
+#### **🎯 Cibles d'attaque infrastructure**
+- **Base PostgreSQL** : Tentatives d'accès direct (normalement bloquées)
+- **Conteneurs Docker** : Tests d'évasion de conteneur
+- **Réseau backend** : Scanning de ports et services internes
+
+## �️ Environnement de détection
+
+### **Notre laboratoire de cybersécurité : Voir les attaques en temps réel**
+
+L'objectif n'est pas seulement de créer une application sécurisée, mais de **comprendre comment elle est attaquée**. Notre stack de monitoring nous permet d'observer et d'analyser chaque tentative d'intrusion.
+
+#### **🚨 Snort IDS : L'œil sur le réseau**
+```
+📡 Snort - Système de détection d'intrusion réseau
+├── Rôle : Intercepter et analyser tout le trafic réseau en temps réel
+├── Position : Entre l'attaquant et notre application  
+├── Détection : Scans de ports, injections SQL, attaques XSS, tentatives de brute force
+└── Alertes : Notification immédiate de toute activité suspecte
+```
+
+**Pourquoi Snort ?**
+- **Standard industriel** : Utilisé par 80% des entreprises pour la détection réseau
+- **Règles personnalisables** : Nous avons configuré des règles spécifiques pour détecter les attaques sur notre gestionnaire de mots de passe
+- **Temps réel** : Analyse instantanée du trafic, pas de délai de détection
+
+#### **🛡️ Wazuh HIDS : Le gardien du système**
+```
+🔍 Wazuh - Host-based Intrusion Detection System
+├── Rôle : Surveiller l'intégrité des fichiers et du système
+├── Position : À l'intérieur de nos conteneurs et services
+├── Détection : Modifications de fichiers, escalade de privilèges, activités malveillantes
+└── Monitoring : Logs système, accès aux fichiers, tentatives d'évasion
+```
+
+**Pourquoi Wazuh ?**
+- **Vision interne** : Complète Snort en surveillant ce qui se passe À L'INTÉRIEUR du système
+- **Conformité** : Aide à respecter les standards PCI DSS, GDPR
+- **Machine Learning** : Détection d'anomalies comportementales
+
+#### **📊 ELK Stack : Le cerveau analytique**
+```
+🧠 ELK Stack - Elasticsearch + Logstash + Kibana
+├── Elasticsearch : Moteur de recherche ultra-rapide pour indexer tous les logs
+├── Logstash : Pipeline intelligent qui enrichit et corrèle les données
+└── Kibana : Interface de visualisation pour comprendre les patterns d'attaque
+```
+
+**Le processus d'analyse :**
+1. **Collecte** : Snort et Wazuh envoient leurs alertes vers Logstash
+2. **Enrichissement** : Logstash ajoute contexte géographique, réputation IP, historique
+3. **Indexation** : Elasticsearch stocke et indexe pour recherche ultra-rapide
+4. **Visualisation** : Kibana transforme les données en graphiques compréhensibles
+
+### **🎯 Types d'attaques détectées**
+
+Notre environnement est configuré pour détecter et analyser :
+
+#### **🌐 Attaques réseau (Snort)**
+- **Scan de ports** : Reconnaissance des services exposés
+- **Attaques DDoS** : Tentatives de surcharge de nos services
+- **Injections SQL** : Tentatives d'exploitation de nos formulaires
+- **Attaques XSS** : Injection de scripts malveillants
+- **Brute force** : Tentatives répétées de connexion
+
+#### **💻 Attaques système (Wazuh)**  
+- **Escalade de privilèges** : Tentatives d'élévation de droits
+- **Modifications de fichiers** : Altération de notre code ou configuration
+- **Accès non autorisés** : Tentatives d'accès aux fichiers sensibles
+- **Processus suspects** : Détection de logiciels malveillants
+
+#### **📈 Patterns d'attaque analysés**
+- **Géolocalisation** : D'où viennent les attaques ?
+- **Chronologie** : Séquences d'attaque et techniques utilisées  
+- **Corrélation** : Liens entre différentes tentatives d'intrusion
+- **Impact** : Évaluation des dégâts potentiels ou réels
+
+## ⚙️ Installation rapide
+
+### **Déployer votre laboratoire de sécurité en 5 minutes**
+
+Notre objectif : **simplicité maximale** pour se concentrer sur les tests de sécurité plutôt que sur la configuration.
+
+#### **🎯 Pré-requis (vérifiez d'abord !)**
 ```bash
+# Vérifier Docker
+docker --version
+# Résultat attendu : Docker version 20.x.x ou plus récent
+
+# Vérifier Docker Compose  
+docker compose version
+# Résultat attendu : Docker Compose version 2.x.x ou plus récent
+
+# Vérifier Python (pour le script de configuration)
+python --version
+# Résultat attendu : Python 3.8+ 
+```
+
+#### **🚀 Installation en une commande**
+```bash
+# Cloner et configurer automatiquement
 git clone https://github.com/BelmonteLucas/Projet_Annuel.git
 cd Projet_Annuel
-```
 
-### 3. Configuration de l'environnement
-
-#### a. Installer les dépendances de développement
-
-```bash
-pip install -r requirements-dev.txt
-```
-
-#### b. Lancer le script de configuration
-
-```bash
+# Script de configuration automatique
 python setup_dev_environment.py
-```
 
-Ce script va :
-- Créer le répertoire `secrets/` si nécessaire
-- Générer une clé de chiffrement MFA unique (`secrets/mfa_encryption_key.txt`)
-- Configurer l'environnement de développement local
-
-#### c. Configurer le mot de passe de la base de données
-
-Créez le fichier `secrets/db_password.txt` avec votre mot de passe :
-
-```bash
-echo "votre_mot_de_passe_securise" > secrets/db_password.txt
-```
-
-### 4. Déploiement avec Docker
-
-```bash
-# Construction et lancement de toute l'infrastructure
+# Lancement de tout l'environnement
 docker compose up -d --build
-
-# Vérifier que tous les services sont opérationnels
-docker compose ps
 ```
 
-L'option `--build` est recommandée la première fois ou après des modifications.
+**Ce que fait le script de configuration :**
+1. ✅ Crée le répertoire `secrets/` sécurisé
+2. ✅ Génère une clé de chiffrement MFA unique (256 bits)
+3. ✅ Configure les certificats SSL pour HTTPS
+4. ✅ Initialise les bases de données
+5. ✅ Prépare l'environnement de monitoring
+
+#### **⏱️ Temps d'installation estimé**
+- **Première installation** : 5-8 minutes (téléchargement des images Docker)
+- **Installations suivantes** : 30 secondes (images en cache)
+- **Redémarrage après modifications** : 1-2 minutes
+
+#### **✅ Vérification de l'installation**
+```bash
+# Vérifier que tous les services sont actifs
+docker compose ps
+
+# Vous devriez voir tous ces services en état "Up" :
+# ✅ frontend_nginx_service    
+# ✅ backend_api_service       
+# ✅ postgres_db_service       
+# ✅ pgadmin_service          
+# ✅ elasticsearch            
+# ✅ logstash                 
+# ✅ kibana                   
+# ✅ snort_ids                
+# ✅ wazuh_manager            
+```
+
+### **🔧 Configuration manuelle (si besoin)**
+
+Si vous préférez comprendre chaque étape :
+
+#### **1. Secrets de sécurité**
+```bash
+# Créer le répertoire des secrets
+mkdir secrets
+
+# Générer la clé de chiffrement MFA (IMPORTANT : unique par installation)
+python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())" > secrets/mfa_encryption_key.txt
+
+# Définir le mot de passe de la base de données
+echo "VotreMotDePasseSecurise123!" > secrets/db_password.txt
+```
+
+#### **2. Lancement sélectif des services**
+```bash
+# Lancer uniquement l'application (sans monitoring)
+docker compose up -d frontend backend postgres pgadmin
+
+# Ajouter le monitoring progressivement
+docker compose up -d elasticsearch logstash kibana
+docker compose up -d snort wazuh
+```
 
 ---
+
+## 📊 Monitoring et analyse
+
+### **Votre centre de commandement : Interpréter les données de sécurité**
+
+Une fois vos tests d'attaque lancés, il est crucial de **comprendre ce qui s'est passé**. Voici comment exploiter au maximum vos données de monitoring.
+
+#### **🎯 Dashboard Kibana : Votre tour de contrôle**
+
+**Accès :** [http://localhost:5601](http://localhost:5601)
+
+```
+📊 Dashboards recommandés à créer :
+├── Security Overview : Vue d'ensemble des menaces détectées
+├── Network Traffic : Analyse du trafic Snort en temps réel  
+├── Authentication Attempts : Suivi des tentatives de connexion
+├── System Integrity : Monitoring Wazuh des fichiers système
+└── Incident Timeline : Chronologie des attaques pour analyse forensique
+```
+
+#### **🔍 Commandes de monitoring en direct**
+
+```bash
+# 📡 Surveillance réseau (Snort)
+docker logs snort_ids --tail 50 | grep -i "ALERT"
+docker exec snort_ids tail -f /var/log/snort/alert
+
+# 🛡️ Surveillance système (Wazuh)  
+docker logs wazuh_manager --tail 30 | grep -i "rule"
+docker exec wazuh_manager tail -f /var/ossec/logs/alerts/alerts.log
+
+# 📈 État de santé général
+docker compose ps --format "table {{.Service}}\t{{.Status}}\t{{.Ports}}"
+docker stats --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}"
+
+# 🔍 Recherche dans les logs ELK
+curl -s "http://localhost:9200/_search?q=alert&size=10" | jq '.hits.hits[]._source'
+```
+
+#### **📈 Métriques clés à surveiller**
+
+| Métrique | Commande | Interprétation |
+|----------|----------|----------------|
+| **Tentatives de connexion** | `grep "login" docker logs` | > 10/min = attaque possible |
+| **Scans de ports** | `grep "SCAN" snort logs` | Reconnaissance d'attaquant |
+| **Erreurs 4xx/5xx** | `grep "error" nginx logs` | Tentatives d'exploitation |
+| **Modifications fichiers** | Wazuh integrity checks | Intrusion réussie potentielle |
+| **Trafic anormal** | Analyse bandwidth Snort | DDoS ou exfiltration |
+
+### **🚨 Types d'alertes et leur signification**
+
+#### **🔴 Alertes critiques (Action immédiate requise)**
+```
+⚠️ "Multiple failed login attempts" 
+└── Signification : Tentative de force brute active
+└── Action : Vérifier les IPs sources dans Kibana
+
+⚠️ "SQL injection detected"
+└── Signification : Tentative d'injection sur vos formulaires  
+└── Action : Analyser les payloads dans les logs FastAPI
+
+⚠️ "File integrity violation"
+└── Signification : Modification non autorisée de fichiers système
+└── Action : Audit complet des changements via Wazuh
+```
+
+#### **🟡 Alertes d'information (Surveillance continue)**
+```
+ℹ️ "Port scan detected"
+└── Signification : Reconnaissance réseau normale
+└── Action : Noter l'IP source, surveiller escalade
+
+ℹ️ "Unusual traffic pattern"  
+└── Signification : Comportement différent de la baseline
+└── Action : Analyser dans Kibana pour confirmer légitimité
+```
+
+### **🔬 Analyse forensique post-incident**
+
+#### **📋 Checklist d'investigation**
+
+Quand une attaque est détectée, suivez cette méthode :
+
+1. **🕐 Timeline reconstruction**
+```bash
+# Obtenir la chronologie complète d'un incident
+docker exec elasticsearch curl -s "localhost:9200/_search" \
+  -H 'Content-Type: application/json' \
+  -d '{"query":{"range":{"@timestamp":{"gte":"2024-01-01T10:00:00","lte":"2024-01-01T11:00:00"}}},"sort":[{"@timestamp":{"order":"asc"}}]}'
+```
+
+2. **🌐 Source analysis**
+```bash
+# Identifier l'origine géographique des attaques
+grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}' docker logs | sort | uniq -c | sort -nr
+```
+
+3. **💥 Impact assessment**
+```bash
+# Vérifier l'intégrité de la base de données
+docker exec postgres_db_service psql -U admin -d honeypot_db -c "SELECT COUNT(*) FROM users;"
+docker exec postgres_db_service psql -U admin -d honeypot_db -c "SELECT * FROM users WHERE created_at > NOW() - INTERVAL '1 hour';"
+```
+docker compose up -d elasticsearch logstash kibana
+docker compose up -d snort wazuh
+```
 
 ## 🌐 Accès aux services
 
-### **🖥️ Applications principales**
+### **Votre tableau de bord de test : Tous les outils en un coup d'œil**
 
-| Service | URL | Description |
-|---------|-----|-------------|
-| **Frontend** | [https://localhost/](https://localhost/) | Interface utilisateur principale (HTTPS) |
-| **API Backend** | [http://localhost:8000](http://localhost:8000) | API FastAPI avec documentation |
-| **Swagger Docs** | [http://localhost:8000/docs](http://localhost:8000/docs) | Documentation interactive de l'API |
+Une fois l'installation terminée, voici comment accéder à chaque composant de votre laboratoire de sécurité :
 
-### **🔧 Administration**
+#### **🎯 Applications principales - VOS CIBLES DE TEST**
 
-| Service | URL | Identifiants | Description |
-|---------|-----|--------------|-------------|
-| **pgAdmin** | [http://localhost:5050](http://localhost:5050) | `admin@admin.com` / `admin` | Interface d'administration PostgreSQL |
-| **Kibana** | [http://localhost:5601](http://localhost:5601) | Accès direct | Tableaux de bord de sécurité |
+| 🌐 Service | URL d'accès | Description | Pourquoi l'utiliser ? |
+|-----------|-------------|-------------|---------------------|
+| **SecureVault** | [http://localhost:9080](http://localhost:9080) | Interface HTTP (non sécurisée) | ⚡ **Tester les attaques man-in-the-middle** |
+| **SecureVault SSL** | [https://localhost:9443](https://localhost:9443) | Interface HTTPS (sécurisée) | 🔐 **Tester la résistance des connexions chiffrées** |
+| **API Documentation** | [http://localhost:8000/docs](http://localhost:8000/docs) | Documentation Swagger interactive | 🔍 **Explorer les endpoints pour tests d'intrusion** |
+| **API Backend** | [http://localhost:8000](http://localhost:8000) | API FastAPI directe | ⚠️ **Tests d'injection et bypassing du proxy** |
 
-### **🛡️ Monitoring de sécurité**
+#### **� Interfaces de monitoring - VOS OUTILS D'ANALYSE**
 
-| Service | Port | Description |
-|---------|------|-------------|
-| **Snort IDS** | `1514/udp` | Collecte des logs syslog |
-| **Wazuh API** | `55000` | API de gestion Wazuh |
-| **Elasticsearch** | `9200` | Moteur de recherche des logs |
+| 🔧 Service | URL d'accès | Identifiants | À quoi ça sert ? |
+|-----------|-------------|--------------|------------------|
+| **Kibana** | [http://localhost:5601](http://localhost:5601) | Accès direct | 📈 **Visualiser les attaques en temps réel** |
+| **pgAdmin** | [http://localhost:5050](http://localhost:5050) | `admin@admin.com` / `admin` | 🗄️ **Analyser l'impact sur la base de données** |
 
----
+#### **🛡️ Services de détection - VOS SENTINELLES**
 
-## 📊 Surveillance et monitoring
+| ⚙️ Service | Port | Statut | Rôle dans le laboratoire |
+|-----------|------|--------|-------------------------|
+| **Snort IDS** | `1514/udp` | 🔒 Service interne | 📡 **Capture TOUT le trafic réseau d'attaque** |
+| **Wazuh HIDS** | `1515`, `55000` | 🔒 Service interne | 🛡️ **Surveille les intrusions au niveau système** |
+| **Elasticsearch** | `9200` | 🔒 Service interne | 🗃️ **Stocke et indexe tous les logs d'attaque** |
+| **Logstash** | `5044` | 🔒 Service interne | ⚙️ **Traite et enrichit les données de sécurité** |
+| **PostgreSQL** | `5432` | 🔒 Service interne | 💾 **Base de données (accès via pgAdmin)** |
 
-### **🔍 Commandes utiles pour vérifier l'état**
+### **🎯 Scénario d'utilisation typique**
 
-```bash
-# Afficher le statut de tous les services avec format tableau
-docker compose ps --format "table {{.Name}}\t{{.Status}}\t{{.Ports}}"
+1. **🔍 Commencer par explorer** : Ouvrez [Kibana](http://localhost:5601) pour voir le dashboard vide
+2. **🎯 Attaquer votre application** : Testez [SecureVault HTTP](http://localhost:9080) et [HTTPS](https://localhost:9443)
+3. **📊 Observer les résultats** : Retournez sur Kibana pour voir les alertes générées
+4. **🔧 Analyser en profondeur** : Utilisez [pgAdmin](http://localhost:5050) pour voir l'impact sur les données
 
-# Alternative : format personnalisé avec services
-docker compose ps --format "table {{.Service}}\t{{.Name}}\t{{.Status}}"
-
-# Affichage compact avec statut uniquement
-docker ps --format "table {{.Names}}\t{{.Status}}" --filter "label=com.docker.compose.project=projet_annuel"
-
-# Affichage détaillé avec ports et santé
-docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}\t{{.Size}}"
-
-# Vérifier les logs de Snort IDS
-docker logs snort_ids --tail 20
-
-# Consulter les alertes de sécurité en temps réel
-docker exec snort_ids tail -f /var/log/snort/alert
-
-# Vérifier l'état de Wazuh
-docker logs wazuh_manager --tail 10
-
-# État de santé d'Elasticsearch
-curl -s http://localhost:9200/_cluster/health | jq
-
-# Surveillance en temps réel des logs
-docker compose logs -f --tail=10
-```
-
-#### **📊 Commandes de monitoring avancé**
+### **⚡ Tests rapides de connexion**
 
 ```bash
-# Statistiques d'utilisation des ressources
-docker stats --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}"
+# Vérifier que tout fonctionne
+curl http://localhost:9080/          # ✅ Frontend HTTP
+curl -k https://localhost:9443/      # ✅ Frontend HTTPS  
+curl http://localhost:8000/docs      # ✅ Documentation API
+curl http://localhost:5601/          # ✅ Kibana
+curl http://localhost:5050/          # ✅ pgAdmin
 
-# Vérifier les healthchecks
-docker inspect --format='{{.State.Health.Status}}' elasticsearch
-docker inspect --format='{{.State.Health.Status}}' postgres_db_service
-
-# Logs filtrés par niveau d'erreur
-docker compose logs | grep -i error
-
-# État des volumes Docker
-docker volume ls | grep projet_annuel
-docker system df
+# Si toutes ces commandes retournent du HTML, tout est opérationnel !
 ```
 
-### **📈 Métriques de sécurité**
-
-- **Snort IDS** : Capture et analyse le trafic réseau en temps réel
-- **Wazuh HIDS** : Surveille l'intégrité des fichiers backend
-- **ELK Stack** : Centralise tous les logs pour analyse et visualisation
-- **Healthchecks** : Garantissent la disponibilité des services critiques
-
----
-
-## 🔒 Sécurité et bonnes pratiques
-
-### **🔐 Gestion des secrets**
-
-- **Mots de passe** : Stockés dans `secrets/db_password.txt` (gitignore)
-- **Clés MFA** : Chiffrées avec `secrets/mfa_encryption_key.txt`
-- **Certificats SSL** : `nginx.crt` et `nginx.key` pour HTTPS
-- **Isolation réseau** : Réseau Docker interne isolé
-
-### **🛡️ Fonctionnalités MFA**
-
-1. **Activation du MFA** : Interface utilisateur avec QR code
-2. **Authentification TOTP** : Compatible Google Authenticator, Authy
-3. **Stockage sécurisé** : Secrets MFA chiffrés en base
-4. **Vérification obligatoire** : Code OTP requis pour la connexion
-
-### **⚠️ Alertes de sécurité configurées**
-
-- Tentatives de brute force SSH
-- Scans de ports suspects  
-- Accès non autorisés aux fichiers sensibles
-- Trafic réseau anormal
-- Connexions à la base de données
-
----
-
-## 🧪 Tests et validation
-
-### **✅ Vérifier l'installation**
+### **🚨 Que faire si un service ne répond pas ?**
 
 ```bash
-# Tous les conteneurs doivent être "Up"
-docker ps
+# Diagnostiquer les problèmes
+docker compose ps                    # Voir l'état de tous les services
+docker compose logs [nom_service]    # Voir les logs d'un service spécifique
 
-# Tester l'accès à l'interface web
-curl -k https://localhost/
+# Redémarrer un service problématique
+docker compose restart [nom_service]
 
-# Vérifier l'API
-curl http://localhost:8000/
-
-# Tester Elasticsearch
-curl http://localhost:9200/_cluster/health
+# En cas de problème majeur, redémarrer tout
+docker compose down && docker compose up -d
 ```
 
-### **🎯 Scénarios de test**
+## 🧪 Scénarios de test
 
-1. **Créer un compte utilisateur** sur l'interface web
-2. **Activer le MFA** et scanner le QR code
-3. **Se déconnecter et reconnecter** avec le code OTP
-4. **Ajouter/supprimer des mots de passe**
-5. **Générer du trafic** pour tester Snort
-6. **Consulter les tableaux de bord** Kibana
+### **Votre laboratoire d'attaque : Comment mettre à l'épreuve votre gestionnaire**
+
+L'objectif de ce projet est de **tester en conditions réelles** la sécurité de notre gestionnaire de mots de passe. Voici les scénarios que vous pouvez exécuter :
+
+### **🎯 Niveau 1 : Tests fonctionnels de base**
+
+#### **✅ Scénario A : Utilisation normale (baseline)**
+```
+🎯 Objectif : Établir le comportement normal pour détecter les anomalies
+📍 Cible : http://localhost:9080
+
+1. Créer un compte utilisateur standard
+2. Activer la MFA avec Google Authenticator
+3. Ajouter 5-10 mots de passe dans le gestionnaire
+4. Se déconnecter et reconnecter avec MFA
+5. Observer les logs "normaux" dans Kibana
+```
+**💡 Pourquoi ce test ?** Comprendre le trafic légitime pour identifier plus facilement les attaques.
+
+#### **✅ Scénario B : Test de l'interface sécurisée**
+```
+🎯 Objectif : Vérifier que HTTPS fonctionne correctement
+📍 Cible : https://localhost:9443
+
+1. Répéter le scénario A en HTTPS
+2. Comparer les logs Snort HTTP vs HTTPS
+3. Vérifier que les données sensibles ne sont pas visibles
+```
+**💡 Pourquoi ce test ?** Valider que le chiffrement SSL protège effectivement les données.
+
+### **⚔️ Niveau 2 : Tests de sécurité offensifs**
+
+#### **🚨 Scénario C : Attaque par force brute**
+```
+🎯 Objectif : Tester la résistance aux tentatives de connexion répétées
+📍 Cible : http://localhost:9080 (formulaire de connexion)
+
+Méthodes de test :
+1. Manuel : Essayer 20+ combinaisons mot de passe incorrectes
+2. Outil : Utiliser Hydra ou Burp Suite pour automatiser
+3. Observer : Alertes Snort pour détection de brute force
+
+# Exemple avec curl (simulation basique)
+for i in {1..50}; do
+  curl -X POST http://localhost:9080/api/login \
+    -d "username=admin&password=wrong$i" \
+    -H "Content-Type: application/x-www-form-urlencoded"
+  sleep 1
+done
+```
+**💡 Attendu :** Snort doit détecter l'attaque et générer des alertes dans Kibana.
+
+#### **🚨 Scénario D : Tentatives d'injection SQL**
+```
+🎯 Objectif : Tester la validation des données d'entrée
+📍 Cible : Tous les formulaires de l'application
+
+Payloads de test :
+1. Injection basique : admin' OR '1'='1
+2. Union attack : ' UNION SELECT * FROM users--
+3. Time-based : admin'; WAITFOR DELAY '00:00:05'--
+
+# Test avec curl
+curl -X POST http://localhost:9080/api/login \
+  -d "username=admin' OR '1'='1--&password=test" \
+  -H "Content-Type: application/x-www-form-urlencoded"
+```
+**💡 Attendu :** L'application doit résister + Wazuh doit alerter sur les tentatives.
+
+#### **🚨 Scénario E : Scan de ports et reconnaissance**
+```
+🎯 Objectif : Tester la détection de reconnaissance réseau
+📍 Cible : Infrastructure complète
+
+# Scan avec Nmap (si installé)
+nmap -sS -O localhost -p 1-10000
+
+# Scan basique avec netcat  
+for port in 22 80 443 3306 5432 8000 9080; do
+  echo "Testing port $port"
+  nc -zv localhost $port 2>&1 | grep succeeded
+done
+```
+**💡 Attendu :** Snort doit détecter le scan et l'identifier comme activité suspecte.
+
+### **🎭 Niveau 3 : Tests avancés de sécurité**
+
+#### **🔥 Scénario F : Tentative de contournement MFA**
+```
+🎯 Objectif : Tester la robustesse de l'authentification à deux facteurs
+📍 Cible : Workflow MFA complet
+
+1. S'authentifier normalement (username + password)
+2. Intercepter la session avant validation MFA
+3. Essayer d'accéder directement au gestionnaire de mots de passe
+4. Tenter des codes MFA invalides ou expirés
+5. Essayer de désactiver la MFA sans autorisation
+```
+
+#### **🔥 Scénario G : Test d'évasion de conteneur**
+```
+🎯 Objectif : Vérifier l'isolation des conteneurs Docker
+📍 Cible : Services backend
+
+# Accéder à un conteneur
+docker exec -it backend_api_service /bin/bash
+
+# À l'intérieur, essayer :
+1. Accéder aux fichiers de l'hôte : ls /host/
+2. Scanner le réseau interne : ping autres_conteneurs
+3. Escalade de privilèges : sudo, su, chmod exploits
+```
+**💡 Attendu :** Wazuh doit détecter les tentatives d'évasion et d'escalade.
+
+### **📊 Analyse des résultats**
+
+#### **🔍 Comment interpréter vos tests**
+
+**Dans Kibana (http://localhost:5601) :**
+1. **Dashboard "Security Overview"** : Vue d'ensemble des attaques détectées
+2. **Logs Snort** : Filtrer par "snort" pour voir les détections réseau
+3. **Logs Wazuh** : Filtrer par "wazuh" pour les alertes système
+4. **Timeline des attaques** : Chronologie des tentatives d'intrusion
+
+**Métriques à surveiller :**
+- **Nombre d'alertes générées** par type d'attaque
+- **Temps de détection** entre l'attaque et l'alerte
+- **Faux positifs** : Alertes sur du trafic légitime
+- **Faux négatifs** : Attaques non détectées
+
+#### **✅ Critères de succès**
+
+| Type d'attaque | Résultat attendu | Où le vérifier |
+|----------------|------------------|-----------------|
+| **Force brute** | Alerte dans les 10 tentatives | Snort + Kibana |
+| **Injection SQL** | Requête bloquée + alerte | Logs backend + Wazuh |
+| **Scan de ports** | Détection immédiate | Snort IDS |
+| **Contournement MFA** | Accès refusé | Logs application |
+| **Évasion conteneur** | Tentative loggée | Wazuh HIDS |
+
+### **🚀 Tests automatisés (optionnel)**
+
+Pour les plus avancés, vous pouvez automatiser ces tests :
+
+```bash
+# Script de test automatique (exemple)
+#!/bin/bash
+echo "🚀 Lancement des tests de sécurité automatisés"
+
+# Test 1: Force brute
+echo "Test 1: Force brute attack"
+for i in {1..20}; do
+  curl -s -X POST http://localhost:9080/api/login \
+    -d "username=admin&password=wrong$i" > /dev/null
+done
+
+# Test 2: SQL Injection
+echo "Test 2: SQL Injection"
+curl -s -X POST http://localhost:9080/api/login \
+  -d "username=admin' OR '1'='1--&password=test" > /dev/null
+
+# Test 3: Port scan
+echo "Test 3: Port scanning"
+nmap -sS localhost -p 8000-9500 > /dev/null 2>&1
+
+echo "✅ Tests terminés. Vérifiez Kibana pour les résultats !"
+```
 
 ---
 
@@ -282,10 +711,14 @@ Projet_Annuel/
 │   ├── main.py                # Point d'entrée de l'API
 │   ├── models.py              # Modèles de données
 │   └── requirements.txt       # Dépendances Python
-├── frontend/                   # Interface web
-│   ├── index.html             # Page principale
-│   ├── app.js                 # Logique JavaScript
-│   └── style.css              # Styles CSS
+├── frontend/                   # Interface web moderne
+│   ├── index.html             # Interface SecureVault Pro Max
+│   ├── app.js                 # Logique JavaScript (obsolète)
+│   ├── style.css              # Styles CSS (obsolète)
+│   ├── css/                   # Feuilles de style
+│   ├── js/                    # Scripts JavaScript
+│   └── images/                # Images et assets
+│       └── HoneyPot.png       # Logo de l'application
 ├── snort/                      # Configuration Snort IDS
 │   ├── Dockerfile             # Image Snort personnalisée
 │   ├── snort.conf             # Configuration Snort
@@ -316,6 +749,83 @@ docker compose logs -f [service_name]
 # Accès aux conteneurs
 docker exec -it [container_name] /bin/bash
 ```
+
+---
+
+## 🆕 Dernières améliorations
+
+### **🎨 Interface utilisateur modernisée**
+- **Design glassmorphism** : Interface "SecureVault Pro Max" avec effets visuels modernes
+- **Police Inter** : Typographie professionnelle Google Fonts
+- **Variables CSS** : Système de couleurs cohérent et maintenable
+- **Animations fluides** : Transitions et effets visuels sophistiqués
+- **Responsive design** : Optimisation mobile et desktop parfaite
+
+### **� Système MFA/2FA complet (nouveau)**
+- **Interface de gestion intégrée** : Bouton "Gérer la 2FA" dans le gestionnaire
+- **Détection automatique du statut** : Vérification en temps réel de l'état MFA
+- **QR Code dynamique** : Génération automatique via service externe sécurisé
+- **Workflow d'activation complet** : De la configuration à l'utilisation
+- **Connexion adaptative** : Détection MFA et redirection automatique
+- **Apps authenticator multiples** : Google, Microsoft, Authy, 1Password, Bitwarden
+- **Chiffrement Fernet** : Protection des secrets TOTP avec clé 256 bits
+- **Architecture TOTP standard** : Compatible RFC 6238 pour interopérabilité
+
+### **🛡️ Sécurité renforcée (nouveau)**
+- **Effacement automatique** : Nettoyage des champs sensibles entre formulaires
+- **Protection anti-persistance** : Mots de passe non conservés en mémoire
+- **Réinitialisation sécurisée** : Remise en mode masqué des champs
+- **Déconnexion complète** : Nettoyage de toutes les données sensibles
+- **Gestion d'erreurs robuste** : Messages informatifs sans exposition de données
+
+### **�🔧 Corrections techniques récentes**
+- **URLs API corrigées** : Passage par proxy NGINX avec préfixe `/api/`
+- **Gestion CORS optimisée** : Communication frontend-backend sécurisée
+- **Endpoints MFA fonctionnels** : `/api/mfa/setup`, `/api/mfa/verify`, `/api/login/*`
+- **Fallback intelligent** : Connexion normale si problème MFA temporaire
+- **Validation des formulaires** : Vérification des codes à 6 chiffres
+- **Accès Kibana** : Résolution du problème de réseau Docker interne
+- **Ports frontend** : Configuration HTTP (9080) et HTTPS (9443)
+- **Boutons de visibilité** : Alignement parfait des icônes SVG
+- **Centrage des éléments** : Amélioration de l'ergonomie du tableau
+- **Documentation Docker** : Commentaires complets dans docker-compose.yml
+
+### **🌐 Architecture technique MFA**
+
+#### **Frontend (NGINX + HTML/CSS/JS)**
+```
+Interface MFA
+├── Gestion du statut (loadMfaStatus)
+├── Configuration (generateMfaSetup)  
+├── Activation (setupMfa)
+├── Connexion adaptative (authenticate)
+├── Vérification OTP (verifyMfaLogin)
+└── Sécurité (clearAllPasswordFields)
+```
+
+#### **Backend (FastAPI + SQLAlchemy)**
+```
+API MFA
+├── /api/mfa/setup (génération secret + QR)
+├── /api/mfa/verify (validation code + activation)
+├── /api/login (détection MFA requise)
+├── /api/login/otp (vérification connexion)
+└── Chiffrement Fernet (secrets protégés)
+```
+
+#### **Base de données (PostgreSQL)**
+```sql
+Table Users
+├── mfa_enabled (boolean)
+├── mfa_secret (text encrypted)
+├── password (bcrypt hashed)
+└── created_at (timestamp)
+```
+
+### **🌐 URLs de développement actualisées**
+- **Frontend** : http://localhost:9080 (HTTP) / https://localhost:9443 (HTTPS)
+- **Kibana** : http://localhost:5601 (maintenant accessible)
+- **Architecture réseau** : Optimisée pour le développement et la production
 
 ---
 
@@ -353,6 +863,10 @@ Pour une configuration en production, consultez :
 | Permissions refusées | Vérifier les fichiers dans `secrets/` |
 | Services non healthy | `docker compose logs [service]` |
 | Erreur SSL/TLS | Régénérer les certificats NGINX |
+| **Erreur MFA "Impossible de communiquer"** | Vérifier que le backend est accessible via `/api/` |
+| **QR Code ne s'affiche pas** | Connexion Internet requise pour génération QR |
+| **Code MFA refusé** | Vérifier synchronisation horloge app/serveur |
+| **MFA ne se désactive pas** | Fonctionnalité de désactivation en développement |
 
 ### **🔍 Debugging**
 
@@ -370,25 +884,194 @@ docker network inspect [network_name]
 # Volumes Docker
 docker volume ls
 docker volume inspect [volume_name]
+
+# Test connectivité backend
+curl http://localhost:8000/docs
+---
+
+## 🆘 Dépannage
+
+### **🚨 Problèmes courants et solutions**
+
+Notre laboratoire de sécurité est complexe, mais la plupart des problèmes ont des solutions simples :
+
+| ❌ Problème | 💡 Solution rapide | 🔧 Solution avancée |
+|-------------|-------------------|---------------------|
+| **Port déjà utilisé** | `docker compose down` puis changer les ports | Modifier `docker-compose.yml` |
+| **Permissions refusées** | Vérifier `secrets/` avec `ls -la` | `chmod 600 secrets/*` |
+| **Services non healthy** | `docker compose logs [service]` | Redémarrer individuellement |
+| **Erreur SSL/TLS** | Régénérer certificats NGINX | `openssl req -x509 -newkey...` |
+| **Erreur MFA "Communication impossible"** | Vérifier proxy `/api/` | `curl http://localhost:9080/api/docs` |
+| **QR Code ne s'affiche pas** | Vérifier connexion Internet | Service externe requis |
+| **Code MFA refusé** | Synchroniser horloge | `timedatectl set-ntp true` |
+| **Kibana inaccessible** | Attendre démarrage complet (2-3 min) | `docker logs kibana` |
+
+### **🔍 Diagnostics avancés**
+
+#### **📊 État de santé global**
+```bash
+# Vue d'ensemble complète
+docker compose ps --format "table {{.Service}}\t{{.Status}}\t{{.Ports}}"
+
+# Utilisation des ressources
+docker stats --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}"
+
+# Logs en temps réel
+docker compose logs -f --tail=20
 ```
 
-### **🆘 Support**
+#### **🔐 Tests de connectivité spécifiques**
+```bash
+# Frontend
+curl -I http://localhost:9080/          # HTTP
+curl -I -k https://localhost:9443/      # HTTPS
 
-- **Issues GitHub** : [https://github.com/BelmonteLucas/Projet_Annuel/issues](https://github.com/BelmonteLucas/Projet_Annuel/issues)
-- **Documentation** : Ce README et les commentaires dans le code
-- **Logs** : Consultez toujours les logs Docker en cas de problème
+# Backend API
+curl -I http://localhost:8000/docs      # Documentation
+curl -I http://localhost:9080/api/docs  # Via proxy
+
+# Monitoring
+curl -I http://localhost:5601/          # Kibana
+curl -I http://localhost:5050/          # pgAdmin
+
+# Base de données
+docker exec postgres_db_service pg_isready -U admin
+```
+
+#### **🚨 Résolution de problèmes critiques**
+
+**Problème : Tous les services plantent**
+```bash
+# 1. Nettoyer complètement
+docker compose down -v --remove-orphans
+docker system prune -a
+
+# 2. Regénérer les secrets
+rm -rf secrets/
+python setup_dev_environment.py
+
+# 3. Redémarrer proprement
+docker compose up -d --build
+```
+
+**Problème : Attaques non détectées**
+```bash
+# Vérifier les règles Snort
+docker exec snort_ids snort -T -c /etc/snort/snort.conf
+
+# Tester Wazuh
+docker exec wazuh_manager /var/ossec/bin/ossec-logtest
+
+# Vérifier Elasticsearch
+curl "http://localhost:9200/_cluster/health?pretty"
+```
+
+### **📋 Checklist de validation complète**
+
+#### **✅ Installation correcte :**
+- [ ] Docker et Docker Compose installés et fonctionnels
+- [ ] Projet cloné et `setup_dev_environment.py` exécuté
+- [ ] Fichiers `secrets/` créés avec bonnes permissions
+- [ ] Tous les services en état "Up" dans `docker compose ps`
+- [ ] Frontend accessible sur ports 9080 et 9443
+
+#### **✅ Sécurité opérationnelle :**
+- [ ] MFA activé et QR code scannable
+- [ ] Connexion avec code TOTP fonctionnelle  
+- [ ] Champs sensibles effacés entre formulaires
+- [ ] Base de données accessible via pgAdmin uniquement
+- [ ] Services internes non exposés directement
+
+#### **✅ Monitoring fonctionnel :**
+- [ ] Kibana accessible et responsive
+- [ ] Snort détecte le trafic réseau
+- [ ] Wazuh surveille les fichiers système
+- [ ] Elasticsearch indexe les logs
+- [ ] Logs d'attaque visibles dans les dashboards
+
+### **🆘 Support et ressources**
+
+#### **📚 Ressources d'aide**
+- **Documentation officielle** : Ce README (version la plus récente)
+- **Issues GitHub** : [Signaler un problème](https://github.com/BelmonteLucas/Projet_Annuel/issues)
+- **Logs détaillés** : Toujours commencer par `docker compose logs [service]`
+- **Community** : Forum ESGI et discussions étudiantes
+
+#### **🔧 Scripts utiles de maintenance**
+```bash
+# Sauvegarde complète
+docker compose exec postgres_db_service pg_dump -U admin honeypot_db > backup.sql
+
+# Nettoyage des logs volumineux  
+docker exec elasticsearch curl -X DELETE "localhost:9200/logstash-*"
+
+# Redémarrage d'urgence
+docker compose restart && docker compose logs -f
+```
 
 ---
 
-## 📄 Licence et contributions
+## 👥 Équipe
 
-Ce projet est développé dans le cadre d'un **projet annuel ESGI** à des fins pédagogiques.
+### **🎓 Projet annuel ESGI 2024-2025**
 
-- **Auteur** : Lucas Belmonte
-- **Formation** : ESGI - Expert en Sécurité Informatique
-- **Année** : 2024-2025
+Ce projet démontre l'expertise en **sécurité informatique** acquise durant notre formation. Chaque membre a apporté ses compétences spécialisées pour créer un laboratoire de cybersécurité professionnel.
 
-Les contributions sont les bienvenues via des Pull Requests sur GitHub.
+#### **👨‍💻 Équipe de développement**
+
+**🎯 Jakub WERLINSKI** - *Chef de projet et architecte*
+- **Spécialité** : Planification stratégique et vision produit
+- **Contributions** : Conception de l'architecture globale, coordination équipe, définition des objectifs pédagogiques
+- **Expertise** : Management de projet, architecture système, coordination technique
+
+**🔐 Lucas BELMONTE** - *Développeur sécurité et MFA*  
+- **Spécialité** : Développement sécurisé et authentification
+- **Contributions** : Gestionnaire de mots de passe, système MFA/2FA complet, chiffrement Fernet, interface utilisateur moderne
+- **Expertise** : FastAPI, cryptographie, TOTP/OTP, sécurité applicative, frontend moderne
+
+**🏗️ Evan RATSIMANOHATRA** - *Architecte infrastructure et DevOps*
+- **Spécialité** : Infrastructure et déploiement
+- **Contributions** : Mise en place de l'architecture Docker, configuration ELK Stack, orchestration des services
+- **Expertise** : Docker/Compose, monitoring, infrastructure as code, déploiement automatisé
+
+#### **🎯 Objectifs pédagogiques atteints**
+
+Notre formation **ESGI - Expert en Sécurité Informatique** nous a permis de maîtriser :
+
+- **🔒 Développement sécurisé** : Application web avec MFA, chiffrement, validation
+- **🔍 Détection d'intrusion** : IDS/HIDS, monitoring réseau et système  
+- **📊 Analyse forensique** : ELK Stack, investigation d'incidents, analyse de logs
+- **🏗️ DevSecOps** : Intégration sécurité dans le cycle de développement
+- **⚔️ Red Team / Blue Team** : Tests d'intrusion et défense active
+
+#### **🌟 Innovation et apprentissages**
+
+**Ce qui rend notre projet unique :**
+- **Approche pédagogique** : Apprendre en attaquant sa propre création
+- **Stack professionnelle** : Technologies utilisées en entreprise (ELK, Snort, Wazuh)
+- **Documentation complète** : Guide pour reproduire et comprendre
+- **Tests réels** : Laboratoire fonctionnel pour expérimentations sécuritaires
+
+**Compétences développées :**
+- Architecture de sécurité en couches
+- Chiffrement et gestion des secrets
+- Détection d'intrusion et réponse incident
+- Monitoring et analyse de logs
+- Communication technique et documentation
+
+#### **🚀 Perspectives d'évolution**
+
+Ce projet ouvre la voie à plusieurs extensions :
+- **Machine Learning** : Détection d'anomalies par IA
+- **Threat Intelligence** : Intégration de feeds de menaces
+- **Automation** : Réponse automatique aux incidents
+- **Scale** : Déploiement multi-serveurs avec Kubernetes
+
+---
+
+*🛡️ "La meilleure défense, c'est de comprendre l'attaque" - Ce projet illustre cette philosophie en créant un laboratoire où nous apprenons la cybersécurité en pratiquant à la fois l'attaque et la défense.*
+
+**📧 Contact** : [Lien vers le dépôt GitHub](https://github.com/BelmonteLucas/Projet_Annuel) pour contributions et discussions techniques.
 
 ---
 

@@ -132,6 +132,14 @@ class MfaLoginOtpRequest(BaseModel):
     username: str
     otp_code: str
 
+class MfaStatusRequest(BaseModel):
+    username: str
+    password: str
+
+class MfaDisableRequest(BaseModel):
+    user: str
+    otp_code: str
+
 def get_username_from_b64(user_b64: str) -> str:
     try:
         decoded_str = base64.b64decode(user_b64).decode("utf-8")
@@ -326,6 +334,56 @@ def mfa_verify(request_data: MfaVerifyRequest):
                 db.commit()
                 db.refresh(user)
             return {"message": "Code OTP valide. MFA activé avec succès."}
+        else:
+            raise HTTPException(status_code=400, detail="Code OTP invalide.")
+    finally:
+        db.close()
+
+@app.post("/mfa/status")
+def mfa_status(request_data: MfaStatusRequest):
+    db = Session()
+    try:
+        user = db.query(User).filter_by(username=request_data.username).first()
+
+        if not user:
+            raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+
+        # Vérifier le mot de passe
+        if not verify_password(request_data.password, user.password):
+            raise HTTPException(status_code=401, detail="Mot de passe incorrect")
+
+        return {
+            "mfa_enabled": user.mfa_enabled if user.mfa_enabled else False,
+            "setup_date": user.created_at.isoformat() if user.mfa_enabled and hasattr(user, 'created_at') else None
+        }
+    finally:
+        db.close()
+
+@app.post("/mfa/disable")
+def mfa_disable(request_data: MfaDisableRequest):
+    db = Session()
+    try:
+        username = get_username_from_b64(request_data.user)
+        user = db.query(User).filter_by(username=username).first()
+
+        if not user:
+            raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+
+        if not user.mfa_enabled or not user.mfa_secret:
+            raise HTTPException(status_code=400, detail="MFA non activé pour cet utilisateur.")
+
+        try:
+            decrypted_mfa_secret = FERNET_INSTANCE.decrypt(user.mfa_secret.encode()).decode()
+        except Exception:
+            raise HTTPException(status_code=500, detail="Erreur lors du déchiffrement du secret MFA.")
+
+        totp = pyotp.TOTP(decrypted_mfa_secret)
+        if totp.verify(request_data.otp_code):
+            user.mfa_enabled = False
+            user.mfa_secret = None
+            db.commit()
+            db.refresh(user)
+            return {"success": True, "message": "MFA désactivé avec succès."}
         else:
             raise HTTPException(status_code=400, detail="Code OTP invalide.")
     finally:

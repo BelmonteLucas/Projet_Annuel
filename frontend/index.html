@@ -342,17 +342,24 @@
             right: 15px;
             top: 50%;
             transform: translateY(-50%);
-            z-index: 100;
+            z-index: 10;
             cursor: pointer;
             padding: 8px;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             border-radius: 8px;
             transition: all 0.3s ease;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 40px;
+            width: 40px;
         }
         
         .password-toggle:hover {
             background: rgba(102, 126, 234, 0.1);
-            transform: translateY(-50%) scale(1.1);
+            transform: translateY(-50%) scale(1.05);
         }
         
         .password-toggle svg {
@@ -361,6 +368,7 @@
             height: 20px;
             fill: var(--text-secondary);
             transition: fill 0.3s ease;
+            opacity: 1;
         }
         
         .password-toggle:hover svg {
@@ -397,6 +405,7 @@
             padding: 16px;
             border-bottom: 1px solid var(--border-color);
             vertical-align: middle;
+            text-align: center;
         }
 
         #password-list tr:last-child td {
@@ -748,6 +757,9 @@
             <button onclick="addPassword()" class="btn-success">
                 <span>➕ Ajouter</span>
             </button>
+            <button onclick="showMfaSettings()" class="btn-secondary">
+                <span>🔐 Gérer la 2FA</span>
+            </button>
             <button onclick="deleteAllPasswords()" class="btn-danger">
                 <span>🗑️ Supprimer tout</span>
             </button>
@@ -759,26 +771,142 @@
         <div id="password-list"></div>
     </div>
 
+    <!-- Interface de gestion MFA/2FA -->
+    <div id="mfa-settings" class="card">
+        <h1>🔐 Authentification à deux facteurs (2FA)</h1>
+        
+        <div id="mfa-status" style="margin-bottom: 30px;">
+            <div style="padding: 20px; border-radius: 12px; background: rgba(255, 193, 7, 0.1); border-left: 4px solid var(--warning-color);">
+                <p><strong>🔄 Vérification du statut MFA...</strong></p>
+            </div>
+        </div>
+
+        <!-- Activation de la MFA -->
+        <div id="mfa-setup" style="display: none;">
+            <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 30px;">
+                <h3>📱 Configurer l'authentification à deux facteurs</h3>
+                <p style="margin-bottom: 20px;">1. Téléchargez une application d'authentification comme <strong>Google Authenticator</strong>, <strong>Authy</strong> ou <strong>Microsoft Authenticator</strong></p>
+                <p style="margin-bottom: 20px;">2. Scannez le QR code ci-dessous avec votre application :</p>
+                
+                <div id="qr-code" style="text-align: center; margin: 20px 0; padding: 20px; background: white; border-radius: 12px; display: inline-block; width: 100%;"></div>
+                
+                <p style="margin-bottom: 20px;">3. Entrez le code à 6 chiffres généré par votre application pour confirmer :</p>
+                
+                <div class="form-group">
+                    <input type="text" id="mfa-verify-code" placeholder="123456" maxlength="6" style="text-align: center; font-size: 1.2em; letter-spacing: 0.3em;">
+                </div>
+                
+                <button onclick="setupMfa()" class="btn-success">
+                    <span>✅ Activer la 2FA</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- MFA déjà activée -->
+        <div id="mfa-active" style="display: none;">
+            <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 30px;">
+                <h3>✅ Authentification à deux facteurs activée</h3>
+                <p>Votre compte est protégé par l'authentification à deux facteurs. Un code de vérification sera requis à chaque connexion.</p>
+            </div>
+            
+            <div style="background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.3); border-radius: 12px; padding: 20px;">
+                <h4>⚠️ Désactivation de la 2FA</h4>
+                <p>La désactivation de la 2FA n'est pas encore disponible via l'interface. Contactez l'administrateur si nécessaire.</p>
+                <p><em>Cette fonctionnalité sera disponible dans une prochaine mise à jour.</em></p>
+            </div>
+        </div>
+
+        <button onclick="backToMainApp()" class="btn-secondary" style="margin-top: 30px;">
+            <span>🔙 Retour au gestionnaire</span>
+        </button>
+    </div>
+
+    <!-- Interface de vérification MFA lors de la connexion -->
+    <div id="mfa-verification" class="card">
+        <h1>🔐 Vérification en deux étapes</h1>
+        
+        <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 30px; text-align: center;">
+            <p><strong>📱 Ouvrez votre application d'authentification</strong></p>
+            <p>Entrez le code à 6 chiffres affiché pour <strong id="mfa-username-display"></strong></p>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">🔢 Code de vérification</label>
+            <input type="text" id="mfa-login-code" placeholder="123456" maxlength="6" style="text-align: center; font-size: 1.5em; letter-spacing: 0.3em;">
+        </div>
+        
+        <button onclick="verifyMfaLogin()" class="btn-success">
+            <span>✅ Vérifier et se connecter</span>
+        </button>
+        
+        <div style="margin-top: 20px; text-align: center;">
+            <a href="#" onclick="cancelMfaLogin(); return false;">
+                <span>🔙 Annuler la connexion</span>
+            </a>
+        </div>
+    </div>
+
     <script>
+        // Variables globales pour MFA
+        let mfaSetupData = null;
+        let pendingUsername = null;
+        let pendingPassword = null;
+
         // Affiche uniquement le conteneur demandé, cache les autres
         function showOnly(id) {
-            ["auth-choice", "setup-container", "auth-container", "app"].forEach(function(div) {
+            ["auth-choice", "setup-container", "auth-container", "app", "mfa-settings", "mfa-verification"].forEach(function(div) {
                 document.getElementById(div).style.display = (div === id) ? "block" : "none";
             });
-            document.getElementById("logout-btn").style.display = (id === "app") ? "block" : "none";
+            document.getElementById("logout-btn").style.display = (["app", "mfa-settings"].includes(id)) ? "block" : "none";
         }
 
         // Affiche le formulaire de création de compte
         function showSignup() {
+            // Sécurité : vider tous les champs de mot de passe
+            clearAllPasswordFields();
             showOnly("setup-container");
         }
 
         // Affiche le formulaire de connexion
         function showLogin() {
+            // Sécurité : vider tous les champs de mot de passe
+            clearAllPasswordFields();
             if (localStorage.getItem("masterPassword") && localStorage.getItem("username")) {
                 showOnly("auth-container");
             } else {
                 alert("Aucun compte trouvé, veuillez créer un compte.");
+            }
+        }
+
+        // Fonction de sécurité pour vider tous les champs sensibles
+        function clearAllPasswordFields() {
+            const passwordFields = [
+                "new-master-password",
+                "master-password", 
+                "password",
+                "mfa-verify-code",
+                "mfa-login-code"
+            ];
+            
+            passwordFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.value = "";
+                    // Réinitialiser le type en mode masqué
+                    if (field.type === "text" && field.parentElement.classList.contains('password-container')) {
+                        field.type = "password";
+                        const toggleIcon = field.parentElement.querySelector('.password-toggle svg');
+                        if (toggleIcon) {
+                            toggleIcon.innerHTML = '<path d="M12.015 7c4.751 0 8.063 3.012 9.504 4.636-1.401 1.837-4.713 5.364-9.504 5.364-4.42 0-7.93-3.536-9.478-5.407 1.493-1.647 4.817-4.593 9.478-4.593zm0-2c-7.569 0-12.015 6.551-12.015 6.551s4.835 7.449 12.015 7.449c7.733 0 11.985-7.449 11.985-7.449s-4.291-6.551-11.985-6.551zm-.015 3c-2.209 0-4 1.792-4 4 0 2.209 1.791 4 4s4-1.791 4-4c0-2.208-1.791-4-4-4z"/>';
+                        }
+                    }
+                }
+            });
+            
+            // Masquer les hints de mot de passe
+            const hintDiv = document.getElementById("password-hint");
+            if (hintDiv) {
+                hintDiv.style.display = "none";
             }
         }
 
@@ -876,9 +1004,34 @@
             }
 
             if (enteredUsername === savedUsername && btoa(enteredPassword) === savedPassword) {
-                localStorage.setItem("currentUser", btoa(enteredUsername + ":" + enteredPassword));
-                showOnly("app");
-                displayPasswords();
+                // Utiliser l'endpoint /api/login du backend pour vérifier si MFA est requis
+                fetch("/api/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username: enteredUsername, password: enteredPassword })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.mfa_required) {
+                        // MFA activée, demander le code de vérification
+                        pendingUsername = enteredUsername;
+                        pendingPassword = enteredPassword;
+                        document.getElementById("mfa-username-display").textContent = enteredUsername;
+                        showOnly("mfa-verification");
+                    } else {
+                        // Pas de MFA, connexion directe
+                        localStorage.setItem("currentUser", data.user_b64_token || btoa(enteredUsername + ":" + enteredPassword));
+                        showOnly("app");
+                        displayPasswords();
+                    }
+                })
+                .catch(err => {
+                    console.error("Erreur vérification login:", err);
+                    // En cas d'erreur, connexion normale (fallback)
+                    localStorage.setItem("currentUser", btoa(enteredUsername + ":" + enteredPassword));
+                    showOnly("app");
+                    displayPasswords();
+                });
             } else {
                 alert("Identifiant ou mot de passe incorrect");
             }
@@ -1080,25 +1233,21 @@
         function logout() {
             localStorage.removeItem("currentUser");
 
-            // Réinitialiser les champs
+            // Sécurité : vider tous les champs sensibles
+            clearAllPasswordFields();
+
+            // Réinitialiser les champs du gestionnaire
             document.getElementById("account-username").value = "";
             document.getElementById("site-link").value = "";
-            document.getElementById("password").value = "";
 
-            // Réinitialiser tous les champs mot de passe en mode masqué
-            const passwordInputs = ["password", "new-master-password", "master-password"];
-            passwordInputs.forEach(inputId => {
-                const input = document.getElementById(inputId);
-                if (input && input.parentElement.classList.contains('password-container')) {
-                    input.type = "password";
-                    const toggleIcon = input.parentElement.querySelector('.password-toggle svg');
-                    if (toggleIcon) {
-                        toggleIcon.innerHTML = '<path d="M12.015 7c4.751 0 8.063 3.012 9.504 4.636-1.401 1.837-4.713 5.364-9.504 5.364-4.42 0-7.93-3.536-9.478-5.407 1.493-1.647 4.817-4.593 9.478-4.593zm0-2c-7.569 0-12.015 6.551-12.015 6.551s4.835 7.449 12.015 7.449c7.733 0 11.985-7.449 11.985-7.449s-4.291-6.551-11.985-6.551zm-.015 3c-2.209 0-4 1.792-4 4 0 2.209 1.791 4 4s4-1.791 4-4c0-2.208-1.791-4-4-4z"/>';
-                    }
-                }
-            });
+            // Réinitialiser les variables MFA
+            pendingUsername = null;
+            pendingPassword = null;
+            mfaSetupData = null;
 
             document.getElementById("app").style.display = "none";
+            document.getElementById("mfa-settings").style.display = "none";
+            document.getElementById("mfa-verification").style.display = "none";
             document.getElementById("auth-choice").style.display = "block";
             document.getElementById("logout-btn").style.display = "none";
         }
@@ -1154,6 +1303,187 @@
             setTimeout(() => {
                 document.getElementById("site-link-list").style.display = "none";
             }, 150);
+        }
+
+        // ========== FONCTIONS MFA/2FA ==========
+
+        // Affiche l'interface de gestion MFA
+        function showMfaSettings() {
+            showOnly("mfa-settings");
+            loadMfaStatus();
+        }
+
+        // Retourne au gestionnaire principal
+        function backToMainApp() {
+            showOnly("app");
+        }
+
+        // Charge le statut MFA de l'utilisateur
+        function loadMfaStatus() {
+            const user = localStorage.getItem("currentUser");
+            const statusDiv = document.getElementById("mfa-status");
+            const setupDiv = document.getElementById("mfa-setup");
+            const activeDiv = document.getElementById("mfa-active");
+
+            // Essayer de faire un setup MFA pour détecter si déjà activé
+            fetch("/api/mfa/setup", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ user })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.detail && data.detail.includes("déjà activé")) {
+                    // MFA déjà activée
+                    statusDiv.innerHTML = `
+                        <div style="padding: 20px; border-radius: 12px; background: rgba(34, 197, 94, 0.1); border-left: 4px solid var(--success-color);">
+                            <p><strong>✅ Authentification à deux facteurs activée</strong></p>
+                            <p>Votre compte est protégé par la 2FA.</p>
+                        </div>
+                    `;
+                    setupDiv.style.display = "none";
+                    activeDiv.style.display = "block";
+                } else if (data.provisioning_uri) {
+                    // MFA pas encore activée, on peut la configurer
+                    statusDiv.innerHTML = `
+                        <div style="padding: 20px; border-radius: 12px; background: rgba(245, 101, 101, 0.1); border-left: 4px solid var(--error-color);">
+                            <p><strong>⚠️ Authentification à deux facteurs désactivée</strong></p>
+                            <p>Votre compte n'est protégé que par votre mot de passe. Activez la 2FA pour plus de sécurité.</p>
+                        </div>
+                    `;
+                    setupDiv.style.display = "block";
+                    activeDiv.style.display = "none";
+                    generateMfaSetupFromData(data);
+                } else {
+                    // Erreur inconnue
+                    statusDiv.innerHTML = `
+                        <div style="padding: 20px; border-radius: 12px; background: rgba(245, 101, 101, 0.1); border-left: 4px solid var(--error-color);">
+                            <p><strong>❌ Erreur lors de la vérification du statut MFA</strong></p>
+                            <p>Réponse inattendue du serveur : ${JSON.stringify(data)}</p>
+                        </div>
+                    `;
+                }
+            })
+            .catch(err => {
+                console.error("Erreur statut MFA:", err);
+                statusDiv.innerHTML = `
+                    <div style="padding: 20px; border-radius: 12px; background: rgba(245, 101, 101, 0.1); border-left: 4px solid var(--error-color);">
+                        <p><strong>❌ Erreur lors de la vérification du statut MFA</strong></p>
+                        <p>Erreur réseau : ${err.message}</p>
+                    </div>
+                `;
+            });
+        }
+
+        // Génère la configuration MFA à partir des données reçues
+        function generateMfaSetupFromData(data) {
+            if (data.provisioning_uri) {
+                mfaSetupData = data;
+                // Générer l'URL du QR code en utilisant un service en ligne
+                const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(data.provisioning_uri)}`;
+                document.getElementById("qr-code").innerHTML = `
+                    <img src="${qrCodeUrl}" alt="QR Code MFA" style="max-width: 200px; border: 2px solid #ddd; border-radius: 8px;">
+                    <p style="margin-top: 15px; font-size: 0.9em; color: var(--text-secondary);">
+                        <strong>Configuration manuelle :</strong><br>
+                        Nom de l'app : ProjetAnnuelESGI<br>
+                        Utilisateur : ${atob(localStorage.getItem("currentUser")).split(':')[0]}
+                    </p>
+                `;
+            }
+        }
+
+        // Génère la configuration MFA (QR code) - version simplifiée
+        function generateMfaSetup() {
+            // Cette fonction est appelée depuis loadMfaStatus maintenant
+            // Ne fait rien car le setup est déjà fait
+        }
+
+        // Active la MFA avec le code de vérification
+        function setupMfa() {
+            const code = document.getElementById("mfa-verify-code").value.trim();
+            
+            if (!code || code.length !== 6) {
+                alert("Veuillez entrer un code à 6 chiffres");
+                return;
+            }
+
+            const user = localStorage.getItem("currentUser");
+
+            fetch("/api/mfa/verify", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ user, otp_code: code })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.message && data.message.includes("succès")) {
+                    alert("✅ Authentification à deux facteurs activée avec succès !");
+                    document.getElementById("mfa-verify-code").value = "";
+                    loadMfaStatus(); // Recharger le statut
+                } else {
+                    alert("❌ Code de vérification incorrect. Veuillez réessayer.");
+                }
+            })
+            .catch(err => {
+                console.error("Erreur vérification MFA:", err);
+                alert("Erreur lors de l'activation MFA : " + err.message);
+            });
+        }
+
+        // Vérifie le code MFA lors de la connexion
+        function verifyMfaLogin() {
+            const code = document.getElementById("mfa-login-code").value.trim();
+            
+            if (!code || code.length !== 6) {
+                alert("Veuillez entrer un code à 6 chiffres");
+                return;
+            }
+
+            if (!pendingUsername) {
+                alert("Erreur de session. Veuillez vous reconnecter.");
+                showOnly("auth-container");
+                return;
+            }
+
+            fetch("/api/login/otp", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 
+                    username: pendingUsername, 
+                    otp_code: code 
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.message && data.message.includes("réussie")) {
+                    // Code correct, connexion réussie
+                    localStorage.setItem("currentUser", btoa(pendingUsername + ":" + pendingPassword));
+                    
+                    // Réinitialiser les variables temporaires
+                    pendingUsername = null;
+                    pendingPassword = null;
+                    document.getElementById("mfa-login-code").value = "";
+                    
+                    // Aller au gestionnaire principal
+                    showOnly("app");
+                    displayPasswords();
+                } else {
+                    alert("❌ Code de vérification incorrect. Veuillez réessayer.");
+                    document.getElementById("mfa-login-code").focus();
+                }
+            })
+            .catch(err => {
+                console.error("Erreur vérification MFA login:", err);
+                alert("Erreur lors de la vérification : " + err.message);
+            });
+        }
+
+        // Annule la connexion MFA
+        function cancelMfaLogin() {
+            pendingUsername = null;
+            pendingPassword = null;
+            document.getElementById("mfa-login-code").value = "";
+            showOnly("auth-container");
         }
     </script>
 </body>
