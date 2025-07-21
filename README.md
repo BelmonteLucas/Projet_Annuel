@@ -1,4 +1,4 @@
-# 🛡️ HoneyPot Security Suite – Projet Annuel ESGI
+# HoneyPot Security Suite – Projet Annuel ESGI
 
 **Un gestionnaire de mots de passe mis à l'épreuve dans un environnement hostile**
 
@@ -6,100 +6,101 @@ Ce projet ESGI démontre la création d'une **application sécurisée** (gestion
 
 ---
 
-## 📋 Table des matières
+## Table des matières
 
-1. [🎯 Vision du projet](#-vision-du-projet)
-2. [🏗️ Architecture de test](#️-architecture-de-test)
-3. [🔐 Le gestionnaire SecureVault](#-le-gestionnaire-securevault)
-4. [🛡️ Environnement de détection](#️-environnement-de-détection)
-5. [⚙️ Installation rapide](#️-installation-rapide)
-6. [🌐 Accès aux services](#-accès-aux-services)
-7. [🧪 Scénarios de test](#-scénarios-de-test)
-8. [📊 Monitoring et analyse](#-monitoring-et-analyse)
-9. [🔧 Guide développeur](#-guide-développeur)
-10. [🆘 Dépannage](#-dépannage)
-11. [👥 Équipe](#-équipe)
+1. [Vision du projet](#vision-du-projet)
+2. [Architecture de test](#architecture-de-test)
+3. [Le gestionnaire SecureVault](#le-gestionnaire-securevault)
+4. [Environnement de détection](#environnement-de-détection)
+5. [Installation rapide](#installation-rapide)
+6. [Accès aux services](#accès-aux-services)
+7. [Scénarios de test](#scénarios-de-test)
+8. [Monitoring et analyse](#monitoring-et-analyse)
+9. [Guide développeur](#guide-développeur)
+10. [Dépannage](#dépannage)
+11. [Équipe](#équipe)
 
 ---
 
-## 🎯 Vision du projet
+## Vision du projet
 
 ### **Le défi : Créer et tester une application sécurisée**
 
 Dans le monde réel, développer une application "sécurisée" ne suffit pas. Il faut la **tester face à de vraies menaces**. Ce projet ESGI simule cette réalité :
 
-1. **🎯 Phase 1 - Développement** : Création d'un gestionnaire de mots de passe moderne avec authentification à deux facteurs
-2. **🛡️ Phase 2 - Fortification** : Mise en place d'un environnement de monitoring et détection d'intrusion  
-3. **⚔️ Phase 3 - Test en conditions hostiles** : Exposition contrôlée à des attaques pour valider la sécurité
+1. **Phase 1 - Développement** : Création d'un gestionnaire de mots de passe moderne avec authentification à deux facteurs
+2. **Phase 2 - Fortification** : Mise en place d'un environnement de monitoring et détection d'intrusion  
+3. **Phase 3 - Test en conditions hostiles** : Exposition contrôlée à des attaques pour valider la sécurité
 
 ### **Pourquoi cette approche ?**
 
 **Problématique réelle** : 90% des violations de données proviennent d'applications mal sécurisées ou non testées en conditions réelles.
 
 **Notre solution** : 
-- ✅ **Développement sécurisé dès la conception** (MFA, chiffrement, validation)
-- ✅ **Infrastructure de détection** (Snort IDS, Wazuh HIDS, ELK Stack)
-- ✅ **Test en continu** avec monitoring en temps réel des tentatives d'attaque
+- Développement sécurisé dès la conception (MFA, chiffrement, validation)
+- Infrastructure de détection (Snort IDS, Wazuh HIDS, ELK Stack)
+- Test en continu avec monitoring en temps réel des tentatives d'attaque
 
 ### **Objectifs pédagogiques**
 
-- **🔒 Sécurité applicative** : Comprendre les enjeux du développement sécurisé
-- **🔍 Détection d'intrusion** : Mettre en œuvre des systèmes de monitoring professionnels
-- **📈 Analyse forensique** : Interpréter les logs et identifier les patterns d'attaque
-- **🏗️ DevSecOps** : Intégrer la sécurité dans le cycle de développement
+- **Sécurité applicative** : Comprendre les enjeux du développement sécurisé
+- **Détection d'intrusion** : Mettre en œuvre des systèmes de monitoring professionnels
+- **Analyse forensique** : Interpréter les logs et identifier les patterns d'attaque
+- **DevSecOps** : Intégrer la sécurité dans le cycle de développement
 
-## 🏗️ Architecture de test
+## Architecture de test
 
 ### **Le concept : Un laboratoire de sécurité**
 
 Notre infrastructure simule un **environnement de production vulnérable** pour tester la résilience de notre gestionnaire de mots de passe. Voici comment nous avons conçu ce laboratoire :
 
 ```
-🌍 INTERNET HOSTILE                                    🏢 INFRASTRUCTURE CIBLE
-(Attaquants simulés)                                   (Notre application à tester)
-          │                                                        │
-          ▼                                                        ▼
-┌─────────────────────────────────────────────────────────────────────────────────────┐
-│                                🔒 ZONE DÉMILITARISÉE                                │
-│                                                                                     │
-│  ┌──────────────────┐  HTTPS/HTTP   ┌─────────────────┐   API    ┌──────────────┐  │
-│  │   🌐 Frontend    │◄──────────────►│  🛡️ NGINX Proxy │◄────────►│ 🚀 Backend   │  │
-│  │  (Cible visible) │                │  (Point d'entrée)│          │  (FastAPI)   │  │
-│  │   Ports: 9080/   │                │  SSL Termination │          │  Port: 8000  │  │
-│  │        9443      │                │  Load Balancing  │          │              │  │
-│  └──────────────────┘                └─────────────────┘          └──────────────┘  │
-│                                                                                     │
-│                                   ┌─────────────────────────────────────────────┐   │
-│                                   │           🗄️ COUCHE DONNÉES                │   │
-│                                   │                                             │   │
-│                                   │  ┌──────────────┐    ┌──────────────────┐  │   │
-│                                   │  │ PostgreSQL   │    │    pgAdmin       │  │   │
-│                                   │  │ (Mots de    │    │  (Interface      │  │   │
-│                                   │  │  passe +     │    │   administration)│  │   │
-│                                   │  │  MFA secrets)│    │  Port: 5050      │  │   │
-│                                   │  │ Port: 5432   │    │                  │  │   │
-│                                   │  └──────────────┘    └──────────────────┘  │   │
-│                                   └─────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────────────────────────────┘
-                                            │
-                                            ▼
-┌─────────────────────────────────────────────────────────────────────────────────────┐
-│                           🔍 SYSTÈME DE DÉTECTION ET ANALYSE                        │
-│                                                                                     │
-│  ┌──────────────────┐     ┌──────────────────┐     ┌──────────────────────────────┐ │
-│  │   📡 Snort IDS   │     │   🛡️ Wazuh HIDS │     │        📊 ELK Stack         │ │
-│  │                  │     │                  │     │                              │ │
-│  │ • Analyse réseau │     │ • Intégrité     │     │ • 🔍 Elasticsearch          │ │
-│  │ • Détection      │     │   fichiers      │     │   (Indexation des logs)     │ │
-│  │   d'intrusion    │     │ • Monitoring    │     │                              │ │
-│  │ • Alertes temps  │     │   système       │     │ • ⚙️ Logstash               │ │
-│  │   réel           │     │ • Logs sécurité │     │   (Pipeline de traitement)  │ │
-│  │                  │     │                  │     │                              │ │
-│  │ Port: 1514       │────►│ Ports: 1515     │────►│ • 📈 Kibana                 │ │
-│  │                  │     │        55000     │     │   (Visualisation)           │ │
-│  │                  │     │                  │     │   Port: 5601                │ │
-│  └──────────────────┘     └──────────────────┘     └──────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────────────────────────────┘
+🌍 INTERNET HOSTILE                                     🏢 INFRASTRUCTURE CIBLE  
+(Attaquants simulés)                                    (Notre application à tester)  
+          │                                                       │  
+          ▼                                                       ▼  
+┌────────────────────────────────────────────────────────────────────────────────────────────┐  
+│                                 🔒 ZONE DÉMILITARISÉE                                      │  
+│                                                                                            │  
+│  ┌──────────────────┐  HTTPS/HTTP   ┌──────────────────┐   API     ┌──────────────┐        │  
+│  │   🌐 Frontend    │◄────────────►│  🛡️ NGINX Proxy  │◄─────────►│ 🚀 Backend   │        │  
+│  │  (Cible visible) │               │  (Point d'entrée)│           │  (FastAPI)   │        │  
+│  │   Ports: 9080/   │               │  SSL Termination │           │  Port: 8000  │        │  
+│  │        9443      │               │  Load Balancing  │           │              │        │  
+│  └──────────────────┘               └──────────────────┘           └──────────────┘        │  
+│                                                                                            │  
+│                                   ┌──────────────────────────────────────────────┐         │  
+│                                   │             🗄️ COUCHE DONNÉES                │         │  
+│                                   │                                              │         │  
+│                                   │  ┌──────────────┐    ┌──────────────────┐    │         │  
+│                                   │  │ PostgreSQL   │    │    pgAdmin       │    │         │  
+│                                   │  │ (Mots de     │    │  (Interface      │    │         │  
+│                                   │  │  passe +     │    │   administration)│    │         │  
+│                                   │  │  MFA secrets)│    │  Port: 5050      │    │         │  
+│                                   │  │ Port: 5432   │    │                  │    │         │  
+│                                   │  └──────────────┘    └──────────────────┘    │         │  
+│                                   └──────────────────────────────────────────────┘         │  
+└────────────────────────────────────────────────────────────────────────────────────────────┘  
+                                             │  
+                                             ▼  
+┌────────────────────────────────────────────────────────────────────────────────────────────┐  
+│                         🔍 SYSTÈME DE DÉTECTION ET ANALYSE                                 │  
+│                                                                                            │  
+│  ┌──────────────────┐     ┌──────────────────┐     ┌──────────────────────────────┐        │  
+│  │   📡 Snort IDS   │     │   🛡️ Wazuh HIDS │     │        📊 ELK Stack          │       │  
+│  │                  │     │                  │     │                              │        │  
+│  │ • Analyse réseau │     │ • Intégrité      │     │ • 🔍 Elasticsearch           │       │  
+│  │ • Détection      │     │   fichiers       │     │   (Indexation des logs)      │        │  
+│  │   d'intrusion    │     │ • Monitoring     │     │                              │        │  
+│  │ • Alertes temps  │     │   système        │     │ • ⚙️ Logstash                │       │  
+│  │   réel           │     │ • Logs sécurité  │     │   (Pipeline de traitement)   │        │  
+│  │                  │     │                  │     │                              │        │  
+│  │ Port: 1514       │────►│ Ports: 1515      │────►│ • 📈 Kibana                  │        │  
+│  │                  │     │        55000     │     │   (Visualisation)            │        │  
+│  │                  │     │                  │     │   Port: 5601                 │        │  
+│  └──────────────────┘     └──────────────────┘     └──────────────────────────────┘        │  
+└────────────────────────────────────────────────────────────────────────────────────────────┘  
+
 ```
 
 ### **Pourquoi cette architecture en couches ?**
