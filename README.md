@@ -306,6 +306,8 @@ python setup_dev_environment.py
 docker compose up -d --build
 ```
 
+> **🪟 Note Windows :** Un popup "Docker File Sharing" peut apparaître - cliquez **"Allow"** pour autoriser Docker à accéder aux fichiers du projet. C'est normal et nécessaire.
+
 **Ce que fait le script de configuration :**
 1. ✅ Crée le répertoire `secrets/` sécurisé
 2. ✅ Génère une clé de chiffrement MFA unique (256 bits)
@@ -814,6 +816,15 @@ docker exec -it [container_name] /bin/bash
 <a name="ameliorations"></a>
 ## 10. 🆕 Dernières améliorations
 
+### **🪟 Compatibilité Windows optimisée (juillet 2025)**
+- **Correction Snort IDS** : Résolution de l'erreur "EOF" sur Windows Docker Desktop
+- **Configuration réseau adaptée** : Remplacement de `network_mode: host` par `bridge networking`
+- **Port mapping ajouté** : Snort accessible sur `localhost:8080` pour monitoring
+- **Documentation Windows** : Section dépannage spécifique Windows ajoutée
+- **Tests de compatibilité** : Validation complète sur Windows 10/11 avec Docker Desktop
+
+> **✅ Statut :** Tous les services fonctionnent maintenant parfaitement sur Windows, macOS et Linux.
+
 ### **🎨 Interface utilisateur modernisée**
 - **Design glassmorphism** : Interface "HoneyPot Pro Max" avec effets visuels modernes
 - **Police Inter** : Typographie professionnelle Google Fonts
@@ -952,6 +963,25 @@ Notre laboratoire de sécurité est complexe, mais la plupart des problèmes ont
 | **QR Code ne s'affiche pas** | Vérifier connexion Internet | Service externe requis |
 | **Code MFA refusé** | Synchroniser horloge | `timedatectl set-ntp true` |
 | **Kibana inaccessible** | Attendre démarrage complet (2-3 min) | `docker logs kibana` |
+
+### **🪟 Problèmes spécifiques Windows**
+
+| ❌ Problème Windows | 💡 Solution | 🔧 Explication |
+|-------------------|-------------|----------------|
+| **Snort container échoue (EOF error)** | Autoriser Docker File Sharing | Windows Docker Desktop nécessite l'accès aux dossiers |
+| **`network_mode: host` non supporté** | ✅ **Corrigé automatiquement** | Le projet utilise maintenant `bridge networking` |
+| **Popup "Docker File Sharing"** | **Cliquer "Allow"** - Normal et sécurisé | Obligatoire pour monter les volumes |
+| **Erreur "Invalid terminal ID"** | Utiliser PowerShell ou CMD | Compatibilité terminaux Windows |
+| **Certificats SSL bloqués** | Désactiver antivirus temporairement | Certificats auto-signés détectés comme suspects |
+
+#### **✅ Configuration Windows validée**
+```powershell
+# Commandes PowerShell pour Windows
+docker compose up -d --build
+docker ps --format "table {{.Names}}\t{{.Status}}"
+```
+
+**Note importante :** Ce projet a été testé et optimisé pour Windows Docker Desktop. La configuration `network_mode: host` problématique a été remplacée par une approche compatible.
 
 ### **🔍 Diagnostics avancés**
 

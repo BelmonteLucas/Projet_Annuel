@@ -107,7 +107,11 @@ services:
     container_name: snort_ids
     cap_add:
       - NET_ADMIN                                          # Privilèges réseau pour capturer le trafic
-    network_mode: host                                     # Accès direct au réseau de l'hôte
+    # network_mode: host                                   # Commenté car problématique sur Windows Docker Desktop
+    networks:
+      - backend_network                                    # Utilisation du réseau bridge pour Windows
+    ports:
+      - "8080:8080"                                        # Port pour le monitoring Snort
     command: ["monitor"]                                   # Mode monitoring pour tests et développement
     volumes:
       - ./snort/rules:/etc/snort/rules:ro                 # Règles de détection personnalisées
