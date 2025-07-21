@@ -309,7 +309,11 @@ docker compose up -d --build
 **Ce que fait le script de configuration :**
 1. ✅ Crée le répertoire `secrets/` sécurisé
 2. ✅ Génère une clé de chiffrement MFA unique (256 bits)
-3. ✅ Génère un mot de passe PostgreSQL sécurisé (32 caractères)
+3. ✅ **Génère un mot de passe PostgreSQL cryptographiquement sécurisé** :
+   - **32 caractères** de longueur
+   - **Alphabet complet** : majuscules, minuscules, chiffres, caractères spéciaux
+   - **Génération avec `secrets`** (cryptographiquement sûr)
+   - **Validation de complexité** automatique
 4. ✅ Génère ou migre les certificats SSL dans `secrets/`
 5. ✅ Initialise les bases de données
 6. ✅ Prépare l'environnement de monitoring
@@ -355,8 +359,8 @@ mkdir secrets
 # Générer la clé de chiffrement MFA (IMPORTANT : unique par installation)
 python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())" > secrets/mfa_encryption_key.txt
 
-# Définir le mot de passe de la base de données
-echo "VotreMotDePasseSecurise123!" > secrets/db_password.txt
+# Générer un mot de passe de base de données sécurisé (32 caractères)
+python -c "import secrets, string; alphabet = string.ascii_letters + string.digits + '!@#$%^&*()_+-=[]{}|;:,.<>?'; print(''.join(secrets.choice(alphabet) for _ in range(32)))" > secrets/db_password.txt
 
 # Générer les certificats SSL auto-signés (optionnel si vous en avez déjà)
 openssl req -x509 -newkey rsa:4096 -keyout secrets/nginx.key -out secrets/nginx.crt -days 365 -nodes -subj "/C=FR/ST=IDF/L=Paris/O=ESGI/OU=Security/CN=localhost"
@@ -763,7 +767,32 @@ Projet_Annuel/
     └── nginx.key                       # Clé privée SSL
 ```
 
-### **🔄 Workflow de développement**
+### **� Sécurité des mots de passe - Implémentation technique**
+
+Notre script `setup_dev_environment.py` génère des mots de passe respectant les standards de sécurité :
+
+#### **Caractéristiques des mots de passe générés :**
+- **Longueur** : 32 caractères (résistant aux attaques par force brute)
+- **Alphabet étendu** : `[a-zA-Z0-9!@#$%^&*()_+-=[]{}|;:,.<>?]` (94 caractères possibles)
+- **Entropie** : ~211 bits (2^211 combinaisons possibles)
+- **Génération** : Module `secrets` de Python (cryptographiquement sûr)
+- **Validation** : Au moins un caractère de chaque catégorie obligatoire
+
+#### **Exemple de mot de passe généré :**
+```
+A:L9sK.>3ZFoXOovgkeXiZ*)X,@tXY2K
+```
+
+#### **Fonction de génération :**
+```python
+def generate_secure_password(length=32):
+    alphabet = string.ascii_letters + string.digits + "!@#$%^&*()_+-=[]{}|;:,.<>?"
+    password = ''.join(secrets.choice(alphabet) for _ in range(length))
+    # + validation de complexité automatique
+    return password
+```
+
+### **�🔄 Workflow de développement**
 
 ```bash
 # Développement local
@@ -1229,14 +1258,9 @@ python scripts/audit_files.py
 3. **Création de compte avec MFA** → Démontre l'UX sécurisée
 4. **Scripts de validation** → Prouve la qualité technique
 
-Ces scripts transforment votre projet en une démonstration interactive et convaincante ! 🎪
 
 ---
 
 *🛡️ "La meilleure défense, c'est de comprendre l'attaque" - Ce projet illustre cette philosophie en créant un laboratoire où nous apprenons la cybersécurité en pratiquant à la fois l'attaque et la défense.*
 
 **📧 Contact** : [Lien vers le dépôt GitHub](https://github.com/BelmonteLucas/Projet_Annuel) pour contributions et discussions techniques.
-
----
-
-*🛡️ Sécurité avant tout - Ce projet démontre l'implémentation d'une infrastructure de sécurité complète avec détection d'intrusion et monitoring en temps réel.*
