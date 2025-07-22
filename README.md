@@ -745,7 +745,8 @@ Projet_Annuel/
 ├── scripts/                        # Outils de validation et test
 │   ├── validate_installation.py        # Validation complète installation
 │   ├── test_fresh_install.py           # Test installation fraîche
-│   └── security_tests.py               # Tests de sécurité automatisés
+│   ├── security_tests.py               # Tests de sécurité automatisés
+│   └── fix_line_endings.py             # Correction problèmes LF/CRLF
 ├── snort/                          # Configuration Snort IDS
 │   ├── Dockerfile                      # Image Snort personnalisée
 │   ├── snort.conf                      # Configuration Snort
@@ -906,9 +907,32 @@ Table Users
 - **`scripts/validate_installation.py`** - Validation complète de l'installation avec rapport détaillé
 - **`scripts/test_fresh_install.py`** - Simulation d'installation fraîche pour validation UX
 - **`scripts/security_tests.py`** - Tests de sécurité automatisés et framework de pentesting
+- **`scripts/fix_line_endings.py`** - Correction automatique des problèmes de fins de ligne LF/CRLF
 - **`setup_dev_environment.py`** - Script d'installation corrigé (compatible Windows/Linux/Mac)
 
 > **📝 Note** : Ces scripts génèrent des rapports JSON temporaires (*_report.json) qui ne sont pas versionnés (exclus par .gitignore) car ils reflètent l'état ponctuel du système au moment de l'exécution.
+
+### **🔧 Résolution des problèmes LF/CRLF**
+
+Si vous rencontrez des différences de fins de ligne après un `git pull` :
+
+```bash
+# Solution rapide automatique
+python scripts/fix_line_endings.py
+
+# Ou manuellement :
+git add --renormalize .
+git commit -m "Fix line endings"
+git push origin main
+```
+
+**Configuration recommandée pour tous les développeurs :**
+```bash
+git config core.autocrlf input    # Convertir CRLF -> LF
+git config core.safecrlf true     # Avertir des conversions
+```
+
+> **💡 Astuce** : Le fichier `.gitattributes` force l'utilisation de LF pour tous les fichiers texte, évitant les conflits entre Windows/Linux/Mac.
 
 ---
 
