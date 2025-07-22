@@ -744,10 +744,8 @@ Projet_Annuel/
 │       └── HoneyPot.png                    # Logo de l'application
 ├── scripts/                        # Outils de validation et test
 │   ├── validate_installation.py        # Validation complète installation
-│   ├── readme_compliance_check.py      # Vérification conformité README
 │   ├── test_fresh_install.py           # Test installation fraîche
-│   ├── security_tests.py               # Tests de sécurité automatisés
-│   └── audit_files.py                  # Audit fichiers inutilisés
+│   └── security_tests.py               # Tests de sécurité automatisés
 ├── snort/                          # Configuration Snort IDS
 │   ├── Dockerfile                      # Image Snort personnalisée
 │   ├── snort.conf                      # Configuration Snort
@@ -906,10 +904,8 @@ Table Users
 
 ### **🛠️ Outils de validation et test (nouveaux)**
 - **`scripts/validate_installation.py`** - Validation complète de l'installation avec rapport détaillé
-- **`scripts/readme_compliance_check.py`** - Vérification de conformité avec le README (score 100%)
 - **`scripts/test_fresh_install.py`** - Simulation d'installation fraîche pour validation UX
 - **`scripts/security_tests.py`** - Tests de sécurité automatisés et framework de pentesting
-- **`scripts/audit_files.py`** - Audit des fichiers inutilisés et optimisation du projet
 - **`setup_dev_environment.py`** - Script d'installation corrigé (compatible Windows/Linux/Mac)
 
 > **📝 Note** : Ces scripts génèrent des rapports JSON temporaires (*_report.json) qui ne sont pas versionnés (exclus par .gitignore) car ils reflètent l'état ponctuel du système au moment de l'exécution.
@@ -1223,14 +1219,6 @@ python scripts/test_fresh_install.py
 - ✅ Suivi exact du README
 - ✅ Reproductibilité garantie
 
-### **4. 📊 Audit des Fichiers**
-**Fichier :** `scripts/audit_files.py`
-
-**Utilité pour la présentation :**
-- Montre la surveillance des fichiers critiques
-- Démonstration de Wazuh HIDS
-- Intégrité du système
-
 ### **🎬 Scénario de Démonstration Recommandé**
 
 #### **Phase 1 : Validation du Système (2-3 minutes)**
@@ -1258,12 +1246,12 @@ python scripts/security_tests.py --scenario brute_force
 
 #### **Phase 3 : Monitoring et Analyse (3-5 minutes)**
 ```bash
-# 1. Audit des fichiers
-python scripts/audit_files.py
-
-# 2. Architecture complète
+# 1. Architecture complète
 # Montrer le README avec schéma
 # Expliquer l'architecture DMZ
+
+# 2. Vérification finale du système
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 ```
 
 ### **💡 Messages Clés pour la Présentation**
