@@ -122,14 +122,92 @@ DB_NAME = os.getenv("DB_NAME", "postgres")
 
 try:
     DB_PASSWORD = get_db_password()
+    print(f"DB Password obtained successfully (length: {len(DB_PASSWORD)})")
 except Exception as e:
     print(f"Failed to get DB_PASSWORD: {e}")
     raise
 
-DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-print(f"Connecting to database with URL: postgresql://{DB_USER}:********@{DB_HOST}:{DB_PORT}/{DB_NAME}")
+# Encoder le mot de passe pour l'URL (pour gérer les caractères spéciaux)
+import urllib.parse
+encoded_password = urllib.parse.quote_plus(DB_PASSWORD)
 
-engine = create_engine(DATABASE_URL)
+# Créer une URL de connexion avec mot de passe encodé
+DATABASE_URL = f"postgresql+psycopg2://{DB_USER}:{encoded_password}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+print(f"Connecting to database with URL: postgresql+psycopg2://{DB_USER}:********@{DB_HOST}:{DB_PORT}/{DB_NAME}")
+
+# Test de connectivité direct avant SQLAlchemy
+def test_direct_connection():
+    """Test de connexion directe avec psycopg2 pour validation"""
+    try:
+        import psycopg2
+        conn = psycopg2.connect(
+            host=DB_HOST,
+            port=int(DB_PORT),
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DB_NAME,
+            connect_timeout=5
+        )
+        conn.close()
+        print("PostgreSQL connection test successful")
+        return True
+    except Exception as e:
+        print(f"PostgreSQL connection test failed: {e}")
+        return False
+
+# Tester la connexion avant de créer l'engine SQLAlchemy
+if test_direct_connection():
+    # Créer l'engine avec des paramètres optimisés
+    engine = create_engine(
+        DATABASE_URL,
+        echo=False,  # Mettre à True pour debug SQL
+        pool_pre_ping=True,  # Vérifier la connexion avant utilisation
+        pool_recycle=3600,    # Recycler les connexions toutes les heures
+        pool_timeout=20,
+        pool_size=10,
+        max_overflow=20
+    )
+    print("SQLAlchemy engine created with URL encoding")
+else:
+    print("Warning: Creating SQLAlchemy engine despite connection test failure")
+    engine = create_engine(DATABASE_URL)
+
+Session = sessionmaker(bind=engine)
+def test_direct_connection():
+    """Test de connexion directe avec psycopg2 pour debug"""
+    try:
+        import psycopg2
+        conn = psycopg2.connect(
+            host=DB_HOST,
+            port=int(DB_PORT),
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DB_NAME,
+            connect_timeout=5
+        )
+        conn.close()
+        print("✅ Connexion PostgreSQL directe réussie")
+        return True
+    except Exception as e:
+        print(f"❌ Échec connexion PostgreSQL directe: {e}")
+        return False
+
+# Créer l'engine SQLAlchemy avec connexion validée
+if test_direct_connection():
+    engine = create_engine(
+        DATABASE_URL,
+        echo=False,
+        pool_pre_ping=True,
+        pool_recycle=3600,
+        pool_timeout=20,
+        pool_size=10,
+        max_overflow=20
+    )
+    print("✅ SQLAlchemy engine créé avec mot de passe encodé")
+else:
+    print("⚠️ Création de l'engine SQLAlchemy malgré l'échec du test direct")
+    engine = create_engine(DATABASE_URL)
+
 Session = sessionmaker(bind=engine)
 
 app = FastAPI()
@@ -151,10 +229,84 @@ def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
 try:
-    Base.metadata.create_all(bind=engine)
-    print("Database tables created/verified.")
+    # Tentative de création des tables avec SQLAlchemy
+    import time
+    max_retries = 3
+    tables_created = False
+    
+    for attempt in range(max_retries):
+        try:
+            print(f"Creating database tables (attempt {attempt + 1}/{max_retries})...")
+            Base.metadata.create_all(bind=engine)
+            print("Database tables created successfully with SQLAlchemy.")
+            tables_created = True
+            break
+        except Exception as e:
+            print(f"SQLAlchemy error (attempt {attempt + 1}/{max_retries}): {e}")
+            if attempt < max_retries - 1:
+                time.sleep(1)
+    
+    # Si SQLAlchemy a échoué, essayer avec psycopg2 direct
+    if not tables_created:
+        print("Fallback: Creating tables with psycopg2 direct connection...")
+        try:
+            import psycopg2
+            
+            conn = psycopg2.connect(
+                host=DB_HOST,
+                port=int(DB_PORT),
+                user=DB_USER,
+                password=DB_PASSWORD,
+                database=DB_NAME
+            )
+            
+            cursor = conn.cursor()
+            
+            # Créer la table users
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS users (
+                    id SERIAL PRIMARY KEY,
+                    username VARCHAR UNIQUE NOT NULL,
+                    password VARCHAR NOT NULL,
+                    mfa_secret VARCHAR,
+                    mfa_enabled BOOLEAN DEFAULT FALSE
+                )
+            """)
+            
+            # Créer la table passwords
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS passwords (
+                    id SERIAL PRIMARY KEY,
+                    "user" VARCHAR NOT NULL,
+                    site VARCHAR NOT NULL,
+                    account VARCHAR NOT NULL,
+                    password VARCHAR NOT NULL,
+                    CONSTRAINT uq_user_site_account UNIQUE ("user", site, account)
+                )
+            """)
+            
+            # Créer les index
+            cursor.execute('CREATE INDEX IF NOT EXISTS ix_users_id ON users (id)')
+            cursor.execute('CREATE INDEX IF NOT EXISTS ix_users_username ON users (username)')
+            cursor.execute('CREATE INDEX IF NOT EXISTS ix_passwords_id ON passwords (id)')
+            cursor.execute('CREATE INDEX IF NOT EXISTS ix_passwords_user ON passwords ("user")')
+            
+            conn.commit()
+            cursor.close()
+            conn.close()
+            print("Database tables created successfully with psycopg2.")
+            tables_created = True
+            
+        except Exception as e:
+            print(f"psycopg2 fallback error: {e}")
+    
+    if not tables_created:
+        print("WARNING: Unable to create database tables after all attempts.")
+        print("API will continue but will return explicit errors for database operations.")
+        
 except Exception as e:
-    print(f"Error creating database tables: {e}")
+    print(f"Fatal error during table initialization: {e}")
+    print("API will continue but will return explicit errors for database operations.")
 
 class UserEntry(BaseModel): 
     username: str
@@ -226,6 +378,11 @@ def register_user(entry: UserEntry):
         db.commit()
         db.refresh(user)
         return {"message": "Utilisateur créé avec succès", "user_id": user.id}
+    except HTTPException:
+        raise  # Re-lever les HTTPException pour qu'elles soient gérées par FastAPI
+    except Exception as e:
+        print(f"Database error in /register: {e}")
+        raise HTTPException(status_code=500, detail="Erreur de base de données. Vérifiez que PostgreSQL est accessible.")
     finally:
         db.close()
 
@@ -256,6 +413,11 @@ def login_user(entry: UserEntry):
                 username=user_from_db.username,
                 user_b64_token=user_b64_token
             )
+    except HTTPException:
+        raise  # Re-lever les HTTPException pour qu'elles soient gérées par FastAPI
+    except Exception as e:
+        print(f"Database error in /login: {e}")
+        raise HTTPException(status_code=500, detail="Erreur de base de données. Vérifiez que PostgreSQL est accessible.")
     finally:
         db.close()
 
@@ -299,6 +461,11 @@ def add_password(entry: PasswordEntry):
         db.commit()
         db.refresh(pwd)
         return {"message": "Mot de passe ajouté", "id": pwd.id}
+    except HTTPException:
+        raise  # Re-lever les HTTPException pour qu'elles soient gérées par FastAPI
+    except Exception as e:
+        print(f"Database error in /add: {e}")
+        raise HTTPException(status_code=500, detail="Erreur de base de données. Vérifiez que PostgreSQL est accessible.")
     finally:
         db.close()
 
@@ -364,6 +531,11 @@ def mfa_setup(request_data: MfaSetupRequest):
             issuer_name="ProjetAnnuelESGI" 
         )
         return {"provisioning_uri": provisioning_uri, "message": "Scannez le QR code avec votre application MFA et vérifiez."}
+    except HTTPException:
+        raise  # Re-lever les HTTPException pour qu'elles soient gérées par FastAPI
+    except Exception as e:
+        print(f"Database error in /mfa/setup: {e}")
+        raise HTTPException(status_code=500, detail="Erreur de base de données. Vérifiez que PostgreSQL est accessible.")
     finally:
         db.close()
 
@@ -415,6 +587,11 @@ def mfa_status(request_data: MfaStatusRequest):
             "mfa_enabled": user.mfa_enabled if user.mfa_enabled else False,
             "setup_date": user.created_at.isoformat() if user.mfa_enabled and hasattr(user, 'created_at') else None
         }
+    except HTTPException:
+        raise  # Re-lever les HTTPException pour qu'elles soient gérées par FastAPI
+    except Exception as e:
+        print(f"Database error in /mfa/status: {e}")
+        raise HTTPException(status_code=500, detail="Erreur de base de données. Vérifiez que PostgreSQL est accessible.")
     finally:
         db.close()
 

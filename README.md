@@ -161,6 +161,78 @@ HoneyPot Pro Max est volontairement **exposé aux attaques** pour tester sa rés
 4. **Validation temps réel** : Codes valides 30 secondes avec tolérance de dérive
 5. **Protection anti-replay** : Impossible de réutiliser un code déjà validé
 
+#### **🔧 Implémentation technique MFA - Guide détaillé**
+
+Notre implémentation MFA utilise le standard **RFC 6238 (TOTP)** avec les dernières meilleures pratiques de sécurité :
+
+**Architecture de sécurité :**
+```
+📱 Application Authenticator            🖥️ Backend FastAPI            🗄️ Base de données PostgreSQL
+              │                                   │                                  │
+              │ 1. QR Code scanné                 │                                  │
+              │◄──────────────────────────────────│                                  │
+              │                                   │                                  │
+              │ 2. Code TOTP généré               │   3. Validation + chiffrement    │
+              │    (ex: 123456)                   │      Fernet (AES-256)            │
+              │──────────────────────────────────►│─────────────────────────────────►│
+              │                                   │                                  │
+              │ 4. Authentification réussie       │   5. Secret jamais en clair      │
+              │◄──────────────────────────────────│                                  │
+```
+
+**🔑 Gestion des secrets MFA :**
+
+1. **Génération sécurisée :**
+   ```python
+   # Génération d'un secret TOTP cryptographiquement sûr
+   plain_mfa_secret = pyotp.random_base32()  # 160 bits d'entropie
+   
+   # Chiffrement immédiat avec Fernet (AES-256)
+   encrypted_secret = FERNET_INSTANCE.encrypt(plain_mfa_secret.encode())
+   ```
+
+2. **Stockage sécurisé :**
+   - Le secret n'est **JAMAIS** stocké en clair dans la base de données
+   - Chiffrement avec **Fernet** (AES-256 en mode CBC avec HMAC-SHA256)
+   - Clé de chiffrement séparée, stockée dans Docker secrets
+
+3. **Validation temps réel :**
+   ```python
+   # Déchiffrement sécurisé pour validation
+   decrypted_secret = FERNET_INSTANCE.decrypt(encrypted_secret)
+   totp = pyotp.TOTP(decrypted_secret)
+   
+   # Validation avec fenêtre de tolérance (±30 secondes)
+   is_valid = totp.verify(user_code, valid_window=1)
+   ```
+
+**📊 Endpoints MFA disponibles :**
+
+| Endpoint | Méthode | Description | Sécurité |
+|----------|---------|-------------|----------|
+| `/mfa/setup` | POST | Configuration initiale MFA | ✅ Authentication requise |
+| `/mfa/verify` | POST | Activation après validation code | ✅ Code TOTP requis |
+| `/mfa/status` | POST | Vérification statut MFA | ✅ Mot de passe requis |
+| `/mfa/disable` | POST | Désactivation MFA | ✅ Code TOTP + Auth |
+| `/login/otp` | POST | Connexion avec code MFA | ✅ Code TOTP requis |
+
+**🛡️ Mesures de sécurité avancées :**
+
+- **Protection contre le replay** : Chaque code TOTP ne peut être utilisé qu'une seule fois
+- **Limitation de tentatives** : Protection contre les attaques par force brute
+- **Synchronisation temporelle** : Gestion de la dérive d'horloge (±30 secondes)
+- **Révocation sécurisée** : Possibilité de révoquer l'accès MFA instantanément
+- **Audit complet** : Tous les événements MFA sont loggés pour analyse
+
+**🔍 Tests de sécurité MFA intégrés :**
+
+Notre implémentation résiste aux attaques suivantes :
+- ✅ **Force brute** : Limitation du nombre de tentatives
+- ✅ **Timing attacks** : Utilisation de comparaisons à temps constant
+- ✅ **Replay attacks** : Codes TOTP à usage unique
+- ✅ **Social engineering** : Aucun fallback SMS ou email
+- ✅ **Database compromise** : Secrets chiffrés même si DB compromise
+
 #### **🗄️ Gestion des mots de passe**
 ```
 💾 Fonctionnalités de base
@@ -813,6 +885,42 @@ docker exec -it [container_name] /bin/bash
 
 <a name="ameliorations"></a>
 ## 10. 🆕 Dernières améliorations
+
+### **🔧 Corrections critiques - Session Janvier 2025**
+
+#### **🛠️ Résolution problème SQLAlchemy (CRITIQUE)**
+**Problème identifié** : Erreurs `"Unexpected token 'I', "Internal S"... is not valid JSON"` dans le frontend
+- **Cause racine** : Mots de passe PostgreSQL avec caractères spéciaux non encodés dans l'URL SQLAlchemy
+- **Solution** : Implémentation d'encodage URL avec `urllib.parse.quote_plus()` pour gérer les caractères spéciaux
+- **Impact** : ✅ Tous les endpoints API fonctionnent maintenant (register, login, MFA, mots de passe)
+
+```python
+# Avant (problématique)
+DATABASE_URL = f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{db}"
+
+# Après (corrigé)
+encoded_password = urllib.parse.quote_plus(password)
+DATABASE_URL = f"postgresql+psycopg2://{user}:{encoded_password}@{host}:{port}/{db}"
+```
+
+#### **🔐 Améliorations gestion d'erreurs**
+- **Gestion JSON** : Tous les endpoints retournent maintenant du JSON valide même en cas d'erreur
+- **Messages explicites** : Remplacement "Internal Server Error" par messages détaillés
+- **Fallback robuste** : Création tables avec psycopg2 si SQLAlchemy échoue
+- **Debug amélioré** : Logs détaillés pour diagnostic rapide des problèmes
+
+#### **⚙️ Robustesse de l'initialisation**
+- **Double stratégie** : Création tables SQLAlchemy + fallback psycopg2 direct
+- **Tests connectivité** : Vérification connexion PostgreSQL avant démarrage API
+- **Retry logic** : Tentatives multiples avec délais pour gérer le timing des conteneurs
+- **Monitoring startup** : Logs détaillés du processus d'initialisation
+
+**Status : ✅ TOUTES LES FONCTIONNALITÉS OPÉRATIONNELLES**
+- ✅ Création de comptes utilisateur
+- ✅ Configuration MFA/2FA complète
+- ✅ Ajout/suppression de mots de passe
+- ✅ Authentification sécurisée
+- ✅ Messages d'erreur JSON structurés
 
 ### **✨ Résumé des améliorations clés**
 
