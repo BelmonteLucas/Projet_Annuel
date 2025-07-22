@@ -346,9 +346,6 @@ docker compose ps
 # Script de validation automatique complet
 python scripts/validate_installation.py
 
-# Test de conformité avec le README
-python scripts/readme_compliance_check.py
-
 # Test d'installation fraîche (simulation)
 python scripts/test_fresh_install.py
 ```### **🔧 Configuration manuelle (si besoin)**
