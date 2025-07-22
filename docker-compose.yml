@@ -40,7 +40,7 @@ services:
   # Gère la logique métier et les interactions avec la base de données
   backend:
     build: ./backend                                       # Construit l'image depuis le Dockerfile local
-    container_name: backend_service
+    container_name: backend_api_service
     depends_on:                                            # Attend que la DB soit prête
       db:
         condition: service_healthy                         # Attend le healthcheck de la DB
