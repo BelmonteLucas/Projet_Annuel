@@ -54,6 +54,8 @@ services:
     secrets:
       - db_password                                        # Accès au mot de passe DB
       - mfa_encryption_key                                 # Clé de chiffrement pour l'authentification 2FA
+    networks:
+      - backend_network                                    # Connexion au réseau backend
 
   # ==========================================================================
   # PGADMIN - Interface d'administration PostgreSQL
@@ -98,7 +100,8 @@ services:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro    # Configuration NGINX personnalisée
       - ./secrets/nginx.crt:/etc/ssl/certs/nginx.crt:ro   # Certificat SSL (depuis secrets/)
       - ./secrets/nginx.key:/etc/ssl/private/nginx.key:ro # Clé privée SSL (depuis secrets/)
-    # Retiré networks pour permettre l'accès externe
+    networks:
+      - backend_network                                    # Connexion au réseau backend pour le proxy API
 
   # ==========================================================================
   # SNORT IDS - Système de détection d'intrusion
