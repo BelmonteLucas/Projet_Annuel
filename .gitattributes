@@ -1,0 +1,40 @@
+# Configuration des fins de ligne pour éviter les conflits LF/CRLF
+# =================================================================
+
+# Par défaut, utiliser LF pour tous les fichiers texte
+* text=auto eol=lf
+
+# Fichiers spécifiques qui doivent toujours utiliser LF (Unix)
+*.py text eol=lf
+*.js text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.conf text eol=lf
+*.sh text eol=lf
+
+# Fichiers qui doivent garder CRLF (Windows batch)
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Fichiers binaires - ne pas modifier
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.crt binary
+*.key binary
+
+# Docker files
+Dockerfile text eol=lf
+docker-compose.yml text eol=lf
+
+# Configuration files
+.gitignore text eol=lf
+.gitattributes text eol=lf
+requirements*.txt text eol=lf
