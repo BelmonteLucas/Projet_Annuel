@@ -33,14 +33,14 @@ Ce projet ESGI démontre la création d'**HoneyPot Pro Max** (une application s�
 Dans le monde réel, développer une application "sécurisée" ne suffit pas. Il faut la **tester face à de vraies menaces**. Ce projet ESGI simule cette réalité :
 
 1. **Phase 1 - Développement** : Création d'HoneyPot Pro Max, une application moderne de gestion de mots de passe avec authentification à deux facteurs
-2. **Phase 2 - Fortification** : Mise en place d'un environnement de monitoring et détection d'intrusion  
+2. **Phase 2 - Fortification** : Mise en place d'un environnement de monitoring et détection d'intrusion
 3. **Phase 3 - Test en conditions hostiles** : Exposition contrôlée à des attaques pour valider la sécurité
 
 ### **Pourquoi cette approche ?**
 
 **Problématique réelle** : 90% des violations de données proviennent d'applications mal sécurisées ou non testées en conditions réelles.
 
-**Notre solution** : 
+**Notre solution** :
 - Développement sécurisé dès la conception (MFA, chiffrement, validation)
 - Infrastructure de détection (Snort IDS, Wazuh HIDS, ELK Stack)
 - Test en continu avec monitoring en temps réel des tentatives d'attaque
@@ -60,51 +60,51 @@ Dans le monde réel, développer une application "sécurisée" ne suffit pas. Il
 Notre infrastructure simule un **environnement de production vulnérable** pour tester la résilience d'HoneyPot Pro Max. Voici comment nous avons conçu ce laboratoire :
 
 ```
-🌍 INTERNET HOSTILE                                     🏢 INFRASTRUCTURE CIBLE  
-(Attaquants simulés)                                    (Notre application à tester)  
-          │                                                       │  
-          ▼                                                       ▼  
-┌────────────────────────────────────────────────────────────────────────────────────────────┐  
-│                                 🔒 ZONE DÉMILITARISÉE                                      │  
-│                                                                                            │  
-│  ┌──────────────────┐  HTTPS/HTTP   ┌──────────────────┐   API     ┌──────────────┐        │  
-│  │   🌐 Frontend    │◄────────────►│  🛡️ NGINX Proxy  │◄─────────►│ 🚀 Backend   │        │  
-│  │  (Cible visible) │               │  (Point d'entrée)│           │  (FastAPI)   │        │  
-│  │   Ports: 9080/   │               │  SSL Termination │           │  Port: 8000  │        │  
-│  │        9443      │               │  Load Balancing  │           │              │        │  
-│  └──────────────────┘               └──────────────────┘           └──────────────┘        │  
-│                                                                                            │  
-│                                   ┌──────────────────────────────────────────────┐         │  
-│                                   │             🗄️ COUCHE DONNÉES                │         │  
-│                                   │                                              │         │  
-│                                   │  ┌──────────────┐    ┌──────────────────┐    │         │  
-│                                   │  │ PostgreSQL   │    │    pgAdmin       │    │         │  
-│                                   │  │ (Mots de     │    │  (Interface      │    │         │  
-│                                   │  │  passe +     │    │   administration)│    │         │  
-│                                   │  │  MFA secrets)│    │  Port: 5050      │    │         │  
-│                                   │  │ Port: 5432   │    │                  │    │         │  
-│                                   │  └──────────────┘    └──────────────────┘    │         │  
-│                                   └──────────────────────────────────────────────┘         │  
-└────────────────────────────────────────────────────────────────────────────────────────────┘  
-                                             │  
-                                             ▼  
-┌────────────────────────────────────────────────────────────────────────────────────────────┐  
-│                         🔍 SYSTÈME DE DÉTECTION ET ANALYSE                                 │  
-│                                                                                            │  
-│  ┌──────────────────┐     ┌──────────────────┐     ┌──────────────────────────────┐        │  
-│  │   📡 Snort IDS   │     │   🛡️ Wazuh HIDS │     │        📊 ELK Stack          │       │  
-│  │                  │     │                  │     │                              │        │  
-│  │ • Analyse réseau │     │ • Intégrité      │     │ • 🔍 Elasticsearch           │       │  
-│  │ • Détection      │     │   fichiers       │     │   (Indexation des logs)      │        │  
-│  │   d'intrusion    │     │ • Monitoring     │     │                              │        │  
-│  │ • Alertes temps  │     │   système        │     │ • ⚙️ Logstash                │       │  
-│  │   réel           │     │ • Logs sécurité  │     │   (Pipeline de traitement)   │        │  
-│  │                  │     │                  │     │                              │        │  
-│  │ Port: 1514       │────►│ Ports: 1515      │────►│ • 📈 Kibana                  │        │  
-│  │                  │     │        55000     │     │   (Visualisation)            │        │  
-│  │                  │     │                  │     │   Port: 5601                 │        │  
-│  └──────────────────┘     └──────────────────┘     └──────────────────────────────┘        │  
-└────────────────────────────────────────────────────────────────────────────────────────────┘  
+🌍 INTERNET HOSTILE                                     🏢 INFRASTRUCTURE CIBLE
+(Attaquants simulés)                                    (Notre application à tester)
+          │                                                       │
+          ▼                                                       ▼
+┌────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                 🔒 ZONE DÉMILITARISÉE                                      │
+│                                                                                            │
+│  ┌──────────────────┐  HTTPS/HTTP   ┌──────────────────┐   API     ┌──────────────┐        │
+│  │   🌐 Frontend    │◄────────────►│  🛡️ NGINX Proxy  │◄─────────►│ 🚀 Backend   │        │
+│  │  (Cible visible) │               │  (Point d'entrée)│           │  (FastAPI)   │        │
+│  │   Ports: 9080/   │               │  SSL Termination │           │  Port: 8000  │        │
+│  │        9443      │               │  Load Balancing  │           │              │        │
+│  └──────────────────┘               └──────────────────┘           └──────────────┘        │
+│                                                                                            │
+│                                   ┌──────────────────────────────────────────────┐         │
+│                                   │             🗄️ COUCHE DONNÉES                │         │
+│                                   │                                              │         │
+│                                   │  ┌──────────────┐    ┌──────────────────┐    │         │
+│                                   │  │ PostgreSQL   │    │    pgAdmin       │    │         │
+│                                   │  │ (Mots de     │    │  (Interface      │    │         │
+│                                   │  │  passe +     │    │   administration)│    │         │
+│                                   │  │  MFA secrets)│    │  Port: 5050      │    │         │
+│                                   │  │ Port: 5432   │    │                  │    │         │
+│                                   │  └──────────────┘    └──────────────────┘    │         │
+│                                   └──────────────────────────────────────────────┘         │
+└────────────────────────────────────────────────────────────────────────────────────────────┘
+                                             │
+                                             ▼
+┌────────────────────────────────────────────────────────────────────────────────────────────┐
+│                         🔍 SYSTÈME DE DÉTECTION ET ANALYSE                                 │
+│                                                                                            │
+│  ┌──────────────────┐     ┌──────────────────┐     ┌──────────────────────────────┐        │
+│  │   📡 Snort IDS   │     │   🛡️ Wazuh HIDS │     │        📊 ELK Stack          │       │
+│  │                  │     │                  │     │                              │        │
+│  │ • Analyse réseau │     │ • Intégrité      │     │ • 🔍 Elasticsearch           │       │
+│  │ • Détection      │     │   fichiers       │     │   (Indexation des logs)      │        │
+│  │   d'intrusion    │     │ • Monitoring     │     │                              │        │
+│  │ • Alertes temps  │     │   système        │     │ • ⚙️ Logstash                │       │
+│  │   réel           │     │ • Logs sécurité  │     │   (Pipeline de traitement)   │        │
+│  │                  │     │                  │     │                              │        │
+│  │ Port: 1514       │────►│ Ports: 1515      │────►│ • 📈 Kibana                  │        │
+│  │                  │     │        55000     │     │   (Visualisation)            │        │
+│  │                  │     │                  │     │   Port: 5601                 │        │
+│  └──────────────────┘     └──────────────────┘     └──────────────────────────────┘        │
+└────────────────────────────────────────────────────────────────────────────────────────────┘
 
 ```
 
@@ -115,7 +115,7 @@ Notre infrastructure simule un **environnement de production vulnérable** pour 
 - **Choix technique** : NGINX comme proxy inverse pour simuler un environnement de production
 - **Sécurité** : Certificats SSL/TLS pour chiffrer les communications
 
-#### **🚀 Couche applicative (Backend FastAPI)**  
+#### **🚀 Couche applicative (Backend FastAPI)**
 - **Objectif** : Tester la robustesse de notre code face aux attaques
 - **Choix technique** : FastAPI pour une API moderne avec validation automatique
 - **Sécurité** : Authentification MFA, validation des données, gestion des sessions
@@ -189,7 +189,7 @@ Pour valider la robustesse de notre application, nous avons identifié ces **sur
 - **Port 9443 (HTTPS)** : Test d'attaques SSL/TLS
 - **API REST** : Endpoints FastAPI exposés pour tests d'injection
 
-#### **🎯 Cibles d'attaque applicative**  
+#### **🎯 Cibles d'attaque applicative**
 - **Formulaires de connexion** : Tests de force brute, injection SQL
 - **Gestion MFA** : Tentatives de contournement de la 2FA
 - **Sessions utilisateur** : Tests de hijacking et fixation de session
@@ -210,7 +210,7 @@ L'objectif n'est pas seulement de créer une application sécurisée, mais de **
 ```
 📡 Snort - Système de détection d'intrusion réseau
 ├── Rôle : Intercepter et analyser tout le trafic réseau en temps réel
-├── Position : Entre l'attaquant et notre application  
+├── Position : Entre l'attaquant et notre application
 ├── Détection : Scans de ports, injections SQL, attaques XSS, tentatives de brute force
 └── Alertes : Notification immédiate de toute activité suspecte
 ```
@@ -259,7 +259,7 @@ Notre environnement est configuré pour détecter et analyser :
 - **Attaques XSS** : Injection de scripts malveillants
 - **Brute force** : Tentatives répétées de connexion
 
-#### **💻 Attaques système (Wazuh)**  
+#### **💻 Attaques système (Wazuh)**
 - **Escalade de privilèges** : Tentatives d'élévation de droits
 - **Modifications de fichiers** : Altération de notre code ou configuration
 - **Accès non autorisés** : Tentatives d'accès aux fichiers sensibles
@@ -267,7 +267,7 @@ Notre environnement est configuré pour détecter et analyser :
 
 #### **📈 Patterns d'attaque analysés**
 - **Géolocalisation** : D'où viennent les attaques ?
-- **Chronologie** : Séquences d'attaque et techniques utilisées  
+- **Chronologie** : Séquences d'attaque et techniques utilisées
 - **Corrélation** : Liens entre différentes tentatives d'intrusion
 - **Impact** : Évaluation des dégâts potentiels ou réels
 
@@ -284,13 +284,13 @@ Notre objectif : **simplicité maximale** pour se concentrer sur les tests de s�
 docker --version
 # Résultat attendu : Docker version 20.x.x ou plus récent
 
-# Vérifier Docker Compose  
+# Vérifier Docker Compose
 docker compose version
 # Résultat attendu : Docker Compose version 2.x.x ou plus récent
 
 # Vérifier Python (pour le script de configuration)
 python --version
-# Résultat attendu : Python 3.8+ 
+# Résultat attendu : Python 3.8+
 ```
 
 #### **🚀 Installation en une commande**
@@ -334,13 +334,13 @@ docker compose ps
 
 # Vous devriez voir tous ces services avec des noms cohérents :
 # ✅ frontend_service (nginx)
-# ✅ backend_service (API FastAPI)      
-# ✅ database_service (PostgreSQL)       
-# ✅ pgadmin_service (Interface DB)         
-# ✅ elasticsearch_service (Moteur de recherche)           
-# ✅ logstash_service (Pipeline de logs)               
-# ✅ kibana_service (Visualisation)                 
-# ✅ snort_service (Détection d'intrusion)               
+# ✅ backend_service (API FastAPI)
+# ✅ database_service (PostgreSQL)
+# ✅ pgadmin_service (Interface DB)
+# ✅ elasticsearch_service (Moteur de recherche)
+# ✅ logstash_service (Pipeline de logs)
+# ✅ kibana_service (Visualisation)
+# ✅ snort_service (Détection d'intrusion)
 # ✅ wazuh_service (Surveillance système)
 
 # Script de validation automatique complet
@@ -392,7 +392,7 @@ Une fois vos tests d'attaque lancés, il est crucial de **comprendre ce qui s'es
 ```
 📊 Dashboards recommandés à créer :
 ├── Security Overview : Vue d'ensemble des menaces détectées
-├── Network Traffic : Analyse du trafic Snort en temps réel  
+├── Network Traffic : Analyse du trafic Snort en temps réel
 ├── Authentication Attempts : Suivi des tentatives de connexion
 ├── System Integrity : Monitoring Wazuh des fichiers système
 └── Incident Timeline : Chronologie des attaques pour analyse forensique
@@ -405,7 +405,7 @@ Une fois vos tests d'attaque lancés, il est crucial de **comprendre ce qui s'es
 docker logs snort_service --tail 50 | grep -i "ALERT"
 docker exec snort_service tail -f /var/log/snort/alert
 
-# 🛡️ Surveillance système (Wazuh)  
+# 🛡️ Surveillance système (Wazuh)
 docker logs wazuh_service --tail 30 | grep -i "rule"
 docker exec wazuh_service tail -f /var/ossec/logs/alerts/alerts.log
 
@@ -431,12 +431,12 @@ curl -s "http://localhost:9200/_search?q=alert&size=10" | jq '.hits.hits[]._sour
 
 #### **🔴 Alertes critiques (Action immédiate requise)**
 ```
-⚠️ "Multiple failed login attempts" 
+⚠️ "Multiple failed login attempts"
 └── Signification : Tentative de force brute active
 └── Action : Vérifier les IPs sources dans Kibana
 
 ⚠️ "SQL injection detected"
-└── Signification : Tentative d'injection sur vos formulaires  
+└── Signification : Tentative d'injection sur vos formulaires
 └── Action : Analyser les payloads dans les logs FastAPI
 
 ⚠️ "File integrity violation"
@@ -450,7 +450,7 @@ curl -s "http://localhost:9200/_search?q=alert&size=10" | jq '.hits.hits[]._sour
 └── Signification : Reconnaissance réseau normale
 └── Action : Noter l'IP source, surveiller escalade
 
-ℹ️ "Unusual traffic pattern"  
+ℹ️ "Unusual traffic pattern"
 └── Signification : Comportement différent de la baseline
 └── Action : Analyser dans Kibana pour confirmer légitimité
 ```
@@ -527,7 +527,7 @@ Une fois l'installation terminée, voici comment accéder à chaque composant de
 ```bash
 # Vérifier que tout fonctionne
 curl http://localhost:9080/          # ✅ Frontend HTTP
-curl -k https://localhost:9443/      # ✅ Frontend HTTPS  
+curl -k https://localhost:9443/      # ✅ Frontend HTTPS
 curl http://localhost:8000/docs      # ✅ Documentation API
 curl http://localhost:5601/          # ✅ Kibana
 curl http://localhost:5050/          # ✅ pgAdmin
@@ -629,7 +629,7 @@ curl -X POST http://localhost:9080/api/login \
 # Scan avec Nmap (si installé)
 nmap -sS -O localhost -p 1-10000
 
-# Scan basique avec netcat  
+# Scan basique avec netcat
 for port in 22 80 443 3306 5432 8000 9080; do
   echo "Testing port $port"
   nc -zv localhost $port 2>&1 | grep succeeded
@@ -814,94 +814,129 @@ docker exec -it [container_name] /bin/bash
 <a name="ameliorations"></a>
 ## 10. 🆕 Dernières améliorations
 
-### **🪟 Compatibilité Windows optimisée (juillet 2025)**
-- **Correction Snort IDS** : Résolution de l'erreur "EOF" sur Windows Docker Desktop
-- **Configuration réseau adaptée** : Remplacement de `network_mode: host` par `bridge networking`
-- **Port mapping ajouté** : Snort accessible sur `localhost:8080` pour monitoring
-- **Documentation Windows** : Section dépannage spécifique Windows ajoutée
-- **Tests de compatibilité** : Validation complète sur Windows 10/11 avec Docker Desktop
-- **🔧 Correction dépendances Docker Compose (v2025.1)** : Frontend attend maintenant le backend avant démarrage
-- **🛠️ Correction Logstash** : Configuration simplifiée pour éviter les crashes au démarrage
-- **🏷️ Noms de conteneurs uniformisés (v2025.2)** : Convention de nommage cohérente avec suffixe `_service`
-- **📦 Architecture Docker optimisée** : Démarrage ordonné des services selon leurs dépendances
+### **✨ Résumé des améliorations clés**
 
-> **✅ Statut :** Tous les services fonctionnent maintenant parfaitement sur Windows, macOS et Linux avec des noms de conteneurs professionnels.
+#### **🪟 Compatibilité Windows (v2025.1)**
+- **Correction Snort IDS** : Résolution erreur "EOF" sur Windows Docker Desktop
+- **Bridge networking** : Remplacement `network_mode: host` pour compatibilité Windows
+- **Noms standardisés** : Convention `_service` pour tous les conteneurs
+- **Dépendances optimisées** : Frontend attend le backend, évite erreurs DNS
 
-### **🎨 Interface utilisateur modernisée**
-- **Design glassmorphism** : Interface "HoneyPot Pro Max" avec effets visuels modernes
-- **Police Inter** : Typographie professionnelle Google Fonts
-- **CSS intégré** : Système de couleurs cohérent directement dans `index.html`
-- **Animations fluides** : Transitions et effets visuels sophistiqués
-- **Responsive design** : Optimisation mobile et desktop parfaite
-- **Architecture monolithique** : CSS et JavaScript intégrés dans `index.html` pour simplicité
+#### **🎨 Interface & Sécurité (v2025.2)**
+- **Design glassmorphism** : Interface moderne avec police Inter
+- **MFA/2FA complet** : TOTP intégré, QR Code, chiffrement Fernet
+- **Sécurité renforcée** : Effacement automatique, protection anti-persistance
+- **NGINX proxy** : URLs API corrigées avec préfixe `/api/`
 
-### **� Système MFA/2FA complet (nouveau)**
-- **Interface de gestion intégrée** : Bouton "Gérer la 2FA" dans le gestionnaire
-- **Détection automatique du statut** : Vérification en temps réel de l'état MFA
-- **QR Code dynamique** : Génération automatique via service externe sécurisé
-- **Workflow d'activation complet** : De la configuration à l'utilisation
-- **Connexion adaptative** : Détection MFA et redirection automatique
-- **Apps authenticator multiples** : Google, Microsoft, Authy, 1Password, Bitwarden
-- **Chiffrement Fernet** : Protection des secrets TOTP avec clé 256 bits
-- **Architecture TOTP standard** : Compatible RFC 6238 pour interopérabilité
+#### **🛠️ Outils de validation (nouveaux)**
+- **`scripts/validate_installation.py`** : Validation complète avec rapport détaillé
+- **`scripts/security_tests.py`** : Tests de sécurité automatisés
+- **`scripts/test_fresh_install.py`** : Simulation installation fraîche
+- **Architecture Docker optimisée** : Démarrage ordonné selon dépendances
 
-### **🛡️ Sécurité renforcée (nouveau)**
-- **Effacement automatique** : Nettoyage des champs sensibles entre formulaires
-- **Protection anti-persistance** : Mots de passe non conservés en mémoire
-- **Réinitialisation sécurisée** : Remise en mode masqué des champs
-- **Déconnexion complète** : Nettoyage de toutes les données sensibles
-- **Gestion d'erreurs robuste** : Messages informatifs sans exposition de données
+> **✅ Statut** : Tous les services fonctionnent sur Windows/macOS/Linux avec architecture réseau sécurisée complète.
 
-### **�🔧 Corrections techniques récentes**
-- **URLs API corrigées** : Passage par proxy NGINX avec préfixe `/api/`
-- **Gestion CORS optimisée** : Communication frontend-backend sécurisée
-- **Endpoints MFA fonctionnels** : `/api/mfa/setup`, `/api/mfa/verify`, `/api/login/*`
-- **Fallback intelligent** : Connexion normale si problème MFA temporaire
-- **Validation des formulaires** : Vérification des codes à 6 chiffres
-- **Accès Kibana** : Résolution du problème de réseau Docker interne
-- **Ports frontend** : Configuration HTTP (9080) et HTTPS (9443)
-- **Boutons de visibilité** : Alignement parfait des icônes SVG
-- **Centrage des éléments** : Amélioration de l'ergonomie du tableau
-- **Documentation Docker** : Commentaires complets dans docker-compose.yml
-- **🏷️ Noms de conteneurs standardisés** : Convention `service_name` pour tous les conteneurs
-- **📋 Dépendances Docker Compose** : Frontend dépend du backend, évite les erreurs de résolution DNS
+### **🌐 Architecture des réseaux Docker**
 
-### **🌐 Architecture technique MFA**
+Notre infrastructure utilise une **architecture réseau sécurisée** pour isoler et connecter les services selon le principe du moindre privilège.
 
-#### **Frontend (NGINX + HTML/CSS/JS)**
-```
-Interface MFA
-├── Gestion du statut (loadMfaStatus)
-├── Configuration (generateMfaSetup)  
-├── Activation (setupMfa)
-├── Connexion adaptative (authenticate)
-├── Vérification OTP (verifyMfaLogin)
-└── Sécurité (clearAllPasswordFields)
+#### **📊 Configuration réseau actuelle**
+
+```yaml
+networks:
+  backend_network:
+    # Réseau interne pour les communications inter-services
+    # Permet l'accès externe pour Kibana (monitoring)
 ```
 
-#### **Backend (FastAPI + SQLAlchemy)**
+#### **🔗 Topologie des réseaux**
+
 ```
-API MFA
-├── /api/mfa/setup (génération secret + QR)
-├── /api/mfa/verify (validation code + activation)
-├── /api/login (détection MFA requise)
-├── /api/login/otp (vérification connexion)
-└── Chiffrement Fernet (secrets protégés)
+🌍 INTERNET (Host Network)
+     │
+     ▼
+┌─────────────────────────────────────────────────────────┐
+│               🏢 RÉSEAU HOST                            │
+│              (172.17.0.0/16)                           │
+│                                                         │
+│  Ports exposés vers l'extérieur:                       │
+│  • 9080/9443 → Frontend (HTTP/HTTPS)                   │
+│  • 8000 → Backend API                                  │
+│  • 5601 → Kibana (Monitoring)                          │
+│  • 5050 → pgAdmin (DB Admin)                           │
+│  • 5432 → PostgreSQL (DB Direct)                       │
+│  • 9200 → Elasticsearch                                │
+│  • 1515/1514 → Wazuh                                   │
+│  • 8080 → Snort                                        │
+└─────────────────────────────────────────────────────────┘
+     │
+     ▼
+┌─────────────────────────────────────────────────────────┐
+│            🔒 BACKEND_NETWORK                           │
+│           (172.18.0.0/16)                              │
+│                                                         │
+│  Services internes connectés:                          │
+│  ┌─────────────────┐ ┌─────────────────┐               │
+│  │ frontend_service│ │backend_api_srv  │               │
+│  │   172.18.0.5    │ │   172.18.0.2    │               │
+│  └─────────────────┘ └─────────────────┘               │
+│           │                   │                        │
+│           └───────────────────┼────────┐               │
+│                               │        │               │
+│  ┌─────────────────┐ ┌─────────────────┐ │             │
+│  │ database_service│ │ pgadmin_service │ │             │
+│  │   172.18.0.4    │ │   172.18.0.8    │ │             │
+│  └─────────────────┘ └─────────────────┘ │             │
+│                                          │             │
+│  ┌─────────────────┐ ┌─────────────────┐ │             │
+│  │elasticsearch_srv│ │  kibana_service │ │             │
+│  │   172.18.0.9    │ │   172.18.0.6    │ │             │
+│  └─────────────────┘ └─────────────────┘ │             │
+│                                          │             │
+│  ┌─────────────────┐ ┌─────────────────┐ │             │
+│  │ logstash_service│ │  wazuh_service  │ │             │
+│  │   172.18.0.10   │ │   172.18.0.7    │ │             │
+│  └─────────────────┘ └─────────────────┘ │             │
+│                                          │             │
+│  ┌─────────────────┐                     │             │
+│  │  snort_service  │ ────────────────────┘             │
+│  │   172.18.0.3    │                                   │
+│  └─────────────────┘                                   │
+└─────────────────────────────────────────────────────────┘
 ```
 
-#### **Base de données (PostgreSQL)**
-```sql
-Table Users
-├── mfa_enabled (boolean)
-├── mfa_secret (text encrypted)
-├── password (bcrypt hashed)
-└── created_at (timestamp)
-```
+#### **🔐 Sécurité réseau**
 
-### **🌐 URLs de développement actualisées**
-- **Frontend** : http://localhost:9080 (HTTP) / https://localhost:9443 (HTTPS)
-- **Kibana** : http://localhost:5601 (maintenant accessible)
-- **Architecture réseau** : Optimisée pour le développement et la production
+**✅ Avantages de cette architecture :**
+
+1. **Isolation des services** : Tous les services sont sur le même réseau interne pour faciliter la communication
+2. **Résolution DNS automatique** : Les services se trouvent par nom (`backend_api_service`, `database_service`, etc.)
+3. **Contrôle d'accès** : Seuls les ports nécessaires sont exposés vers l'extérieur
+4. **Monitoring centralisé** : Kibana accessible depuis l'extérieur pour supervision
+5. **Sécurité par défaut** : Communication chiffrée entre services internes
+
+**📋 Communications autorisées :**
+- `frontend_service` → `backend_api_service` (API calls via NGINX proxy)
+- `backend_api_service` → `database_service` (Requêtes PostgreSQL)
+- `pgadmin_service` → `database_service` (Administration DB)
+- `logstash_service` → `elasticsearch_service` (Indexation logs)
+- `kibana_service` → `elasticsearch_service` (Visualisation)
+- `wazuh_service` → `elasticsearch_service` (Logs sécurité)
+- `snort_service` → `logstash_service` (Logs réseau)
+
+#### **🛠️ Commandes de diagnostic réseau**
+
+```bash
+# Vérifier la connectivité réseau
+docker network inspect projet_annuel_backend_network
+
+# Tester la résolution DNS entre services
+docker exec frontend_service nslookup backend_api_service
+docker exec backend_api_service nslookup database_service
+
+# Vérifier les ports exposés
+docker ps --format "table {{.Names}}\t{{.Ports}}"
+```
 
 ### **🛠️ Outils de validation et test (nouveaux)**
 - **`scripts/validate_installation.py`** - Validation complète de l'installation avec rapport détaillé
@@ -1081,7 +1116,7 @@ curl "http://localhost:9200/_cluster/health?pretty"
 
 #### **✅ Sécurité opérationnelle :**
 - [ ] MFA activé et QR code scannable
-- [ ] Connexion avec code TOTP fonctionnelle  
+- [ ] Connexion avec code TOTP fonctionnelle
 - [ ] Champs sensibles effacés entre formulaires
 - [ ] Base de données accessible via pgAdmin uniquement
 - [ ] Services internes non exposés directement
@@ -1106,7 +1141,7 @@ curl "http://localhost:9200/_cluster/health?pretty"
 # Sauvegarde complète
 docker compose exec database_service pg_dump -U postgres postgres > backup.sql
 
-# Nettoyage des logs volumineux  
+# Nettoyage des logs volumineux
 docker exec elasticsearch_service curl -X DELETE "localhost:9200/logstash-*"
 
 # Redémarrage d'urgence
@@ -1129,7 +1164,7 @@ Ce projet démontre l'expertise en **sécurité informatique** acquise durant no
 - **Contributions** : Conception de l'architecture globale, coordination équipe, définition des objectifs pédagogiques
 - **Expertise** : Management de projet, architecture système, coordination technique
 
-**🔐 Lucas BELMONTE** - *Développeur sécurité et MFA*  
+**🔐 Lucas BELMONTE** - *Développeur sécurité et MFA*
 - **Spécialité** : Développement sécurisé et authentification
 - **Contributions** : HoneyPot Pro Max (gestionnaire de mots de passe), système MFA/2FA complet, chiffrement Fernet, interface utilisateur moderne
 - **Expertise** : FastAPI, cryptographie, TOTP/OTP, sécurité applicative, frontend moderne
@@ -1144,7 +1179,7 @@ Ce projet démontre l'expertise en **sécurité informatique** acquise durant no
 Notre formation **ESGI - Expert en Sécurité Informatique** nous a permis de maîtriser :
 
 - **🔒 Développement sécurisé** : Application web avec MFA, chiffrement, validation
-- **🔍 Détection d'intrusion** : IDS/HIDS, monitoring réseau et système  
+- **🔍 Détection d'intrusion** : IDS/HIDS, monitoring réseau et système
 - **📊 Analyse forensique** : ELK Stack, investigation d'incidents, analyse de logs
 - **🏗️ DevSecOps** : Intégration sécurité dans le cycle de développement
 - **⚔️ Red Team / Blue Team** : Tests d'intrusion et défense active
@@ -1152,6 +1187,19 @@ Notre formation **ESGI - Expert en Sécurité Informatique** nous a permis de ma
 #### **🌟 Innovation et apprentissages**
 
 **Ce qui rend notre projet unique :**
+- **Approche pédagogique** : Apprendre en attaquant sa propre création
+- **Stack professionnelle** : Technologies utilisées en entreprise (ELK, Snort, Wazuh)
+- **Documentation complète** : Guide pour reproduire et comprendre
+- **Tests réels** : Laboratoire fonctionnel pour expérimentations sécuritaires
+
+**Compétences développées :**
+- Architecture de sécurité en couches
+- Chiffrement et gestion des secrets
+- Détection d'intrusion et réponse incident
+- Monitoring et analyse de logs
+- Communication technique et documentation
+
+#### **🚀 Perspectives d'évolution**
 - **Approche pédagogique** : Apprendre en attaquant sa propre création
 - **Stack professionnelle** : Technologies utilisées en entreprise (ELK, Snort, Wazuh)
 - **Documentation complète** : Guide pour reproduire et comprendre

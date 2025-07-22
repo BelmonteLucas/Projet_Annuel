@@ -32,6 +32,8 @@ services:
       interval: 10s                                        # Vérification toutes les 10s
       timeout: 5s                                          # Timeout de 5s par vérification
       retries: 5                                           # 5 tentatives avant échec
+    networks:
+      - backend_network                                    # Connexion au réseau backend
 
   # ==========================================================================
   # BACKEND API - Application Python
@@ -81,6 +83,8 @@ services:
     secrets:
       - db_password                                        # Accès au mot de passe DB
     entrypoint: ["/bin/sh", "/custom-entrypoint.sh"]       # Point d'entrée personnalisé
+    networks:
+      - backend_network                                    # Connexion au réseau backend
 
   # ==========================================================================
   # FRONTEND WEB - Interface utilisateur
