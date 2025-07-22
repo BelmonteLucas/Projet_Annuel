@@ -16,7 +16,7 @@ services:
   # Stocke les données de l'application avec authentification sécurisée
   db:
     image: postgres:13
-    container_name: postgres_db_service
+    container_name: database_service
     environment:
       POSTGRES_USER: postgres                              # Utilisateur par défaut
       POSTGRES_PASSWORD_FILE: /run/secrets/db_password     # Mot de passe depuis un secret Docker
@@ -40,7 +40,7 @@ services:
   # Gère la logique métier et les interactions avec la base de données
   backend:
     build: ./backend                                       # Construit l'image depuis le Dockerfile local
-    container_name: backend_api_service
+    container_name: backend_service
     depends_on:                                            # Attend que la DB soit prête
       db:
         condition: service_healthy                         # Attend le healthcheck de la DB
@@ -87,6 +87,9 @@ services:
   # Configuré avec HTTPS et certificats SSL
   frontend:
     image: nginx:alpine                                    # Serveur web léger basé sur Alpine Linux
+    container_name: frontend_service                       # Nom de conteneur explicite et cohérent
+    depends_on:                                            # Attend que le backend soit prêt
+      - backend                                            # Dépendance sur le service backend
     ports:
       - "9080:80"                                          # HTTP accessible sur le port 9080
       - "9443:443"                                         # HTTPS accessible sur le port 9443
@@ -104,7 +107,7 @@ services:
   # Détecte les tentatives d'intrusion et activités suspectes
   snort:
     build: ./snort                                         # Construction depuis le Dockerfile Snort local
-    container_name: snort_ids
+    container_name: snort_service
     cap_add:
       - NET_ADMIN                                          # Privilèges réseau pour capturer le trafic
     # network_mode: host                                   # Commenté car problématique sur Windows Docker Desktop
@@ -124,7 +127,7 @@ services:
   # Version simplifiée de Wazuh pour les tests de sécurité
   wazuh_manager:
     image: wazuh/wazuh-manager:4.7.5
-    container_name: wazuh_manager
+    container_name: wazuh_service
     hostname: wazuh-manager
     restart: unless-stopped
     ulimits:
@@ -163,7 +166,7 @@ services:
   # Cœur de la stack ELK pour l'analyse des données de sécurité
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.9    # Version stable d'Elasticsearch
-    container_name: elasticsearch
+    container_name: elasticsearch_service
     environment:
       - discovery.type=single-node                         # Configuration nœud unique (non-cluster)
       - ES_JAVA_OPTS=-Xms512m -Xmx512m                     # Allocation mémoire JVM (512MB min/max)
@@ -188,7 +191,7 @@ services:
   # Traite les logs de Snort et Wazuh pour analyse unifiée
   logstash:
     image: docker.elastic.co/logstash/logstash:7.17.9     # Version compatible avec Elasticsearch
-    container_name: logstash
+    container_name: logstash_service
     depends_on:
       elasticsearch:
         condition: service_healthy                         # Attend qu'Elasticsearch soit prêt
@@ -209,7 +212,7 @@ services:
   # Interface principale pour le monitoring de sécurité
   kibana:
     image: docker.elastic.co/kibana/kibana:7.17.9         # Interface de visualisation compatible
-    container_name: kibana
+    container_name: kibana_service
     depends_on:
       elasticsearch:
         condition: service_healthy                         # Attend qu'Elasticsearch soit disponible

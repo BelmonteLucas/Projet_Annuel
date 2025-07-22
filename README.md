@@ -332,16 +332,16 @@ docker compose up -d --build
 # Vérifier que tous les services sont actifs
 docker compose ps
 
-# Vous devriez voir tous ces services en état "Up" :
-# ✅ frontend (nginx)
-# ✅ backend_api_service       
-# ✅ postgres_db_service       
-# ✅ pgadmin_service          
-# ✅ elasticsearch            
-# ✅ logstash                 
-# ✅ kibana                   
-# ✅ snort_ids                
-# ✅ wazuh_manager
+# Vous devriez voir tous ces services avec des noms cohérents :
+# ✅ frontend_service (nginx)
+# ✅ backend_service (API FastAPI)      
+# ✅ database_service (PostgreSQL)       
+# ✅ pgadmin_service (Interface DB)         
+# ✅ elasticsearch_service (Moteur de recherche)           
+# ✅ logstash_service (Pipeline de logs)               
+# ✅ kibana_service (Visualisation)                 
+# ✅ snort_service (Détection d'intrusion)               
+# ✅ wazuh_service (Surveillance système)
 
 # Script de validation automatique complet
 python scripts/validate_installation.py
@@ -405,12 +405,12 @@ Une fois vos tests d'attaque lancés, il est crucial de **comprendre ce qui s'es
 
 ```bash
 # 📡 Surveillance réseau (Snort)
-docker logs snort_ids --tail 50 | grep -i "ALERT"
-docker exec snort_ids tail -f /var/log/snort/alert
+docker logs snort_service --tail 50 | grep -i "ALERT"
+docker exec snort_service tail -f /var/log/snort/alert
 
 # 🛡️ Surveillance système (Wazuh)  
-docker logs wazuh_manager --tail 30 | grep -i "rule"
-docker exec wazuh_manager tail -f /var/ossec/logs/alerts/alerts.log
+docker logs wazuh_service --tail 30 | grep -i "rule"
+docker exec wazuh_service tail -f /var/ossec/logs/alerts/alerts.log
 
 # 📈 État de santé général
 docker compose ps --format "table {{.Service}}\t{{.Status}}\t{{.Ports}}"
@@ -467,7 +467,7 @@ Quand une attaque est détectée, suivez cette méthode :
 1. **🕐 Timeline reconstruction**
 ```bash
 # Obtenir la chronologie complète d'un incident
-docker exec elasticsearch curl -s "localhost:9200/_search" \
+docker exec elasticsearch_service curl -s "localhost:9200/_search" \
   -H 'Content-Type: application/json' \
   -d '{"query":{"range":{"@timestamp":{"gte":"2024-01-01T10:00:00","lte":"2024-01-01T11:00:00"}}},"sort":[{"@timestamp":{"order":"asc"}}]}'
 ```
@@ -481,8 +481,8 @@ grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}' docker logs | s
 3. **💥 Impact assessment**
 ```bash
 # Vérifier l'intégrité de la base de données
-docker exec postgres_db_service psql -U admin -d honeypot_db -c "SELECT COUNT(*) FROM users;"
-docker exec postgres_db_service psql -U admin -d honeypot_db -c "SELECT * FROM users WHERE created_at > NOW() - INTERVAL '1 hour';"
+docker exec database_service psql -U postgres -d postgres -c "SELECT COUNT(*) FROM users;"
+docker exec database_service psql -U postgres -d postgres -c "SELECT * FROM users WHERE created_at > NOW() - INTERVAL '1 hour';"
 ```
 
 <a name="acces"></a>
@@ -660,7 +660,7 @@ done
 📍 Cible : Services backend
 
 # Accéder à un conteneur
-docker exec -it backend_api_service /bin/bash
+docker exec -it backend_service /bin/bash
 
 # À l'intérieur, essayer :
 1. Accéder aux fichiers de l'hôte : ls /host/
@@ -824,8 +824,12 @@ docker exec -it [container_name] /bin/bash
 - **Port mapping ajouté** : Snort accessible sur `localhost:8080` pour monitoring
 - **Documentation Windows** : Section dépannage spécifique Windows ajoutée
 - **Tests de compatibilité** : Validation complète sur Windows 10/11 avec Docker Desktop
+- **🔧 Correction dépendances Docker Compose (v2025.1)** : Frontend attend maintenant le backend avant démarrage
+- **🛠️ Correction Logstash** : Configuration simplifiée pour éviter les crashes au démarrage
+- **🏷️ Noms de conteneurs uniformisés (v2025.2)** : Convention de nommage cohérente avec suffixe `_service`
+- **📦 Architecture Docker optimisée** : Démarrage ordonné des services selon leurs dépendances
 
-> **✅ Statut :** Tous les services fonctionnent maintenant parfaitement sur Windows, macOS et Linux.
+> **✅ Statut :** Tous les services fonctionnent maintenant parfaitement sur Windows, macOS et Linux avec des noms de conteneurs professionnels.
 
 ### **🎨 Interface utilisateur modernisée**
 - **Design glassmorphism** : Interface "HoneyPot Pro Max" avec effets visuels modernes
@@ -863,6 +867,8 @@ docker exec -it [container_name] /bin/bash
 - **Boutons de visibilité** : Alignement parfait des icônes SVG
 - **Centrage des éléments** : Amélioration de l'ergonomie du tableau
 - **Documentation Docker** : Commentaires complets dans docker-compose.yml
+- **🏷️ Noms de conteneurs standardisés** : Convention `service_name` pour tous les conteneurs
+- **📋 Dépendances Docker Compose** : Frontend dépend du backend, évite les erreurs de résolution DNS
 
 ### **🌐 Architecture technique MFA**
 
@@ -973,6 +979,8 @@ Notre laboratoire de sécurité est complexe, mais la plupart des problèmes ont
 | **Snort container échoue (EOF error)** | Autoriser Docker File Sharing | Windows Docker Desktop nécessite l'accès aux dossiers |
 | **`network_mode: host` non supporté** | ✅ **Corrigé automatiquement** | Le projet utilise maintenant `bridge networking` |
 | **Popup "Docker File Sharing"** | **Cliquer "Allow"** - Normal et sécurisé | Obligatoire pour monter les volumes |
+| **Frontend "host not found" au démarrage** | ✅ **Corrigé automatiquement** | Dépendances Docker Compose ajoutées dans la v2025.1 |
+| **Logstash crash au démarrage** | ✅ **Corrigé automatiquement** | Configuration simplifiée et dépendances optimisées |
 | **Erreur "Invalid terminal ID"** | Utiliser PowerShell ou CMD | Compatibilité terminaux Windows |
 | **Certificats SSL bloqués** | Désactiver antivirus temporairement | Certificats auto-signés détectés comme suspects |
 
@@ -1014,7 +1022,7 @@ curl -I http://localhost:5601/          # Kibana
 curl -I http://localhost:5050/          # pgAdmin
 
 # Base de données
-docker exec postgres_db_service pg_isready -U admin
+docker exec database_service pg_isready -U postgres
 ```
 
 #### **🚨 Résolution de problèmes critiques**
@@ -1036,10 +1044,10 @@ docker compose up -d --build
 **Problème : Attaques non détectées**
 ```bash
 # Vérifier les règles Snort
-docker exec snort_ids snort -T -c /etc/snort/snort.conf
+docker exec snort_service snort -T -c /etc/snort/snort.conf
 
 # Tester Wazuh
-docker exec wazuh_manager /var/ossec/bin/ossec-logtest
+docker exec wazuh_service /var/ossec/bin/ossec-logtest
 
 # Vérifier Elasticsearch
 curl "http://localhost:9200/_cluster/health?pretty"
@@ -1079,10 +1087,10 @@ curl "http://localhost:9200/_cluster/health?pretty"
 #### **🔧 Scripts utiles de maintenance**
 ```bash
 # Sauvegarde complète
-docker compose exec postgres_db_service pg_dump -U admin honeypot_db > backup.sql
+docker compose exec database_service pg_dump -U postgres postgres > backup.sql
 
 # Nettoyage des logs volumineux  
-docker exec elasticsearch curl -X DELETE "localhost:9200/logstash-*"
+docker exec elasticsearch_service curl -X DELETE "localhost:9200/logstash-*"
 
 # Redémarrage d'urgence
 docker compose restart && docker compose logs -f
