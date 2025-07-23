@@ -27,6 +27,9 @@ Auteur: Équipe ESGI 2024-2025
     <meta name="viewport" content="width=device-width, initial-scale=1.0">  <!-- Responsive design pour mobile -->
     <title>HoneyPot Pro Max - Gestionnaire de mots de passe</title>      <!-- Titre de l'application -->
     
+    <!-- Bibliothèque QR Code Generator - Plus fiable que QRCode.js -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+    
     <style>
         /* =================================================================== */
         /* IMPORTS ET POLICES */
@@ -466,13 +469,14 @@ Auteur: Équipe ESGI 2024-2025
 
         /* --- Boutons d'action du tableau --- */
         .table-action-btn {
-            padding: 8px 16px;
-            margin: 0 4px;
-            border-radius: 8px;
-            font-size: 0.85em;
-            font-weight: 500;
-            min-width: 80px;
-            transition: all 0.3s ease;
+            display: block;              /* place chaque bouton sur sa propre ligne */
+            width: 100%;                 /* même largeur dans la cellule */
+            margin-bottom: 6px;          /* petit écart entre les boutons */
+            white-space: nowrap;         /* empêche le retour à la ligne dans le texte */
+        }
+
+        .table-action-btn:last-child {
+            margin-bottom: 0;            /* retire l’espace sous le dernier bouton */
         }
 
         /* --- Suggestions améliorées --- */
@@ -531,7 +535,7 @@ Auteur: Équipe ESGI 2024-2025
         }
 
         #password-hint li::before {
-            content: 'â€¢';
+            content: '\2022';
             margin-right: 8px;
             font-size: 1.2em;
         }
@@ -594,9 +598,10 @@ Auteur: Équipe ESGI 2024-2025
             }
 
             .table-action-btn {
-                padding: 6px 12px;
+                padding: 6px 10px;
                 font-size: 0.8em;
-                min-width: 70px;
+                min-width: auto;
+                margin: 0 2px;
             }
         }
 
@@ -676,7 +681,7 @@ Auteur: Équipe ESGI 2024-2025
     <!-- Barre supérieure moderne -->
     <div class="topbar">
         <div style="display: flex; align-items: center;">
-            <span style="color: #f39c12; margin-right: 8px; font-size: 1em;">ðŸ”</span>
+            <span style="color: #f39c12; margin-right: 8px; font-size: 1em;">🛡️</span>
             <span class="title">HoneyPot Pro Max</span>
         </div>
         <button id="logout-btn" class="logout-btn" style="display:none;" onclick="logout()">
@@ -686,7 +691,7 @@ Auteur: Équipe ESGI 2024-2025
 
     <!-- Page d'accueil moderne -->
     <div id="auth-choice" class="card" style="display:block;">
-        <h1>âœ¨ Bienvenue sur HoneyPot Pro Max</h1>
+        <h1>✨ Bienvenue sur HoneyPot Pro Max</h1>
         <img src="images/HoneyPot.png" alt="Logo HoneyPot Pro Max" class="logo-img">
         <p style="text-align: center; color: var(--text-secondary); margin-bottom: 30px; font-size: 1.1em;">
             Votre gestionnaire de mots de passe sécurisé et moderne
@@ -695,26 +700,26 @@ Auteur: Équipe ESGI 2024-2025
             <span>🆕 Créer un compte</span>
         </button>
         <button onclick="showLogin()">
-            <span>ðŸ”‘ Se connecter</span>
+            <span>🔒 Se connecter</span>
         </button>
     </div>
 
     <!-- Formulaire de création de compte moderne -->
     <div id="setup-container" class="card" style="display: none;">
-        <h1>ðŸ“ Créer votre compte</h1>
+        <h1>📝 Créer votre compte</h1>
         
         <div class="form-group">
-            <label class="form-label">ðŸ‘¤ Identifiant</label>
+            <label class="form-label">👤 Identifiant</label>
             <input type="text" id="new-username" placeholder="Choisissez votre identifiant unique">
         </div>
         
         <div class="form-group">
-            <label class="form-label">ðŸ” Mot de passe maître</label>
+            <label class="form-label">🔑 Mot de passe maître</label>
             <div class="password-container">
                 <input type="password" id="new-master-password" placeholder="Créez un mot de passe sécurisé" oninput="updatePasswordHint()">
                 <span class="password-toggle" onclick="toggleNewPassword()">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                        <path d="M12.015 7c4.751 0 8.063 3.012 9.504 4.636-1.401 1.837-4.713 5.364-9.504 5.364-4.42 0-7.93-3.536-9.478-5.407 1.493-1.647 4.817-4.593 9.478-4.593zm0-2c-7.569 0-12.015 6.551-12.015 6.551s4.835 7.449 12.015 7.449c7.733 0 11.985-7.449 11.985-7.449s-4.291-6.551-11.985-6.551zm-.015 3c-2.209 0-4 1.792-4 4 0 2.209 1.791 4 4s4-1.791 4-4c0-2.208-1.791-4-4-4z"/>
+                        <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
                     </svg>
                 </span>
             </div>
@@ -728,27 +733,27 @@ Auteur: Équipe ESGI 2024-2025
         
         <div style="margin-top:20px;text-align:center;">
             <a href="#" onclick="showLogin();return false;">
-                <span>ðŸ”„ Déjà  un compte ? Se connecter</span>
+                <span>↩️ Déjà un compte ? Se connecter</span>
             </a>
         </div>
     </div>
 
     <!-- Formulaire de connexion moderne -->
     <div id="auth-container" class="card">
-        <h1>ðŸ” Connexion</h1>
+        <h1>🔑 Connexion</h1>
         
         <div class="form-group">
-            <label class="form-label">ðŸ‘¤ Identifiant</label>
+            <label class="form-label">👤 Identifiant</label>
             <input type="text" id="login-username" placeholder="Saisissez votre identifiant">
         </div>
         
         <div class="form-group">
-            <label class="form-label">ðŸ”‘ Mot de passe</label>
+            <label class="form-label">🔒 Mot de passe</label>
             <div class="password-container">
                 <input type="password" id="master-password" placeholder="Saisissez votre mot de passe">
                 <span class="password-toggle" onclick="toggleLoginPassword()">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                        <path d="M12.015 7c4.751 0 8.063 3.012 9.504 4.636-1.401 1.837-4.713 5.364-9.504 5.364-4.42 0-7.93-3.536-9.478-5.407 1.493-1.647 4.817-4.593 9.478-4.593zm0-2c-7.569 0-12.015 6.551-12.015 6.551s4.835 7.449 12.015 7.449c7.733 0 11.985-7.449 11.985-7.449s-4.291-6.551-11.985-6.551zm-.015 3c-2.209 0-4 1.792-4 4 0 2.209 1.791 4 4s4-1.791 4-4c0-2.208-1.791-4-4-4z"/>
+                        <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
                     </svg>
                 </span>
             </div>
@@ -765,27 +770,27 @@ Auteur: Équipe ESGI 2024-2025
         </div>
     </div>    <!-- Gestionnaire de mots de passe moderne -->
     <div id="app" class="card">
-        <h1>ðŸ” Vos mots de passe sécurisés</h1>
+        <h1>🔑 Vos mots de passe sécurisés</h1>
         
         <div class="form-grid">
             <div class="form-group">
-                <label class="form-label">ðŸ‘¤ Identifiant du compte</label>
+                <label class="form-label">👤 Identifiant du compte</label>
                 <input type="text" id="account-username" placeholder="Ex: john.doe@gmail.com">
             </div>
             
             <div class="form-group" style="position:relative;">
-                <label class="form-label">ðŸŒ Site web</label>
+                <label class="form-label">🌐 Site web</label>
                 <input type="text" id="site-link" placeholder="Ex: https://www.google.com" autocomplete="off" oninput="showSiteSuggestions()" onblur="hideSiteSuggestionsWithDelay()">
                 <div id="site-link-list"></div>
             </div>
             
             <div class="form-group">
-                <label class="form-label">ðŸ”‘ Mot de passe</label>
+                <label class="form-label">🔒 Mot de passe</label>
                 <div class="password-container">
                     <input type="password" id="password" placeholder="Votre mot de passe sécurisé">
                     <span class="password-toggle" onclick="toggleMainPassword()">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                            <path d="M12.015 7c4.751 0 8.063 3.012 9.504 4.636-1.401 1.837-4.713 5.364-9.504 5.364-4.42 0-7.93-3.536-9.478-5.407 1.493-1.647 4.817-4.593 9.478-4.593zm0-2c-7.569 0-12.015 6.551-12.015 6.551s4.835 7.449 12.015 7.449c7.733 0 11.985-7.449 11.985-7.449s-4.291-6.551-11.985-6.551zm-.015 3c-2.209 0-4 1.792-4 4 0 2.209 1.791 4 4s4-1.791 4-4c0-2.208-1.791-4-4-4z"/>
+                            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
                         </svg>
                     </span>
                 </div>
@@ -794,16 +799,16 @@ Auteur: Équipe ESGI 2024-2025
         
         <div class="actions-grid">
             <button onclick="generatePassword()">
-                <span>ðŸŽ² Générer un mot de passe</span>
+                <span>🎲 Générer un mot de passe</span>
             </button>
             <button onclick="addPassword()" class="btn-success">
-                <span>âž• Ajouter</span>
+                <span>➕ Ajouter</span>
             </button>
             <button onclick="showMfaSettings()" class="btn-secondary">
-                <span>ðŸ” Gérer la 2FA</span>
+                <span>🛡️ Gérer la 2FA</span>
             </button>
             <button onclick="deleteAllPasswords()" class="btn-danger">
-                <span>ðŸ—‘ï¸ Supprimer tout</span>
+                <span>🗑️ Supprimer tout</span>
             </button>
         </div>
         
@@ -815,24 +820,24 @@ Auteur: Équipe ESGI 2024-2025
 
     <!-- Interface de gestion MFA/2FA -->
     <div id="mfa-settings" class="card">
-        <h1>ðŸ” Authentification à  deux facteurs (2FA)</h1>
+        <h1>🛡️ Authentification à deux facteurs (2FA)</h1>
         
         <div id="mfa-status" style="margin-bottom: 30px;">
             <div style="padding: 20px; border-radius: 12px; background: rgba(255, 193, 7, 0.1); border-left: 4px solid var(--warning-color);">
-                <p><strong>ðŸ”„ Vérification du statut MFA...</strong></p>
+                <p><strong>↩️ Vérification du statut MFA...</strong></p>
             </div>
         </div>
 
         <!-- Activation de la MFA -->
         <div id="mfa-setup" style="display: none;">
             <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 30px;">
-                <h3>ðŸ“± Configurer l'authentification à  deux facteurs</h3>
+                <h3>📱 Configurer l'authentification à deux facteurs</h3>
                 <p style="margin-bottom: 20px;">1. Téléchargez une application d'authentification comme <strong>Google Authenticator</strong>, <strong>Authy</strong> ou <strong>Microsoft Authenticator</strong></p>
                 <p style="margin-bottom: 20px;">2. Scannez le QR code ci-dessous avec votre application :</p>
                 
                 <div id="qr-code" style="text-align: center; margin: 20px 0; padding: 20px; background: white; border-radius: 12px; display: inline-block; width: 100%;"></div>
                 
-                <p style="margin-bottom: 20px;">3. Entrez le code à  6 chiffres généré par votre application pour confirmer :</p>
+                <p style="margin-bottom: 20px;">3. Entrez le code à 6 chiffres généré par votre application pour confirmer :</p>
                 
                 <div class="form-group">
                     <input type="text" id="mfa-verify-code" placeholder="123456" maxlength="6" style="text-align: center; font-size: 1.2em; letter-spacing: 0.3em;">
@@ -844,36 +849,43 @@ Auteur: Équipe ESGI 2024-2025
             </div>
         </div>
 
-        <!-- MFA déjà  activée -->
+        <!-- MFA déjà activée -->
         <div id="mfa-active" style="display: none;">
             <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 30px;">
-                <h3>✅ Authentification à  deux facteurs activée</h3>
-                <p>Votre compte est protégé par l'authentification à  deux facteurs. Un code de vérification sera requis à  chaque connexion.</p>
+                <h3>✅ Authentification à deux facteurs activée</h3>
+                <p>Votre compte est protégé par l'authentification à deux facteurs. Un code de vérification sera requis à chaque connexion.</p>
             </div>
             
             <div style="background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.3); border-radius: 12px; padding: 20px;">
-                <h4>⚠️ Désactivation de la 2FA</h4>
-                <p>La désactivation de la 2FA n'est pas encore disponible via l'interface. Contactez l'administrateur si nécessaire.</p>
-                <p><em>Cette fonctionnalité sera disponible dans une prochaine mise à  jour.</em></p>
+                <h4>⚠️ Désactivation de la 2FA</h4>
+                <p>Pour désactiver l'authentification à deux facteurs, entrez le code de votre application d'authentification :</p>
+                
+                <div class="form-group" style="margin-top: 20px;">
+                    <input type="text" id="mfa-disable-code" placeholder="123456" maxlength="6" style="text-align: center; font-size: 1.2em; letter-spacing: 0.3em;">
+                </div>
+                
+                <button onclick="disableMfa()" class="btn-danger" style="margin-top: 10px;">
+                    <span>🔓 Désactiver la 2FA</span>
+                </button>
             </div>
         </div>
 
         <button onclick="backToMainApp()" class="btn-secondary" style="margin-top: 30px;">
-            <span>ðŸ”™ Retour au gestionnaire</span>
+            <span>↩️ Retour au gestionnaire</span>
         </button>
     </div>
 
     <!-- Interface de vérification MFA lors de la connexion -->
     <div id="mfa-verification" class="card">
-        <h1>ðŸ” Vérification en deux étapes</h1>
+        <h1>🛡️ Vérification en deux étapes</h1>
         
         <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 30px; text-align: center;">
-            <p><strong>ðŸ“± Ouvrez votre application d'authentification</strong></p>
-            <p>Entrez le code à  6 chiffres affiché pour <strong id="mfa-username-display"></strong></p>
+            <p><strong>📱 Ouvrez votre application d'authentification</strong></p>
+            <p>Entrez le code à 6 chiffres affiché pour <strong id="mfa-username-display"></strong></p>
         </div>
         
         <div class="form-group">
-            <label class="form-label">ðŸ”¢ Code de vérification</label>
+            <label class="form-label">🔢 Code de vérification</label>
             <input type="text" id="mfa-login-code" placeholder="123456" maxlength="6" style="text-align: center; font-size: 1.5em; letter-spacing: 0.3em;">
         </div>
         
@@ -883,649 +895,907 @@ Auteur: Équipe ESGI 2024-2025
         
         <div style="margin-top: 20px; text-align: center;">
             <a href="#" onclick="cancelMfaLogin(); return false;">
-                <span>ðŸ”™ Annuler la connexion</span>
+                <span>↩️ Annuler la connexion</span>
             </a>
         </div>
     </div>
 
     <script>
-        // Variables globales pour MFA
-        let mfaSetupData = null;
-        let pendingUsername = null;
-        let pendingPassword = null;
-
-        // Affiche uniquement le conteneur demandé, cache les autres
-        function showOnly(id) {
-            ["auth-choice", "setup-container", "auth-container", "app", "mfa-settings", "mfa-verification"].forEach(function(div) {
-                document.getElementById(div).style.display = (div === id) ? "block" : "none";
-            });
-            document.getElementById("logout-btn").style.display = (["app", "mfa-settings"].includes(id)) ? "block" : "none";
-        }
-
-        // Affiche le formulaire de création de compte
-        function showSignup() {
-            // Sécurité : vider tous les champs de mot de passe
-            clearAllPasswordFields();
-            showOnly("setup-container");
-        }
-
-        // Affiche le formulaire de connexion
-        function showLogin() {
-            // Sécurité : vider tous les champs de mot de passe
-            clearAllPasswordFields();
-            if (localStorage.getItem("masterPassword") && localStorage.getItem("username")) {
-                showOnly("auth-container");
-            } else {
-                alert("Aucun compte trouvé, veuillez créer un compte.");
-            }
-        }
-
-        // Fonction de sécurité pour vider tous les champs sensibles
-        function clearAllPasswordFields() {
-            const passwordFields = [
-                "new-master-password",
-                "master-password", 
-                "password",
-                "mfa-verify-code",
-                "mfa-login-code"
-            ];
-            
-            passwordFields.forEach(fieldId => {
-                const field = document.getElementById(fieldId);
-                if (field) {
-                    field.value = "";
-                    // Réinitialiser le type en mode masqué
-                    if (field.type === "text" && field.parentElement.classList.contains('password-container')) {
-                        field.type = "password";
-                        const toggleIcon = field.parentElement.querySelector('.password-toggle svg');
-                        if (toggleIcon) {
-                            toggleIcon.innerHTML = '<path d="M12.015 7c4.751 0 8.063 3.012 9.504 4.636-1.401 1.837-4.713 5.364-9.504 5.364-4.42 0-7.93-3.536-9.478-5.407 1.493-1.647 4.817-4.593 9.478-4.593zm0-2c-7.569 0-12.015 6.551-12.015 6.551s4.835 7.449 12.015 7.449c7.733 0 11.985-7.449 11.985-7.449s-4.291-6.551-11.985-6.551zm-.015 3c-2.209 0-4 1.792-4 4 0 2.209 1.791 4 4s4-1.791 4-4c0-2.208-1.791-4-4-4z"/>';
-                        }
-                    }
-                }
-            });
-            
-            // Masquer les hints de mot de passe
-            const hintDiv = document.getElementById("password-hint");
-            if (hintDiv) {
-                hintDiv.style.display = "none";
-            }
-        }
-
-        // Vérifie la complexité du mot de passe
-        function checkPasswordComplexity(password) {
-            const minLength = 8;
-            const hasUpper = /[A-Z]/.test(password);
-            const hasLower = /[a-z]/.test(password);
-            const hasDigit = /\d/.test(password);
-            const hasSpecial = /[!@#$%^&*()_\-+=\[\]{};':"\\|,.<>\/?]/.test(password);
-            return {
-                minLength: password.length >= minLength,
-                hasUpper,
-                hasLower,
-                hasDigit,
-                hasSpecial
-            };
-        }
-
-        // Affiche les conseils de complexité du mot de passe
-        function updatePasswordHint() {
-            const password = document.getElementById("new-master-password").value;
-            const hintDiv = document.getElementById("password-hint");
-            const checks = checkPasswordComplexity(password);
-
-            let html = "Le mot de passe n'est pas assez complexe.<br>Il doit contenir au moins :<ul style='margin:4px 0 0 18px;padding:0;'>";
-            html += `<li style="color:${checks.minLength ? '#22c55e' : '#ef4444'}">8 caractères</li>`;
-            html += `<li style="color:${checks.hasUpper ? '#22c55e' : '#ef4444'}">une lettre majuscule</li>`;
-            html += `<li style="color:${checks.hasLower ? '#22c55e' : '#ef4444'}">une lettre minuscule</li>`;
-            html += `<li style="color:${checks.hasDigit ? '#22c55e' : '#ef4444'}">un chiffre</li>`;
-            html += `<li style="color:${checks.hasSpecial ? '#22c55e' : '#ef4444'}">un caractère spécial (ex: !@#$%^&amp;*)</li>`;
-            html += "</ul>";
-
-            // Affiche le hint si le champ n'est pas vide ou si tout n'est pas validé
-            if (password.length > 0 && Object.values(checks).some(v => !v)) {
-                hintDiv.innerHTML = html;
-                hintDiv.style.display = "block";
-            } else {
-                hintDiv.style.display = "none";
-            }
-        }
-
-        // Création de compte
-        function setMasterPassword() {
-            const newUsername = document.getElementById("new-username").value;
-            const newPassword = document.getElementById("new-master-password").value;
-            const hintDiv = document.getElementById("password-hint");
-            hintDiv.style.display = "none";
-            hintDiv.textContent = "";
-
-            if (!newUsername || !newPassword) {
-                hintDiv.textContent = "Veuillez saisir un identifiant et un mot de passe.";
-                hintDiv.style.display = "block";
-                return;
-            }
-
-            const checks = checkPasswordComplexity(newPassword);
-            if (!checks.minLength || !checks.hasUpper || !checks.hasLower || !checks.hasDigit || !checks.hasSpecial) {
-                updatePasswordHint();
-                return;
-            }
-
-            const hashedKey = btoa(newUsername + ":" + newPassword);
-            localStorage.setItem("masterPassword", btoa(newPassword));
-            localStorage.setItem("username", newUsername);
-            localStorage.setItem("currentUser", hashedKey);
-
-            fetch("/api/register", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username: newUsername, password: newPassword })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.message === "Utilisateur créé avec succès") {
-                    alert("Compte créé !");
-                    showOnly("auth-container");
-                } else {
-                    alert("Erreur : " + (data.detail || JSON.stringify(data)));
-                }
-            })
-            .catch(err => alert("Erreur API : " + err.message));
-        }
-
-        // Connexion utilisateur
-        function authenticate() {
-            const enteredUsername = document.getElementById("login-username").value;
-            const enteredPassword = document.getElementById("master-password").value;
-            const savedUsername = localStorage.getItem("username");
-            const savedPassword = localStorage.getItem("masterPassword");
-
-            if (!enteredUsername || !enteredPassword) {
-                alert("Veuillez saisir l'identifiant et le mot de passe");
-                return;
-            }
-
-            if (enteredUsername === savedUsername && btoa(enteredPassword) === savedPassword) {
-                // Utiliser l'endpoint /api/login du backend pour vérifier si MFA est requis
-                fetch("/api/login", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ username: enteredUsername, password: enteredPassword })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.mfa_required) {
-                        // MFA activée, demander le code de vérification
-                        pendingUsername = enteredUsername;
-                        pendingPassword = enteredPassword;
-                        document.getElementById("mfa-username-display").textContent = enteredUsername;
-                        showOnly("mfa-verification");
-                    } else {
-                        // Pas de MFA, connexion directe
-                        localStorage.setItem("currentUser", data.user_b64_token || btoa(enteredUsername + ":" + enteredPassword));
-                        showOnly("app");
-                        displayPasswords();
-                    }
-                })
-                .catch(err => {
-                    console.error("Erreur vérification login:", err);
-                    // En cas d'erreur, connexion normale (fallback)
-                    localStorage.setItem("currentUser", btoa(enteredUsername + ":" + enteredPassword));
-                    showOnly("app");
-                    displayPasswords();
-                });
-            } else {
-                alert("Identifiant ou mot de passe incorrect");
-            }
-        }
-
-        // Génère un mot de passe aléatoire
-        function generatePassword() {
-            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
-            const password = Array.from({ length: 12 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
-            const passwordInput = document.getElementById("password");
-            passwordInput.value = password;
-        }
-
-        // Fonctions pour afficher/masquer les mots de passe avec les icônes SVG
-        function toggleMainPassword() {
-            const passwordInput = document.getElementById("password");
-            const toggleIcon = passwordInput.parentElement.querySelector('.password-toggle svg');
-            
-            if (passwordInput.type === "password") {
-                passwordInput.type = "text";
-                // Icône Å“il barré (mot de passe visible)
-                toggleIcon.innerHTML = '<path d="M11.83,9L15,12.16C15,12.11 15,12.05 15,12A3,3 0 0,0 12,9C11.94,9 11.89,9 11.83,9M7.53,9.8L9.08,11.35C9.03,11.56 9,11.77 9,12A3,3 0 0,0 12,15C12.22,15 12.44,14.97 12.65,14.92L14.2,16.47C13.53,16.8 12.79,17 12,17A5,5 0 0,1 7,12C7,11.21 7.2,10.47 7.53,9.8M2,4.27L4.28,6.55L4.73,7C3.08,8.3 1.78,10 1,12C2.73,16.39 7,19.5 12,19.5C13.55,19.5 15.03,19.2 16.38,18.66L16.81,19.08L19.73,22L21,20.73L3.27,3M12,7A5,5 0 0,1 17,12C17,12.64 16.87,13.26 16.64,13.82L19.57,16.75C21.07,15.5 22.27,13.86 23,12C21.27,7.61 17,4.5 12,4.5C10.6,4.5 9.26,4.75 8,5.2L10.17,7.35C10.76,7.13 11.37,7 12,7Z"/>';
-            } else {
-                passwordInput.type = "password";
-                // Icône Å“il normal (mot de passe masqué)
-                toggleIcon.innerHTML = '<path d="M12.015 7c4.751 0 8.063 3.012 9.504 4.636-1.401 1.837-4.713 5.364-9.504 5.364-4.42 0-7.93-3.536-9.478-5.407 1.493-1.647 4.817-4.593 9.478-4.593zm0-2c-7.569 0-12.015 6.551-12.015 6.551s4.835 7.449 12.015 7.449c7.733 0 11.985-7.449 11.985-7.449s-4.291-6.551-11.985-6.551zm-.015 3c-2.209 0-4 1.792-4 4 0 2.209 1.791 4 4s4-1.791 4-4c0-2.208-1.791-4-4-4z"/>';
-            }
-        }
-
-        function toggleNewPassword() {
-            const passwordInput = document.getElementById("new-master-password");
-            const toggleIcon = passwordInput.parentElement.querySelector('.password-toggle svg');
-            
-            if (passwordInput.type === "password") {
-                passwordInput.type = "text";
-                // Icône Å“il barré (mot de passe visible)
-                toggleIcon.innerHTML = '<path d="M11.83,9L15,12.16C15,12.11 15,12.05 15,12A3,3 0 0,0 12,9C11.94,9 11.89,9 11.83,9M7.53,9.8L9.08,11.35C9.03,11.56 9,11.77 9,12A3,3 0 0,0 12,15C12.22,15 12.44,14.97 12.65,14.92L14.2,16.47C13.53,16.8 12.79,17 12,17A5,5 0 0,1 7,12C7,11.21 7.2,10.47 7.53,9.8M2,4.27L4.28,6.55L4.73,7C3.08,8.3 1.78,10 1,12C2.73,16.39 7,19.5 12,19.5C13.55,19.5 15.03,19.2 16.38,18.66L16.81,19.08L19.73,22L21,20.73L3.27,3M12,7A5,5 0 0,1 17,12C17,12.64 16.87,13.26 16.64,13.82L19.57,16.75C21.07,15.5 22.27,13.86 23,12C21.27,7.61 17,4.5 12,4.5C10.6,4.5 9.26,4.75 8,5.2L10.17,7.35C10.76,7.13 11.37,7 12,7Z"/>';
-            } else {
-                passwordInput.type = "password";
-                // Icône Å“il normal (mot de passe masqué)
-                toggleIcon.innerHTML = '<path d="M12.015 7c4.751 0 8.063 3.012 9.504 4.636-1.401 1.837-4.713 5.364-9.504 5.364-4.42 0-7.93-3.536-9.478-5.407 1.493-1.647 4.817-4.593 9.478-4.593zm0-2c-7.569 0-12.015 6.551-12.015 6.551s4.835 7.449 12.015 7.449c7.733 0 11.985-7.449 11.985-7.449s-4.291-6.551-11.985-6.551zm-.015 3c-2.209 0-4 1.792-4 4 0 2.209 1.791 4 4s4-1.791 4-4c0-2.208-1.791-4-4-4z"/>';
-            }
-        }
-
-        function toggleLoginPassword() {
-            const passwordInput = document.getElementById("master-password");
-            const toggleIcon = passwordInput.parentElement.querySelector('.password-toggle svg');
-            
-            if (passwordInput.type === "password") {
-                passwordInput.type = "text";
-                // Icône Å“il barré (mot de passe visible)
-                toggleIcon.innerHTML = '<path d="M11.83,9L15,12.16C15,12.11 15,12.05 15,12A3,3 0 0,0 12,9C11.94,9 11.89,9 11.83,9M7.53,9.8L9.08,11.35C9.03,11.56 9,11.77 9,12A3,3 0 0,0 12,15C12.22,15 12.44,14.97 12.65,14.92L14.2,16.47C13.53,16.8 12.79,17 12,17A5,5 0 0,1 7,12C7,11.21 7.2,10.47 7.53,9.8M2,4.27L4.28,6.55L4.73,7C3.08,8.3 1.78,10 1,12C2.73,16.39 7,19.5 12,19.5C13.55,19.5 15.03,19.2 16.38,18.66L16.81,19.08L19.73,22L21,20.73L3.27,3M12,7A5,5 0 0,1 17,12C17,12.64 16.87,13.26 16.64,13.82L19.57,16.75C21.07,15.5 22.27,13.86 23,12C21.27,7.61 17,4.5 12,4.5C10.6,4.5 9.26,4.75 8,5.2L10.17,7.35C10.76,7.13 11.37,7 12,7Z"/>';
-            } else {
-                passwordInput.type = "password";
-                // Icône Å“il normal (mot de passe masqué)
-                toggleIcon.innerHTML = '<path d="M12.015 7c4.751 0 8.063 3.012 9.504 4.636-1.401 1.837-4.713 5.364-9.504 5.364-4.42 0-7.93-3.536-9.478-5.407 1.493-1.647 4.817-4.593 9.478-4.593zm0-2c-7.569 0-12.015 6.551-12.015 6.551s4.835 7.449 12.015 7.449c7.733 0 11.985-7.449 11.985-7.449s-4.291-6.551-11.985-6.551zm-.015 3c-2.209 0-4 1.792-4 4 0 2.209 1.791 4 4s4-1.791 4-4c0-2.208-1.791-4-4-4z"/>';
-            }
-        }
-
-        // Stocke les mots de passe récupérés pour vérifier les doublons côté client
-        let currentPasswords = [];
-
-        // Ajoute un mot de passe pour un site/compte
-        function addPassword() {
-            const accountUsername = document.getElementById("account-username").value.trim();
-            const siteLink = document.getElementById("site-link").value.trim();
-            const password = document.getElementById("password").value;
-            const user = localStorage.getItem("currentUser");
-            const errorDiv = document.getElementById("add-error");
-            errorDiv.style.display = "none";
-            errorDiv.textContent = "";
-
-            if (!accountUsername || !siteLink || !password) {
-                errorDiv.textContent = "Veuillez remplir tous les champs";
-                errorDiv.style.display = "block";
-                return;
-            }
-
-            // Vérifie côté client s'il existe déjà  ce compte pour ce site
-            const duplicate = currentPasswords.find(
-                item => item.site === siteLink && item.account === accountUsername
-            );
-            if (duplicate) {
-                errorDiv.textContent = "Un compte avec cet identifiant existe déjà  pour ce site.";
-                errorDiv.style.display = "block";
-                return;
-            }
-
-            fetch("/api/add", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ user, site: siteLink, account: accountUsername, password })
-            })
-            .then(res => res.json())
-            .then(data => {
-                alert(data.message);
-                displayPasswords();
-            })
-            .catch(err => {
-                errorDiv.textContent = "Erreur ajout : " + err.message;
-                errorDiv.style.display = "block";
-            });
-        }
-
-        // Affiche la liste des mots de passe dans un tableau
-        function displayPasswords() {
-            const user = localStorage.getItem("currentUser");
-            fetch(`/api/list?user=${user}`)
-                .then(res => res.json())
-                .then(data => {
-                    const list = document.getElementById("password-list");
-                    list.innerHTML = "";
-
-                    if (!data.passwords || !Array.isArray(data.passwords) || data.passwords.length === 0) {
-                        list.innerHTML = "<p>Aucun mot de passe trouvé ou erreur de chargement.</p>";
-                        currentPasswords = [];
-                        return;
-                    }
-
-                    currentPasswords = data.passwords;
-
-                    // Table header
-                    let html = `<table>
-                        <thead>
-                            <tr>
-                                <th style="width:30%;">Site</th>
-                                <th style="width:30%;">Identifiant</th>
-                                <th style="width:25%;">Mot de passe</th>
-                                <th style="width:15%;">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>`;
-
-                    data.passwords.forEach((item, index) => {
-                        html += `
-                            <tr>
-                                <td>${item.site}</td>
-                                <td>${item.account}</td>
-                                <td>
-                                    <span id="pwd-${index}">*****</span>
-                                </td>
-                                <td>
-                                    <button class="table-action-btn" onclick="togglePassword(${index}, '${item.password}')">Voir</button>
-                                    <button class="table-action-btn" style="background:#ef4444;color:#fff;" onclick="deletePassword('${item.site}','${item.account}')">Supprimer</button>
-                                </td>
-                            </tr>
-                        `;
-                    });
-
-                    html += "</tbody></table>";
-                    list.innerHTML = html;
-                })
-                .catch(err => {
-                    console.error("Erreur lors du chargement des mots de passe :", err);
-                });
-        }
-
-        // Affiche ou masque le mot de passe
-        function togglePassword(index, password) {
-            const span = document.getElementById(`pwd-${index}`);
-            span.textContent = span.textContent === "*****" ? password : "*****";
-        }
-
-        // Supprime un mot de passe pour un site/compte
-        function deletePassword(site, account) {
-            const user = localStorage.getItem("currentUser");
-
-            fetch("/api/delete", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ user, site, account })
-            })
-            .then(res => res.json())
-            .then(data => {
-                alert(data.message);
-                displayPasswords();
-            })
-            .catch(err => alert("Erreur suppression : " + err.message));
-        }
-
-        // Supprime tous les mots de passe de l'utilisateur
-        function deleteAllPasswords() {
-            if (!confirm("Êtes-vous sûr de vouloir supprimer tous vos mots de passe ?")) return;
-            const user = localStorage.getItem("currentUser");
-            fetch("/api/delete_all", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ user })
-            })
-            .then(res => res.json())
-            .then(data => {
-                alert(data.message);
-                displayPasswords();
-            })
-            .catch(err => alert("Erreur suppression : " + err.message));
-        }
-
-        // Déconnexion utilisateur
-        function logout() {
-            localStorage.removeItem("currentUser");
-
-            // Sécurité : vider tous les champs sensibles
-            clearAllPasswordFields();
-
-            // Réinitialiser les champs du gestionnaire
-            document.getElementById("account-username").value = "";
-            document.getElementById("site-link").value = "";
-
-            // Réinitialiser les variables MFA
-            pendingUsername = null;
-            pendingPassword = null;
-            mfaSetupData = null;
-
-            document.getElementById("app").style.display = "none";
-            document.getElementById("mfa-settings").style.display = "none";
-            document.getElementById("mfa-verification").style.display = "none";
-            document.getElementById("auth-choice").style.display = "block";
-            document.getElementById("logout-btn").style.display = "none";
-        }
-
-        // Suggestions de sites populaires
-        const popularSites = [
-            "https://www.google.com",
-            "https://www.facebook.com",
-            "https://www.youtube.com",
-            "https://www.twitter.com",
-            "https://www.instagram.com",
-            "https://www.linkedin.com",
-            "https://www.github.com",
-            "https://www.microsoft.com",
-            "https://www.amazon.com",
-            "https://www.reddit.com",
-            "https://www.wikipedia.org",
-            "https://www.yahoo.com"
+        // ===================================================================
+        // CONFIGURATION GLOBALE ET ÉTAT DE L'APPLICATION
+        // ===================================================================
+        const API_BASE_URL = 'http://localhost:9080/api'; // URL de base de l'API via NGINX reverse proxy
+        let currentUsername = ''; // Stocke l'identifiant pour le processus MFA
+                let siteSuggestions = [
+            "google.com", "youtube.com", "facebook.com", "twitter.com", "instagram.com", "linkedin.com", "wikipedia.org",
+            "amazon.com", "reddit.com", "netflix.com", "microsoft.com", "apple.com", "github.com", "stackoverflow.com",
+            "pinterest.com", "tiktok.com", "yahoo.com", "bing.com", "duckduckgo.com", "paypal.com", "ebay.com",
+            "walmart.com", "craigslist.org", "office.com", "live.com", "twitch.tv", "spotify.com", "dropbox.com",
+            "wordpress.org", "whatsapp.com", "telegram.org", "discord.com", "zoom.us", "teams.microsoft.com",
+            "gmail.com", "outlook.com", "hotmail.com", "adobe.com", "figma.com", "canva.com", "notion.so",
+            "trello.com", "slack.com", "esgi.fr"
         ];
 
+        // ===================================================================
+        // FONCTIONS DE NAVIGATION ET D'AFFICHAGE
+        // ===================================================================
+        function showView(viewId) {
+            const views = ['auth-choice', 'setup-container', 'auth-container', 'app', 'mfa-settings', 'mfa-verification'];
+            views.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = (id === viewId) ? 'block' : 'none';
+            });
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) logoutBtn.style.display = (viewId === 'app' || viewId === 'mfa-settings') ? 'block' : 'none';
+        }
+
+        function showSignup() { showView('setup-container'); }
+        function showLogin() { showView('auth-container'); }
+        function backToMainApp() { showView('app'); }
+        function cancelMfaLogin() { 
+            localStorage.removeItem('tempLoginData');
+            currentUsername = '';
+            showView('auth-container'); 
+        }
+
+        // ===================================================================
+        // FONCTIONS UTILITAIRES (Toast, Toggles)
+        // ===================================================================
+        function showToast(message, type = 'success') {
+            // Implémentation simple d'un toast/notification
+            const toast = document.createElement('div');
+            toast.style.position = 'fixed';
+            toast.style.bottom = '20px';
+            toast.style.left = '50%';
+            toast.style.transform = 'translateX(-50%)';
+            toast.style.padding = '12px 24px';
+            toast.style.borderRadius = '8px';
+            toast.style.color = 'white';
+            toast.style.background = type === 'error' ? 'var(--error-color)' : 'var(--success-color)';
+            toast.style.boxShadow = 'var(--shadow-lg)';
+            toast.style.zIndex = '1000';
+            toast.style.transition = 'opacity 0.3s ease';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function togglePasswordVisibility(inputId) {
+            const input = document.getElementById(inputId);
+            const toggle = input.nextElementSibling;
+            if (input.type === 'password') {
+                input.type = 'text';
+                // Idéalement, changer l'icône ici
+            } else {
+                input.type = 'password';
+                // Rechanger l'icône
+            }
+        }
+
+        function toggleNewPassword() { togglePasswordVisibility('new-master-password'); }
+        function toggleLoginPassword() { togglePasswordVisibility('master-password'); }
+        function toggleMainPassword() { togglePasswordVisibility('password'); }
+
+        // ===================================================================
+        // LOGIQUE D'AUTHENTIFICATION ET D'INSCRIPTION
+        // ===================================================================
+        async function setMasterPassword() {
+            const username = document.getElementById('new-username').value;
+            const password = document.getElementById('new-master-password').value;
+            const button = event.target;
+
+            if (!username || !password) {
+                showToast('Veuillez remplir tous les champs.', 'error');
+                return;
+            }
+            
+            button.classList.add('loading');
+            button.disabled = true;
+
+            try {
+                console.log('Tentative de connexion à:', `${API_BASE_URL}/register`);
+                console.log('Données envoyées:', { username, password: '***' });
+                console.log('Données JSON brutes:', JSON.stringify({ username, password }));
+                
+                const response = await fetch(`${API_BASE_URL}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                console.log('Réponse du serveur:', response.status, response.statusText);
+                const result = await response.json();
+                console.log('Données reçues:', result);
+
+                if (response.ok) {
+                    showToast(result.message || 'Utilisateur créé avec succès!', 'success');
+                    setTimeout(() => {
+                        showLogin();
+                        document.getElementById('login-username').value = username;
+                    }, 1500);
+                } else {
+                    console.error('Erreur détaillée du serveur:', result);
+                    showToast(result.detail || 'Erreur lors de la création du compte.', 'error');
+                }
+            } catch (error) {
+                console.error('Erreur détaillée:', error);
+                console.error('Message d\'erreur:', error.message);
+                console.error('Stack trace:', error.stack);
+                
+                let errorMessage = 'Erreur de connexion au serveur.';
+                
+                if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                    errorMessage = 'Impossible de contacter le serveur. Vérifiez que le backend est démarré sur le port 9443.';
+                } else if (error.message.includes('SSL') || error.message.includes('certificate')) {
+                    errorMessage = 'Erreur de certificat SSL. Essayez d\'accéder à http://localhost:9443 dans votre navigateur d\'abord.';
+                } else if (error.message.includes('CORS')) {
+                    errorMessage = 'Erreur CORS. Vérifiez la configuration du backend.';
+                }
+                
+                showToast(errorMessage, 'error');
+            } finally {
+                button.classList.remove('loading');
+                button.disabled = false;
+            }
+        }
+
+        async function authenticate() {
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('master-password').value;
+            const button = event.target;
+
+            if (!username || !password) {
+                showToast('Identifiant et mot de passe requis.', 'error');
+                return;
+            }
+
+            button.classList.add('loading');
+            button.disabled = true;
+            currentUsername = username; // Stocker pour une éventuelle vérification MFA
+
+            try {
+                console.log('Tentative de connexion à:', `${API_BASE_URL}/login`);
+                
+                const response = await fetch(`${API_BASE_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                console.log('Réponse du serveur:', response.status, response.statusText);
+                const data = await response.json();
+                console.log('Données reçues:', data);
+
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Identifiants incorrects.');
+                }
+
+                if (data.mfa_required) {
+                    // Stocker temporairement les données de connexion pour la vérification MFA
+                    localStorage.setItem('tempLoginData', btoa(`${username}:${password}`));
+                    document.getElementById('mfa-username-display').textContent = username;
+                    showView('mfa-verification');
+                } else {
+                    // Connexion réussie sans MFA - utiliser le token fourni par l'API
+                    if (data.user_b64_token) {
+                        localStorage.setItem('currentUser', data.user_b64_token);
+                    } else {
+                        // Fallback : créer notre propre token
+                        localStorage.setItem('currentUser', btoa(`${username}:${password}`));
+                    }
+                    showView('app');
+                    loadPasswords();
+                }
+            } catch (error) {
+                console.error('Erreur détaillée:', error);
+                
+                let errorMessage = error.message;
+                
+                if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                    errorMessage = 'Impossible de contacter le serveur. Vérifiez que le backend est démarré.';
+                }
+                
+                showToast(errorMessage, 'error');
+            } finally {
+                button.classList.remove('loading');
+                button.disabled = false;
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            currentUsername = '';
+            document.getElementById('password-list').innerHTML = '';
+            showView('auth-choice');
+        }
+
+        // ===================================================================
+        // LOGIQUE MFA (Authentification à deux facteurs)
+        // ===================================================================
+        async function showMfaSettings() {
+            showView('mfa-settings');
+            const statusDiv = document.getElementById('mfa-status');
+            const setupDiv = document.getElementById('mfa-setup');
+            const activeDiv = document.getElementById('mfa-active');
+            const currentUser = localStorage.getItem('currentUser');
+            
+            if (!currentUser) {
+                showView('auth-choice');
+                return;
+            }
+
+            statusDiv.innerHTML = '<div style="padding: 20px; border-radius: 12px; background: rgba(255, 193, 7, 0.1); border-left: 4px solid var(--warning-color);"><p><strong>🔄 Vérification du statut MFA...</strong></p></div>';
+            setupDiv.style.display = 'none';
+            activeDiv.style.display = 'none';
+
+            try {
+                // Récupérer le nom d'utilisateur et mot de passe depuis le localStorage
+                const decodedUser = atob(currentUser);
+                const [username, password] = decodedUser.split(':');
+                
+                const response = await fetch(`${API_BASE_URL}/mfa/status`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        username: username,
+                        password: password
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Erreur lors de la vérification du statut MFA');
+                }
+
+                if (data.mfa_enabled) {
+                    statusDiv.innerHTML = '';
+                    setupDiv.style.display = 'none';
+                    activeDiv.style.display = 'block';
+                } else {
+                    statusDiv.innerHTML = '';
+                    setupDiv.style.display = 'block';
+                    activeDiv.style.display = 'none';
+                    await generateMfaQrCode();
+                }
+                
+            } catch (error) {
+                console.error('Erreur lors de la vérification MFA:', error);
+                statusDiv.innerHTML = `
+                    <div style="padding: 20px; border-radius: 12px; background: rgba(245, 101, 101, 0.1); border-left: 4px solid var(--error-color);">
+                        <p><strong>❌ Erreur</strong> - ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function generateMfaQrCode() {
+            const currentUser = localStorage.getItem('currentUser');
+            const qrCodeDiv = document.getElementById('qr-code');
+            
+            if (!currentUser) {
+                showView('auth-choice');
+                return;
+            }
+
+            try {
+                qrCodeDiv.innerHTML = '<div style="text-align: center; padding: 20px;">🔄 Génération du QR code...</div>';
+                
+                const response = await fetch(`${API_BASE_URL}/mfa/setup`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user: currentUser })
+                });
+
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Erreur lors de la génération du QR code');
+                }
+
+                // Vérification de la bibliothèque QR et génération du QR code
+                if (typeof qrcode !== 'undefined') {
+                    // Générer le QR code avec qrcode-generator (plus fiable)
+                    try {
+                        const qr = qrcode(0, 'M'); // Type 0 (auto), correction niveau M
+                        qr.addData(data.provisioning_uri);
+                        qr.make();
+                        
+                        // Créer l'élément image du QR code
+                        const qrCodeHTML = qr.createImgTag(6, 10); // Taille 6, marge 10
+                        qrCodeDiv.innerHTML = `
+                            <div style="text-align: center; padding: 20px; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                <h4 style="color: #007bff; margin-bottom: 15px;">📱 Scannez ce QR code</h4>
+                                ${qrCodeHTML}
+                                <p style="margin-top: 15px; color: #666; font-size: 0.9em;">Utilisez votre application d'authentification pour scanner</p>
+                            </div>
+                        `;
+                        return; // Sortir si le QR code a été généré avec succès
+                    } catch (qrError) {
+                        console.warn('Erreur avec qrcode-generator, utilisation du fallback:', qrError);
+                    }
+                } else if (typeof QRCode !== 'undefined' && QRCode.toCanvas) {
+                    // Fallback 1: QRCode.js (si disponible)
+                    qrCodeDiv.innerHTML = '<canvas id="qrcode-canvas" style="display: block; margin: 0 auto; border-radius: 8px; background: white; padding: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></canvas>';
+                    
+                    try {
+                        await new Promise((resolve, reject) => {
+                            QRCode.toCanvas(document.getElementById('qrcode-canvas'), data.provisioning_uri, {
+                                width: 250,
+                                height: 250,
+                                margin: 2,
+                                color: {
+                                    dark: '#000000',
+                                    light: '#ffffff'
+                                }
+                            }, function (error) {
+                                if (error) {
+                                    reject(error);
+                                } else {
+                                    resolve();
+                                }
+                            });
+                        });
+                        return; // Sortir si le QR code a été généré avec succès
+                    } catch (qrError) {
+                        console.warn('Erreur avec QRCode.js, utilisation du fallback API');
+                    }
+                }
+                
+                // Si aucune bibliothèque locale ne fonctionne, utiliser le fallback API
+                throw new Error('Bibliothèques QR locales non disponibles');
+                
+            } catch (error) {
+                // Fallback amélioré avec l'URI de configuration et un lien Google Charts
+                const uri = error.response ? error.response.provisioning_uri : (error.data ? error.data.provisioning_uri : '');
+                
+                // Récupérer l'URI depuis la réponse si disponible
+                let fallbackUri = '';
+                try {
+                    const response = await fetch(`${API_BASE_URL}/mfa/setup`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ user: localStorage.getItem('currentUser') })
+                    });
+                    const data = await response.json();
+                    if (response.ok) {
+                        fallbackUri = data.provisioning_uri;
+                    }
+                } catch (e) {
+                    // Erreur silencieuse pour éviter l'encombrement des logs
+                }
+
+                qrCodeDiv.innerHTML = `
+                    <div style="text-align: center; padding: 20px; background: #f8f9fa; border-radius: 12px; border: 2px dashed #007bff;">
+                        <h4 style="color: #007bff; margin-bottom: 15px;">📱 QR Code pour l'authentification</h4>
+                        
+                        ${fallbackUri ? `
+                            <!-- QR Code via API externe (fallback principal) -->
+                            <div style="margin: 20px 0;">
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(fallbackUri)}" 
+                                     alt="QR Code MFA" 
+                                     style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); background: white; padding: 10px;"
+                                     onerror="this.style.display='none'; document.getElementById('manual-config').style.display='block';"
+                                     onload="console.log('QR Code externe chargé avec succès')">
+                            </div>
+                            
+                            <!-- Configuration manuelle (fallback final) -->
+                            <div id="manual-config" style="display: none;">
+                                <div style="margin: 20px 0; padding: 20px; background: white; border-radius: 8px; border: 2px solid #28a745;">
+                                    <h5 style="color: #28a745; margin-bottom: 10px;">🔑 Configuration manuelle</h5>
+                                    <p><strong>Clé secrète :</strong></p>
+                                    <p style="font-family: monospace; font-size: 1.1em; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 2px solid #007bff; word-break: break-all; color: #007bff; font-weight: bold; cursor: pointer;" 
+                                       onclick="navigator.clipboard.writeText('${fallbackUri.match(/secret=([A-Z0-9]+)/)?.[1] || ''}').then(() => alert('Clé copiée dans le presse-papiers !'))">
+                                       ${fallbackUri.match(/secret=([A-Z0-9]+)/)?.[1] || 'Clé non disponible'}
+                                    </p>
+                                    <p style="margin-top: 15px; font-size: 0.9em; color: #666;">📋 Cliquez sur la clé pour la copier</p>
+                                </div>
+                            </div>
+                        ` : `
+                            <!-- Si aucune URI n'est disponible -->
+                            <div style="padding: 20px; background: rgba(255, 193, 7, 0.1); border-radius: 8px; border: 2px solid #ffc107;">
+                                <p style="color: #856404;"><strong>⚠️ Erreur de configuration</strong></p>
+                                <p>Impossible de générer le QR code. Veuillez contacter l'administrateur.</p>
+                            </div>
+                        `}
+                        
+                        <div style="margin-top: 20px; padding: 15px; background: rgba(59, 130, 246, 0.1); border-radius: 8px;">
+                            <p style="color: #1e40af;"><strong>📝 Instructions :</strong></p>
+                            <ol style="text-align: left; margin: 10px 0; padding-left: 20px; color: #374151;">
+                                <li>Ouvrez votre application d'authentification</li>
+                                <li>Choisissez "Ajouter un compte" ou "Scanner un QR code"</li>
+                                <li>Scannez le QR code ci-dessus ou utilisez la clé manuelle</li>
+                                <li>Le nom du compte sera : <strong style="color: #007bff;">ProjetAnnuelESGI</strong></li>
+                            </ol>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        async function setupMfa() {
+            const verifyCode = document.getElementById('mfa-verify-code').value;
+            const currentUser = localStorage.getItem('currentUser');
+            const button = event.target;
+
+            if (!verifyCode || verifyCode.length !== 6) {
+                showToast('Veuillez entrer un code à 6 chiffres.', 'error');
+                return;
+            }
+
+            if (!currentUser) {
+                showView('auth-choice');
+                return;
+            }
+
+            button.classList.add('loading');
+            button.disabled = true;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/mfa/verify`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        user: currentUser,
+                        otp_code: verifyCode
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Code de vérification invalide');
+                }
+
+                showToast('🛡️ Authentification à deux facteurs activée avec succès !', 'success');
+                document.getElementById('mfa-verify-code').value = '';
+                
+                // Rafraîchir l'affichage des paramètres MFA
+                setTimeout(() => {
+                    showMfaSettings();
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Erreur lors de l\'activation MFA:', error);
+                showToast(error.message, 'error');
+            } finally {
+                button.classList.remove('loading');
+                button.disabled = false;
+            }
+        }
+
+        async function verifyMfaLogin() {
+            const otpCode = document.getElementById('mfa-login-code').value;
+            const button = event.target;
+
+            if (!otpCode || otpCode.length !== 6) {
+                showToast('Veuillez entrer un code à 6 chiffres.', 'error');
+                return;
+            }
+
+            if (!currentUsername) {
+                showView('auth-choice');
+                return;
+            }
+
+            button.classList.add('loading');
+            button.disabled = true;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/login/otp`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        username: currentUsername,
+                        otp_code: otpCode
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Code de vérification invalide');
+                }
+
+                // Connexion réussie avec MFA
+                showToast('🛡️ Connexion sécurisée réussie !', 'success');
+                
+                // Créer le token utilisateur (similaire à la connexion normale)
+                const decodedUser = atob(localStorage.getItem('tempLoginData') || '');
+                const [username, password] = decodedUser.split(':');
+                const userToken = btoa(`${username}:${password}`);
+                
+                localStorage.setItem('currentUser', userToken);
+                localStorage.removeItem('tempLoginData');
+                
+                showView('app');
+                loadPasswords();
+                
+            } catch (error) {
+                console.error('Erreur lors de la vérification MFA:', error);
+                showToast(error.message, 'error');
+            } finally {
+                button.classList.remove('loading');
+                button.disabled = false;
+            }
+        }
+
+        async function disableMfa() {
+            const otpCode = document.getElementById('mfa-disable-code').value;
+            const currentUser = localStorage.getItem('currentUser');
+            const button = event.target;
+
+            if (!otpCode || otpCode.length !== 6) {
+                showToast('Veuillez entrer un code à 6 chiffres.', 'error');
+                return;
+            }
+
+            if (!currentUser) {
+                showView('auth-choice');
+                return;
+            }
+
+            if (!confirm('Êtes-vous sûr de vouloir désactiver l\'authentification à deux facteurs ? Cette action réduira la sécurité de votre compte.')) {
+                return;
+            }
+
+            button.classList.add('loading');
+            button.disabled = true;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/mfa/disable`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        user: currentUser,
+                        otp_code: otpCode
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Code de vérification invalide');
+                }
+
+                showToast('🔓 Authentification à deux facteurs désactivée', 'success');
+                document.getElementById('mfa-disable-code').value = '';
+                
+                // Rafraîchir l'affichage des paramètres MFA
+                setTimeout(() => {
+                    showMfaSettings();
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Erreur lors de la désactivation MFA:', error);
+                showToast(error.message, 'error');
+            } finally {
+                button.classList.remove('loading');
+                button.disabled = false;
+            }
+        }
+
+        // ===================================================================
+        // GESTION DES MOTS DE PASSE
+        // ===================================================================
+        async function loadPasswords() {
+            const currentUser = localStorage.getItem('currentUser');
+            if (!currentUser) {
+                showView('auth-choice');
+                return;
+            }
+            
+            const listDiv = document.getElementById('password-list');
+            listDiv.innerHTML = 'Chargement des mots de passe...';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/list?user=${currentUser}`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Erreur lors du chargement');
+                }
+                
+                renderPasswords(data.passwords || []);
+                
+            } catch (error) {
+                listDiv.innerHTML = `<p style="color: var(--error-color);">${error.message}</p>`;
+            }
+        }
+
+        function renderPasswords(passwords) {
+            const listDiv = document.getElementById('password-list');
+            if (passwords.length === 0) {
+                listDiv.innerHTML = '<p style="text-align:center; color: var(--text-secondary);">Aucun mot de passe enregistré.</p>';
+                return;
+            }
+            const table = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Site</th>
+                            <th>Identifiant</th>
+                            <th>Mot de passe</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${passwords.map((p, index) => `
+                            <tr data-site="${p.site}" data-account="${p.account}">
+                                <td>${p.site}</td>
+                                <td>${p.account}</td>
+                                <td id="password-cell-${index}">••••••••</td>
+                                <td>
+                                    <button class="table-action-btn btn-secondary" onclick="revealPassword(${index}, '${p.password}')">👁️ Révéler</button>
+                                    <button class="table-action-btn btn-danger" onclick="deletePassword('${p.site}', '${p.account}')">🗑️ Supprimer</button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>`;
+            listDiv.innerHTML = table;
+        }
+
+        async function addPassword() {
+            const currentUser = localStorage.getItem('currentUser');
+            if (!currentUser) {
+                showView('auth-choice');
+                return;
+            }
+            
+            const account_username = document.getElementById('account-username').value;
+            const site_link = document.getElementById('site-link').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('add-error');
+
+            if (!account_username || !site_link || !password) {
+                errorDiv.textContent = 'Veuillez remplir tous les champs.';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            errorDiv.style.display = 'none';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/add`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        user: currentUser,
+                        site: site_link,
+                        account: account_username,
+                        password: password
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Erreur lors de l\'ajout');
+                }
+                
+                showToast('Mot de passe ajouté avec succès!', 'success');
+                loadPasswords();
+                // Vider les champs
+                document.getElementById('account-username').value = '';
+                document.getElementById('site-link').value = '';
+                document.getElementById('password').value = '';
+                
+            } catch (error) {
+                errorDiv.textContent = error.message;
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        async function deletePassword(site, account) {
+            if (!confirm('Êtes-vous sûr de vouloir supprimer ce mot de passe ?')) return;
+            
+            const currentUser = localStorage.getItem('currentUser');
+            if (!currentUser) {
+                showView('auth-choice');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/delete`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        user: currentUser,
+                        site: site,
+                        account: account
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Erreur lors de la suppression');
+                }
+                
+                showToast('Mot de passe supprimé.', 'success');
+                loadPasswords();
+                
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        }
+        
+        async function deleteAllPasswords() {
+            if (!confirm('ATTENTION : Êtes-vous sûr de vouloir supprimer TOUS vos mots de passe ? Cette action est irréversible.')) return;
+            
+            const currentUser = localStorage.getItem('currentUser');
+            if (!currentUser) {
+                showView('auth-choice');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/delete_all`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user: currentUser })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Erreur lors de la suppression');
+                }
+                
+                showToast('Tous les mots de passe ont été supprimés.', 'success');
+                loadPasswords();
+                
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        }
+
+        function revealPassword(index, password) {
+            const cell = document.getElementById(`password-cell-${index}`);
+            const isRevealed = cell.textContent !== '••••••••';
+            
+            if (isRevealed) {
+                // Masquer le mot de passe
+                cell.textContent = '••••••••';
+            } else {
+                // Révéler le mot de passe
+                cell.textContent = password;
+                // Masquer automatiquement après 10 secondes
+                setTimeout(() => {
+                    cell.textContent = '••••••••';
+                }, 10000);
+            }
+        }
+
+        function generatePassword() {
+            const length = 16;
+            const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~`|}{[]:;?><,./-=";
+            let retVal = "";
+            // Ajoute au moins un de chaque type de caractère pour la robustesse
+            retVal += "abcdefghijklmnopqrstuvwxyz"[Math.floor(Math.random() * 26)];
+            retVal += "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[Math.floor(Math.random() * 26)];
+            retVal += "0123456789"[Math.floor(Math.random() * 10)];
+            retVal += "!@#$%^&*()"[Math.floor(Math.random() * 10)];
+            for (let i = 4; i < length; i++) {
+                retVal += charset.charAt(Math.floor(Math.random() * charset.length));
+            }
+            // Mélange le mot de passe pour que les premiers caractères ne soient pas prévisibles
+            document.getElementById('password').value = retVal.split('').sort(() => 0.5 - Math.random()).join('');
+            showToast('Mot de passe généré et copié dans le champ!', 'success');
+        }
+
+        // ===================================================================
+        // FONCTIONS D'AIDE À L'INTERFACE (Suggestions, Hints)
+        // ===================================================================
+        function updatePasswordHint() {
+            const password = document.getElementById('new-master-password').value;
+            const hint = document.getElementById('password-hint');
+            if (password.length === 0) {
+                hint.style.display = 'none';
+                return;
+            }
+            hint.style.display = 'block';
+            const checks = {
+                'Au moins 8 caractères': password.length >= 8,
+                'Une lettre majuscule': /[A-Z]/.test(password),
+                'Une lettre minuscule': /[a-z]/.test(password),
+                'Un chiffre': /[0-9]/.test(password),
+                'Un caractère spécial': /[^A-Za-z0-9]/.test(password)
+            };
+            let html = '<ul>';
+            for (const [text, passed] of Object.entries(checks)) {
+                html += `<li style="color: ${passed ? 'var(--success-color)' : 'var(--error-color)'};">${passed ? '✔' : '✖'} ${text}</li>`;
+            }
+            html += '</ul>';
+            hint.innerHTML = html;
+        }
+
         function showSiteSuggestions() {
-            const input = document.getElementById("site-link");
-            const listDiv = document.getElementById("site-link-list");
-            const value = input.value.trim().toLowerCase();
+            const input = document.getElementById('site-link');
+            const list = document.getElementById('site-link-list');
+            const value = input.value.toLowerCase();
             if (!value) {
-                listDiv.style.display = "none";
-                listDiv.innerHTML = "";
+                list.style.display = 'none';
                 return;
             }
-            // Suggestions à  partir des sites populaires + ceux déjà  enregistrés
-            const allSites = Array.from(new Set([
-                ...popularSites,
-                ...currentPasswords.map(item => item.site)
-            ]));
-            const filtered = allSites.filter(site => site.toLowerCase().includes(value));
+            const filtered = siteSuggestions.filter(s => s.includes(value));
             if (filtered.length === 0) {
-                listDiv.style.display = "none";
-                listDiv.innerHTML = "";
+                list.style.display = 'none';
                 return;
             }
-            listDiv.innerHTML = filtered.map(site =>
-                `<div onclick="selectSiteSuggestion('${site.replace(/'/g, "\\'")}')">${site}</div>`
-            ).join("");
-            listDiv.style.display = "block";
+            list.innerHTML = filtered.map(s => `<div onclick="selectSiteSuggestion('${s}')">${s}</div>`).join('');
+            list.style.display = 'block';
         }
 
         function selectSiteSuggestion(site) {
-            document.getElementById("site-link").value = site;
-            document.getElementById("site-link-list").style.display = "none";
+            document.getElementById('site-link').value = `https://${site}`;
+            document.getElementById('site-link-list').style.display = 'none';
         }
 
         function hideSiteSuggestionsWithDelay() {
+            // Léger délai pour permettre au clic de s'enregistrer
             setTimeout(() => {
-                document.getElementById("site-link-list").style.display = "none";
-            }, 150);
+                const list = document.getElementById('site-link-list');
+                if (list) list.style.display = 'none';
+            }, 200);
         }
 
-        // ========== FONCTIONS MFA/2FA ==========
-
-        // Affiche l'interface de gestion MFA
-        function showMfaSettings() {
-            showOnly("mfa-settings");
-            loadMfaStatus();
-        }
-
-        // Retourne au gestionnaire principal
-        function backToMainApp() {
-            showOnly("app");
-        }
-
-        // Charge le statut MFA de l'utilisateur
-        function loadMfaStatus() {
-            const user = localStorage.getItem("currentUser");
-            const statusDiv = document.getElementById("mfa-status");
-            const setupDiv = document.getElementById("mfa-setup");
-            const activeDiv = document.getElementById("mfa-active");
-
-            // Essayer de faire un setup MFA pour détecter si déjà  activé
-            fetch("/api/mfa/setup", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ user })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.detail && data.detail.includes("déjà  activé")) {
-                    // MFA déjà  activée
-                    statusDiv.innerHTML = `
-                        <div style="padding: 20px; border-radius: 12px; background: rgba(34, 197, 94, 0.1); border-left: 4px solid var(--success-color);">
-                            <p><strong>✅ Authentification à  deux facteurs activée</strong></p>
-                            <p>Votre compte est protégé par la 2FA.</p>
-                        </div>
-                    `;
-                    setupDiv.style.display = "none";
-                    activeDiv.style.display = "block";
-                } else if (data.provisioning_uri) {
-                    // MFA pas encore activée, on peut la configurer
-                    statusDiv.innerHTML = `
-                        <div style="padding: 20px; border-radius: 12px; background: rgba(245, 101, 101, 0.1); border-left: 4px solid var(--error-color);">
-                            <p><strong>⚠️ Authentification à  deux facteurs désactivée</strong></p>
-                            <p>Votre compte n'est protégé que par votre mot de passe. Activez la 2FA pour plus de sécurité.</p>
-                        </div>
-                    `;
-                    setupDiv.style.display = "block";
-                    activeDiv.style.display = "none";
-                    generateMfaSetupFromData(data);
-                } else {
-                    // Erreur inconnue
-                    statusDiv.innerHTML = `
-                        <div style="padding: 20px; border-radius: 12px; background: rgba(245, 101, 101, 0.1); border-left: 4px solid var(--error-color);">
-                            <p><strong>âŒ Erreur lors de la vérification du statut MFA</strong></p>
-                            <p>Réponse inattendue du serveur : ${JSON.stringify(data)}</p>
-                        </div>
-                    `;
-                }
-            })
-            .catch(err => {
-                console.error("Erreur statut MFA:", err);
-                statusDiv.innerHTML = `
-                    <div style="padding: 20px; border-radius: 12px; background: rgba(245, 101, 101, 0.1); border-left: 4px solid var(--error-color);">
-                        <p><strong>âŒ Erreur lors de la vérification du statut MFA</strong></p>
-                        <p>Erreur réseau : ${err.message}</p>
-                    </div>
-                `;
-            });
-        }
-
-        // Génère la configuration MFA à  partir des données reçues
-        function generateMfaSetupFromData(data) {
-            if (data.provisioning_uri) {
-                mfaSetupData = data;
-                // Générer l'URL du QR code en utilisant un service en ligne
-                const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(data.provisioning_uri)}`;
-                document.getElementById("qr-code").innerHTML = `
-                    <img src="${qrCodeUrl}" alt="QR Code MFA" style="max-width: 200px; border: 2px solid #ddd; border-radius: 8px;">
-                    <p style="margin-top: 15px; font-size: 0.9em; color: var(--text-secondary);">
-                        <strong>Configuration manuelle :</strong><br>
-                        Nom de l'app : ProjetAnnuelESGI<br>
-                        Utilisateur : ${atob(localStorage.getItem("currentUser")).split(':')[0]}
-                    </p>
-                `;
+        // ===================================================================
+        // FONCTIONS DE GESTION D'ÉVÉNEMENTS
+        // ===================================================================
+        function toggleNewPassword() {
+            const input = document.getElementById('new-master-password');
+            const toggle = input.nextElementSibling;
+            if (input.type === 'password') {
+                input.type = 'text';
+                toggle.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                    <path d="M12 6c3.79 0 7.17 2.13 8.82 5.5C19.17 14.87 15.79 17 12 17s-7.17-2.13-8.82-5.5C4.83 8.13 8.21 6 12 6m0-2C7 4 2.73 7.11 1 11.5 2.73 15.89 7 19 12 19s9.27-3.11 11-7.5C21.27 7.11 17 4 12 4zm0 5c1.38 0 2.5 1.12 2.5 2.5S13.38 14 12 14s-2.5-1.12-2.5-2.5S10.62 9 12 9m0-2c-2.48 0-4.5 2.02-4.5 4.5S9.52 16 12 16s4.5-2.02 4.5-4.5S14.48 7 12 7z"/>
+                </svg>`;
+            } else {
+                input.type = 'password';
+                toggle.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                    <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                </svg>`;
             }
         }
-
-        // Génère la configuration MFA (QR code) - version simplifiée
-        function generateMfaSetup() {
-            // Cette fonction est appelée depuis loadMfaStatus maintenant
-            // Ne fait rien car le setup est déjà  fait
-        }
-
-        // Active la MFA avec le code de vérification
-        function setupMfa() {
-            const code = document.getElementById("mfa-verify-code").value.trim();
-            
-            if (!code || code.length !== 6) {
-                alert("Veuillez entrer un code à  6 chiffres");
-                return;
+        
+        function toggleLoginPassword() {
+            const input = document.getElementById('master-password');
+            const toggle = input.nextElementSibling;
+            if (input.type === 'password') {
+                input.type = 'text';
+                toggle.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                    <path d="M12 6c3.79 0 7.17 2.13 8.82 5.5C19.17 14.87 15.79 17 12 17s-7.17-2.13-8.82-5.5C4.83 8.13 8.21 6 12 6m0-2C7 4 2.73 7.11 1 11.5 2.73 15.89 7 19 12 19s9.27-3.11 11-7.5C21.27 7.11 17 4 12 4zm0 5c1.38 0 2.5 1.12 2.5 2.5S13.38 14 12 14s-2.5-1.12-2.5-2.5S10.62 9 12 9m0-2c-2.48 0-4.5 2.02-4.5 4.5S9.52 16 12 16s4.5-2.02 4.5-4.5S14.48 7 12 7z"/>
+                </svg>`;
+            } else {
+                input.type = 'password';
+                toggle.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                    <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                </svg>`;
             }
-
-            const user = localStorage.getItem("currentUser");
-
-            fetch("/api/mfa/verify", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ user, otp_code: code })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.message && data.message.includes("succès")) {
-                    alert("✅ Authentification à  deux facteurs activée avec succès !");
-                    document.getElementById("mfa-verify-code").value = "";
-                    loadMfaStatus(); // Recharger le statut
-                } else {
-                    alert("âŒ Code de vérification incorrect. Veuillez réessayer.");
-                }
-            })
-            .catch(err => {
-                console.error("Erreur vérification MFA:", err);
-                alert("Erreur lors de l'activation MFA : " + err.message);
-            });
         }
-
-        // Vérifie le code MFA lors de la connexion
-        function verifyMfaLogin() {
-            const code = document.getElementById("mfa-login-code").value.trim();
-            
-            if (!code || code.length !== 6) {
-                alert("Veuillez entrer un code à  6 chiffres");
-                return;
+        
+        function toggleMainPassword() {
+            const input = document.getElementById('password');
+            const toggle = input.nextElementSibling;
+            if (input.type === 'password') {
+                input.type = 'text';
+                toggle.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                    <path d="M12 6c3.79 0 7.17 2.13 8.82 5.5C19.17 14.87 15.79 17 12 17s-7.17-2.13-8.82-5.5C4.83 8.13 8.21 6 12 6m0-2C7 4 2.73 7.11 1 11.5 2.73 15.89 7 19 12 19s9.27-3.11 11-7.5C21.27 7.11 17 4 12 4zm0 5c1.38 0 2.5 1.12 2.5 2.5S13.38 14 12 14s-2.5-1.12-2.5-2.5S10.62 9 12 9m0-2c-2.48 0-4.5 2.02-4.5 4.5S9.52 16 12 16s4.5-2.02 4.5-4.5S14.48 7 12 7z"/>
+                </svg>`;
+            } else {
+                input.type = 'password';
+                toggle.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                    <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                </svg>`;
             }
-
-            if (!pendingUsername) {
-                alert("Erreur de session. Veuillez vous reconnecter.");
-                showOnly("auth-container");
-                return;
-            }
-
-            fetch("/api/login/otp", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ 
-                    username: pendingUsername, 
-                    otp_code: code 
-                })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.message && data.message.includes("réussie")) {
-                    // Code correct, connexion réussie
-                    localStorage.setItem("currentUser", btoa(pendingUsername + ":" + pendingPassword));
-                    
-                    // Réinitialiser les variables temporaires
-                    pendingUsername = null;
-                    pendingPassword = null;
-                    document.getElementById("mfa-login-code").value = "";
-                    
-                    // Aller au gestionnaire principal
-                    showOnly("app");
-                    displayPasswords();
-                } else {
-                    alert("âŒ Code de vérification incorrect. Veuillez réessayer.");
-                    document.getElementById("mfa-login-code").focus();
-                }
-            })
-            .catch(err => {
-                console.error("Erreur vérification MFA login:", err);
-                alert("Erreur lors de la vérification : " + err.message);
-            });
-        }
-
-        // Annule la connexion MFA
-        function cancelMfaLogin() {
-            pendingUsername = null;
-            pendingPassword = null;
-            document.getElementById("mfa-login-code").value = "";
-            showOnly("auth-container");
         }
     </script>
 </body>

@@ -1,61 +1,62 @@
+2025# -*- coding: utf-8 -*-
 """
 API Backend - HoneyPot Pro Max
 ==============================
 
-Service API principal du gestionnaire de mots de passe sÃ©curisÃ©.
-ImplÃ©mente l'authentification MFA, le chiffrement des donnÃ©es et la gestion des mots de passe.
+Service API principal du gestionnaire de mots de passe sécurisée.
+Implémente l'authentification MFA, le chiffrement des données et la gestion des mots de passe.
 
-FonctionnalitÃ©s principales :
+Fonctionnalités principales :
 - Authentification utilisateur avec hashage bcrypt
-- Authentification Ã  double facteur (TOTP)
+- Authentification à  double facteur (TOTP)
 - Chiffrement des secrets MFA avec Fernet
-- Gestion sÃ©curisÃ©e des mots de passe utilisateurs
+- Gestion sécurisée des mots de passe utilisateurs
 - API RESTful pour l'interface frontend
 
-Auteur: Ã‰quipe ESGI 2024-2025
+Auteur: quipe ESGI 2024-2025
 """
 
 print("INFO: main.py is running")
 
 # =============================================================================
-# IMPORTS ET DÃ‰PENDANCES
+# IMPORTS ET DÉPENDANCES
 # =============================================================================
 from fastapi import FastAPI, HTTPException, Request              # Framework API moderne
-from pydantic import BaseModel                                   # Validation des donnÃ©es
+from pydantic import BaseModel                                   # Validation des données
 from sqlalchemy import create_engine                             # ORM pour PostgreSQL
-from sqlalchemy.orm import sessionmaker                          # Sessions de base de donnÃ©es
-from models import Base, User, Password                          # ModÃ¨les de donnÃ©es
+from sqlalchemy.orm import sessionmaker                          # Sessions de base de données
+from models import Base, User, Password                          # Modèles de données
 import os                                                        # Variables d'environnement
-import base64                                                    # Encodage des donnÃ©es
-from passlib.context import CryptContext                        # Hashage sÃ©curisÃ© des mots de passe
+import base64                                                    # Encodage des données
+from passlib.context import CryptContext                        # Hashage sécurisé des mots de passe
 from fastapi.middleware.cors import CORSMiddleware              # Gestion CORS pour le frontend
-import pyotp                                                     # GÃ©nÃ©ration/validation TOTP (MFA)
+import pyotp                                                     # Génération/validation TOTP (MFA)
 from typing import Optional                                      # Types optionnels
-from cryptography.fernet import Fernet                          # Chiffrement symÃ©trique des secrets MFA
+from cryptography.fernet import Fernet                          # Chiffrement symétrique des secrets MFA
 
 # =============================================================================
 # CONFIGURATION DU CHIFFREMENT MFA
 # =============================================================================
-# Gestion sÃ©curisÃ©e de la clÃ© de chiffrement pour les secrets MFA
-# PrioritÃ© : Docker secrets > fichiers locaux > variables d'environnement
+# Gestion sécurisée de la clé de chiffrement pour les secrets MFA
+# Priorité : Docker secrets > fichiers locaux > variables d'environnement
 
 def get_mfa_encryption_key():
     """
-    RÃ©cupÃ¨re la clÃ© de chiffrement MFA depuis diffÃ©rentes sources sÃ©curisÃ©es.
+    Récupère la clé de chiffrement MFA depuis différentes sources sécurisées.
     
-    Ordre de prioritÃ© :
+    Ordre de priorité :
     1. Docker secret (/run/secrets/mfa_encryption_key)
-    2. Fichier local pour dÃ©veloppement
+    2. Fichier local pour développement
     3. Variable d'environnement (fallback)
     
     Returns:
-        bytes: ClÃ© de chiffrement Fernet valide
+        bytes: Clé de chiffrement Fernet valide
         
     Raises:
-        Exception: Si aucune clÃ© n'est trouvÃ©e
+        Exception: Si aucune clé n'est trouvée
     """
     docker_secret_path = "/run/secrets/mfa_encryption_key"        # Production Docker
-    local_secret_path = "/app/secrets/mfa_encryption_key.txt"     # DÃ©veloppement local
+    local_secret_path = "/app/secrets/mfa_encryption_key.txt"     # Développement local
 
     if os.path.exists(docker_secret_path):
         print(f"Reading MFA encryption key from Docker secret: {docker_secret_path}")
@@ -119,26 +120,26 @@ except Exception as e:
     raise
 
 # =============================================================================
-# CONFIGURATION DE LA BASE DE DONNÃ‰ES
+# CONFIGURATION DE LA BASE DE DONNÉES
 # =============================================================================
-# Gestion sÃ©curisÃ©e du mot de passe de base de donnÃ©es PostgreSQL
+# Gestion sécurisée du mot de passe de base de données PostgreSQL
 
 def get_db_password():
     """
-    RÃ©cupÃ¨re le mot de passe de la base de donnÃ©es depuis des sources sÃ©curisÃ©es.
+    Récupère le mot de passe de la base de données depuis des sources sécurisées.
     
-    Ordre de prioritÃ© :
+    Ordre de priorité :
     1. Docker secret (/run/secrets/db_password) - Production
-    2. Fichier local pour dÃ©veloppement
+    2. Fichier local pour développement
     
     Returns:
-        str: Mot de passe de la base de donnÃ©es
+        str: Mot de passe de la base de données
         
     Raises:
-        Exception: Si aucun mot de passe n'est trouvÃ©
+        Exception: Si aucun mot de passe n'est trouvé
     """
     docker_secret_path = "/run/secrets/db_password"               # Chemin Docker secret (production)
-    local_secret_path = "/app/secrets/db_password.txt"            # Fichier local (dÃ©veloppement)
+    local_secret_path = "/app/secrets/db_password.txt"            # Fichier local (développement)
 
     if os.path.exists(docker_secret_path):
         print(f"Reading DB password from Docker secret: {docker_secret_path}")
@@ -150,10 +151,10 @@ def get_db_password():
         print(f"ERROR: DB password file not found at {docker_secret_path} or {local_secret_path}")
         raise Exception(f"DB password file not found. Searched in {docker_secret_path} and {local_secret_path}")
 
-# Configuration des paramÃ¨tres de connexion PostgreSQL
-DB_USER = os.getenv("DB_USER", "postgres")                       # Utilisateur PostgreSQL (dÃ©faut: postgres)
-DB_HOST = os.getenv("DB_HOST", "db")                             # HÃ´te PostgreSQL (service Docker: db)
-DB_PORT = os.getenv("DB_PORT", "5432")                           # Port PostgreSQL (dÃ©faut: 5432)
+# Configuration des paramètres de connexion PostgreSQL
+DB_USER = os.getenv("DB_USER", "postgres")                       # Utilisateur PostgreSQL (défaut: postgres)
+DB_HOST = os.getenv("DB_HOST", "db")                             # Hôte PostgreSQL (service Docker: db)
+DB_PORT = os.getenv("DB_PORT", "5432")                           # Port PostgreSQL (défaut: 5432)
 DB_NAME = os.getenv("DB_NAME", "postgres")
 
 try:
@@ -163,15 +164,15 @@ except Exception as e:
     print(f"Failed to get DB_PASSWORD: {e}")
     raise
 
-# Encoder le mot de passe pour l'URL (pour gÃ©rer les caractÃ¨res spÃ©ciaux)
+# Encoder le mot de passe pour l'URL (pour gérer les caractères spéciaux)
 import urllib.parse
 encoded_password = urllib.parse.quote_plus(DB_PASSWORD)
 
-# CrÃ©er une URL de connexion avec mot de passe encodÃ©
+# Créer une URL de connexion avec mot de passe encodé
 DATABASE_URL = f"postgresql+psycopg2://{DB_USER}:{encoded_password}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 print(f"Connecting to database with URL: postgresql+psycopg2://{DB_USER}:********@{DB_HOST}:{DB_PORT}/{DB_NAME}")
 
-# Test de connectivitÃ© direct avant SQLAlchemy
+# Test de connectivité direct avant SQLAlchemy
 def test_direct_connection():
     """Test de connexion directe avec psycopg2 pour validation"""
     try:
@@ -191,13 +192,13 @@ def test_direct_connection():
         print(f"PostgreSQL connection test failed: {e}")
         return False
 
-# Tester la connexion avant de crÃ©er l'engine SQLAlchemy
+# Tester la connexion avant de créer l'engine SQLAlchemy
 if test_direct_connection():
-    # CrÃ©er l'engine avec des paramÃ¨tres optimisÃ©s
+    # Créer l'engine avec des paramètres optimisés
     engine = create_engine(
         DATABASE_URL,
         echo=False,  # Mettre Ã  True pour debug SQL
-        pool_pre_ping=True,  # VÃ©rifier la connexion avant utilisation
+        pool_pre_ping=True,  # Vérifier la connexion avant utilisation
         pool_recycle=3600,    # Recycler les connexions toutes les heures
         pool_timeout=20,
         pool_size=10,
@@ -222,13 +223,13 @@ def test_direct_connection():
             connect_timeout=5
         )
         conn.close()
-        print("âœ… Connexion PostgreSQL directe rÃ©ussie")
+        print(" [OK] Connexion PostgreSQL directe réussie")
         return True
     except Exception as e:
-        print(f"âŒ Ã‰chec connexion PostgreSQL directe: {e}")
+        print(f" [FAIL] Échec connexion PostgreSQL directe: {e}")
         return False
 
-# CrÃ©er l'engine SQLAlchemy avec connexion validÃ©e
+# Créer l'engine SQLAlchemy avec connexion validée
 if test_direct_connection():
     engine = create_engine(
         DATABASE_URL,
@@ -239,9 +240,9 @@ if test_direct_connection():
         pool_size=10,
         max_overflow=20
     )
-    print("âœ… SQLAlchemy engine crÃ©Ã© avec mot de passe encodÃ©")
+    print("[OK] SQLAlchemy engine créé avec mot de passe encodé")
 else:
-    print("âš ï¸ CrÃ©ation de l'engine SQLAlchemy malgrÃ© l'Ã©chec du test direct")
+    print("[FAIL] Création de l'engine SQLAlchemy malgré l'échec du test direct")
     engine = create_engine(DATABASE_URL)
 
 Session = sessionmaker(bind=engine)
@@ -300,7 +301,7 @@ def decrypt_stored_password(encrypted_password: str) -> str:
         raise
 
 try:
-    # Tentative de crÃ©ation des tables avec SQLAlchemy
+    # Tentative de création des tables avec SQLAlchemy
     import time
     max_retries = 3
     tables_created = False
@@ -317,7 +318,7 @@ try:
             if attempt < max_retries - 1:
                 time.sleep(1)
     
-    # Si SQLAlchemy a Ã©chouÃ©, essayer avec psycopg2 direct
+    # Si SQLAlchemy a échoué, essayer avec psycopg2 direct
     if not tables_created:
         print("Fallback: Creating tables with psycopg2 direct connection...")
         try:
@@ -333,7 +334,7 @@ try:
             
             cursor = conn.cursor()
             
-            # CrÃ©er la table users
+            # Créer la table users
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS users (
                     id SERIAL PRIMARY KEY,
@@ -344,7 +345,7 @@ try:
                 )
             """)
             
-            # CrÃ©er la table passwords
+            # Créer la table passwords
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS passwords (
                     id SERIAL PRIMARY KEY,
@@ -356,7 +357,7 @@ try:
                 )
             """)
             
-            # CrÃ©er les index
+            # Créer les index
             cursor.execute('CREATE INDEX IF NOT EXISTS ix_users_id ON users (id)')
             cursor.execute('CREATE INDEX IF NOT EXISTS ix_users_username ON users (username)')
             cursor.execute('CREATE INDEX IF NOT EXISTS ix_passwords_id ON passwords (id)')
@@ -440,7 +441,7 @@ def register_user(entry: UserEntry):
     try:
         existing_user = db.query(User).filter_by(username=entry.username).first()
         if existing_user:
-            raise HTTPException(status_code=400, detail="Utilisateur dÃ©jÃ  existant")
+            raise HTTPException(status_code=400, detail="Utilisateur déjà existant")
         
         hashed_password = get_password_hash(entry.password)
         user = User(username=entry.username, password=hashed_password)
@@ -448,12 +449,12 @@ def register_user(entry: UserEntry):
         db.add(user)
         db.commit()
         db.refresh(user)
-        return {"message": "Utilisateur crÃ©Ã© avec succÃ¨s", "user_id": user.id}
+        return {"message": "Utilisateur créé avec succès", "user_id": user.id}
     except HTTPException:
-        raise  # Re-lever les HTTPException pour qu'elles soient gÃ©rÃ©es par FastAPI
+        raise  # Re-lever les HTTPException pour qu'elles soient gérées par FastAPI
     except Exception as e:
         print(f"Database error in /register: {e}")
-        raise HTTPException(status_code=500, detail="Erreur de base de donnÃ©es. VÃ©rifiez que PostgreSQL est accessible.")
+        raise HTTPException(status_code=500, detail="Erreur de base de données. Vérifiez que PostgreSQL est accessible.")
     finally:
         db.close()
 
@@ -464,7 +465,7 @@ def login_user(entry: UserEntry):
         user_from_db = db.query(User).filter_by(username=entry.username).first()
 
         if not user_from_db:
-            raise HTTPException(status_code=404, detail="Utilisateur non trouvÃ©")
+            raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
 
         if not verify_password(entry.password, user_from_db.password):
             raise HTTPException(status_code=401, detail="Mot de passe incorrect")
@@ -479,16 +480,16 @@ def login_user(entry: UserEntry):
             user_b64_token_str = f"{entry.username}:{entry.password}"
             user_b64_token = base64.b64encode(user_b64_token_str.encode("utf-8")).decode("utf-8")
             return LoginResponse(
-                message="Connexion rÃ©ussie", 
+                message="Connexion réussie", 
                 mfa_required=False, 
                 username=user_from_db.username,
                 user_b64_token=user_b64_token
             )
     except HTTPException:
-        raise  # Re-lever les HTTPException pour qu'elles soient gÃ©rÃ©es par FastAPI
+        raise  # Re-lever les HTTPException pour qu'elles soient gérées par FastAPI
     except Exception as e:
         print(f"Database error in /login: {e}")
-        raise HTTPException(status_code=500, detail="Erreur de base de donnÃ©es. VÃ©rifiez que PostgreSQL est accessible.")
+        raise HTTPException(status_code=500, detail="Erreur de base de données. Vérifiez que PostgreSQL est accessible.")
     finally:
         db.close()
 
@@ -499,20 +500,20 @@ def login_otp_verify(request_data: MfaLoginOtpRequest):
         user = db.query(User).filter_by(username=request_data.username).first()
 
         if not user:
-            raise HTTPException(status_code=404, detail="Utilisateur non trouvÃ©")
+            raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
 
         if not user.mfa_enabled or not user.mfa_secret:
-            raise HTTPException(status_code=400, detail="MFA non activÃ© ou non configurÃ© pour cet utilisateur.")
+            raise HTTPException(status_code=400, detail="MFA non activé ou non configuré pour cet utilisateur.")
         
         try:
             decrypted_mfa_secret = FERNET_INSTANCE.decrypt(user.mfa_secret.encode()).decode()
         except Exception: # Inclut InvalidToken de Fernet
             # Potentiellement logguer l'erreur ici pour investiguer
-            raise HTTPException(status_code=500, detail="Erreur lors du dÃ©chiffrement du secret MFA.")
+            raise HTTPException(status_code=500, detail="Erreur lors du déchiffrement du secret MFA.")
 
         totp = pyotp.TOTP(decrypted_mfa_secret)
         if totp.verify(request_data.otp_code):
-            return {"message": "VÃ©rification OTP rÃ©ussie. Connexion autorisÃ©e."}
+            return {"message": "Vérification OTP réussie. Connexion autorisée."}
         else:
             raise HTTPException(status_code=401, detail="Code OTP invalide.")
     finally:
@@ -525,18 +526,18 @@ def add_password(entry: PasswordEntry):
         username_for_db = get_username_from_b64(entry.user)
         existing = db.query(Password).filter_by(user=username_for_db, site=entry.site, account=entry.account).first()
         if existing:
-            raise HTTPException(status_code=400, detail="Ce compte existe dÃ©jÃ  pour ce site.")
+            raise HTTPException(status_code=400, detail="Ce compte existe déjÃ  pour ce site.")
 
         pwd = Password(user=username_for_db, site=entry.site, account=entry.account, password=encrypt_stored_password(entry.password))
         db.add(pwd)
         db.commit()
         db.refresh(pwd)
-        return {"message": "Mot de passe ajoutÃ©", "id": pwd.id}
+        return {"message": "Mot de passe ajouté", "id": pwd.id}
     except HTTPException:
-        raise  # Re-lever les HTTPException pour qu'elles soient gÃ©rÃ©es par FastAPI
+        raise  # Re-lever les HTTPException pour qu'elles soient gérées par FastAPI
     except Exception as e:
         print(f"Database error in /add: {e}")
-        raise HTTPException(status_code=500, detail="Erreur de base de donnÃ©es. VÃ©rifiez que PostgreSQL est accessible.")
+        raise HTTPException(status_code=500, detail="Erreur de base de données. Vérifiez que PostgreSQL est accessible.")
     finally:
         db.close()
 
@@ -568,8 +569,8 @@ def delete_password(entry: DeleteEntry):
         if pwd:
             db.delete(pwd)
             db.commit()
-            return {"message": "Mot de passe supprimÃ©"}
-        raise HTTPException(status_code=404, detail="Mot de passe non trouvÃ©")
+            return {"message": "Mot de passe supprimé"}
+        raise HTTPException(status_code=404, detail="Mot de passe non trouvé")
     finally:
         db.close()
 
@@ -580,7 +581,7 @@ def delete_all_passwords(entry: DeleteAllEntry):
         username_for_db = get_username_from_b64(entry.user)
         deleted_count = db.query(Password).filter_by(user=username_for_db).delete()
         db.commit()
-        return {"message": f"{deleted_count} mot(s) de passe supprimÃ©(s)"}
+        return {"message": f"{deleted_count} mot(s) de passe supprimé(s)"}
     finally:
         db.close()
 
@@ -592,30 +593,30 @@ def mfa_setup(request_data: MfaSetupRequest):
         user = db.query(User).filter_by(username=username).first()
 
         if not user:
-            raise HTTPException(status_code=404, detail="Utilisateur non trouvÃ©")
+            raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
 
         if user.mfa_enabled:
-            raise HTTPException(status_code=400, detail="Le MFA est dÃ©jÃ  activÃ© pour cet utilisateur.")
+            raise HTTPException(status_code=400, detail="Le MFA est déjÃ  activé pour cet utilisateur.")
 
         plain_mfa_secret = pyotp.random_base32()
         encrypted_mfa_secret = FERNET_INSTANCE.encrypt(plain_mfa_secret.encode()).decode() # Chiffrer et stocker en string
 
-        user.mfa_secret = encrypted_mfa_secret # Stocker le secret chiffrÃ©
+        user.mfa_secret = encrypted_mfa_secret # Stocker le secret chiffré
         db.commit()
         db.refresh(user)
 
-        # L'URI de provisioning utilise le secret en clair, NON chiffrÃ©
+        # L'URI de provisioning utilise le secret en clair, NON chiffré
         totp = pyotp.TOTP(plain_mfa_secret) 
         provisioning_uri = totp.provisioning_uri(
             name=user.username, 
             issuer_name="ProjetAnnuelESGI" 
         )
-        return {"provisioning_uri": provisioning_uri, "message": "Scannez le QR code avec votre application MFA et vÃ©rifiez."}
+        return {"provisioning_uri": provisioning_uri, "message": "Scannez le QR code avec votre application MFA et vérifiez."}
     except HTTPException:
-        raise  # Re-lever les HTTPException pour qu'elles soient gÃ©rÃ©es par FastAPI
+        raise  # Re-lever les HTTPException pour qu'elles soient gérées par FastAPI
     except Exception as e:
         print(f"Database error in /mfa/setup: {e}")
-        raise HTTPException(status_code=500, detail="Erreur de base de donnÃ©es. VÃ©rifiez que PostgreSQL est accessible.")
+        raise HTTPException(status_code=500, detail="Erreur de base de données. Vérifiez que PostgreSQL est accessible.")
     finally:
         db.close()
 
@@ -627,16 +628,16 @@ def mfa_verify(request_data: MfaVerifyRequest):
         user = db.query(User).filter_by(username=username).first()
 
         if not user:
-            raise HTTPException(status_code=404, detail="Utilisateur non trouvÃ©")
+            raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
 
-        if not user.mfa_secret: # Le secret stockÃ© est chiffrÃ©
-            raise HTTPException(status_code=400, detail="MFA non initialisÃ© pour cet utilisateur. Veuillez d'abord utiliser /mfa/setup.")
+        if not user.mfa_secret: # Le secret stocké est chiffré
+            raise HTTPException(status_code=400, detail="MFA non initialisé pour cet utilisateur. Veuillez d'abord utiliser /mfa/setup.")
 
         try:
             decrypted_mfa_secret = FERNET_INSTANCE.decrypt(user.mfa_secret.encode()).decode()
         except Exception: # Inclut InvalidToken de Fernet
              # Potentiellement logguer l'erreur ici pour investiguer
-            raise HTTPException(status_code=500, detail="Erreur lors du dÃ©chiffrement du secret MFA pour la vÃ©rification.")
+            raise HTTPException(status_code=500, detail="Erreur lors du déchiffrement du secret MFA pour la vérification.")
 
         totp = pyotp.TOTP(decrypted_mfa_secret)
         if totp.verify(request_data.otp_code):
@@ -644,7 +645,7 @@ def mfa_verify(request_data: MfaVerifyRequest):
                 user.mfa_enabled = True
                 db.commit()
                 db.refresh(user)
-            return {"message": "Code OTP valide. MFA activÃ© avec succÃ¨s."}
+            return {"message": "Code OTP valide. MFA activé avec succès."}
         else:
             raise HTTPException(status_code=400, detail="Code OTP invalide.")
     finally:
@@ -657,9 +658,9 @@ def mfa_status(request_data: MfaStatusRequest):
         user = db.query(User).filter_by(username=request_data.username).first()
 
         if not user:
-            raise HTTPException(status_code=404, detail="Utilisateur non trouvÃ©")
+            raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
 
-        # VÃ©rifier le mot de passe
+        # Vérifier le mot de passe
         if not verify_password(request_data.password, user.password):
             raise HTTPException(status_code=401, detail="Mot de passe incorrect")
 
@@ -668,10 +669,10 @@ def mfa_status(request_data: MfaStatusRequest):
             "setup_date": user.created_at.isoformat() if user.mfa_enabled and hasattr(user, 'created_at') else None
         }
     except HTTPException:
-        raise  # Re-lever les HTTPException pour qu'elles soient gÃ©rÃ©es par FastAPI
+        raise  # Re-lever les HTTPException pour qu'elles soient gérées par FastAPI
     except Exception as e:
         print(f"Database error in /mfa/status: {e}")
-        raise HTTPException(status_code=500, detail="Erreur de base de donnÃ©es. VÃ©rifiez que PostgreSQL est accessible.")
+        raise HTTPException(status_code=500, detail="Erreur de base de données. Vérifiez que PostgreSQL est accessible.")
     finally:
         db.close()
 
@@ -683,15 +684,15 @@ def mfa_disable(request_data: MfaDisableRequest):
         user = db.query(User).filter_by(username=username).first()
 
         if not user:
-            raise HTTPException(status_code=404, detail="Utilisateur non trouvÃ©")
+            raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
 
         if not user.mfa_enabled or not user.mfa_secret:
-            raise HTTPException(status_code=400, detail="MFA non activÃ© pour cet utilisateur.")
+            raise HTTPException(status_code=400, detail="MFA non activé pour cet utilisateur.")
 
         try:
             decrypted_mfa_secret = FERNET_INSTANCE.decrypt(user.mfa_secret.encode()).decode()
         except Exception:
-            raise HTTPException(status_code=500, detail="Erreur lors du dÃ©chiffrement du secret MFA.")
+            raise HTTPException(status_code=500, detail="Erreur lors du déchiffrement du secret MFA.")
 
         totp = pyotp.TOTP(decrypted_mfa_secret)
         if totp.verify(request_data.otp_code):
@@ -699,7 +700,7 @@ def mfa_disable(request_data: MfaDisableRequest):
             user.mfa_secret = None
             db.commit()
             db.refresh(user)
-            return {"success": True, "message": "MFA dÃ©sactivÃ© avec succÃ¨s."}
+            return {"success": True, "message": "MFA désactivé avec succès."}
         else:
             raise HTTPException(status_code=400, detail="Code OTP invalide.")
     finally:
@@ -708,15 +709,15 @@ def mfa_disable(request_data: MfaDisableRequest):
 @app.middleware("http")
 async def db_session_middleware(request: Request, call_next):
     response = None
-    # Si vous dÃ©cidez de gÃ©rer les sessions via middleware, vous initialiseriez et fermeriez la session ici.
-    # Pour l'instant, les routes gÃ¨rent explicitement leurs sessions.
-    # Ce middleware peut Ãªtre utilisÃ© pour d'autres logiques transversales si besoin.
-    # Pour Ã©viter des conflits avec la gestion manuelle dans les routes, on le laisse simple.
+    # Si vous décidez de gérer les sessions via middleware, vous initialiseriez et fermeriez la session ici.
+    # Pour l'instant, les routes gèrent explicitement leurs sessions.
+    # Ce middleware peut Ãªtre utilisé pour d'autres logiques transversales si besoin.
+    # Pour éviter des conflits avec la gestion manuelle dans les routes, on le laisse simple.
     # request.state.db = Session() # Exemple si on voulait injecter
     try:
         response = await call_next(request)
     finally:
-        # if hasattr(request.state, "db"): # Exemple si on voulait fermer la session injectÃ©e
+        # if hasattr(request.state, "db"): # Exemple si on voulait fermer la session injectée
         #    request.state.db.close()
-        pass # Laisser les routes gÃ©rer leur session
+        pass # Laisser les routes gérer leur session
     return response

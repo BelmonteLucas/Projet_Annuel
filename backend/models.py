@@ -15,7 +15,7 @@ from sqlalchemy import create_engine, Column, Integer, String, UniqueConstraint,
 from sqlalchemy.ext.declarative import declarative_base
 
 # Chargement de la clÃ© Fernet
-with open("db_encryption_key.txt", "rb") as f:
+with open("/app/secrets/db_encryption_key.txt", "rb") as f:
     fernet = Fernet(f.read())
 
 Base = declarative_base()

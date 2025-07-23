@@ -10,49 +10,49 @@
 
 services:
   # ==========================================================================
-  # BASE DE DONNÃ‰ES - PostgreSQL
+  # BASE DE DONNÉES - PostgreSQL
   # ==========================================================================
-  # Service de base de donnÃ©es principal utilisant PostgreSQL 13
-  # Stocke les donnÃ©es de l'application avec authentification sÃ©curisÃ©e
+  # Service de base de données principal utilisant PostgreSQL 13
+  # Stocke les données de l'application avec authentification sécurisée
   db:
     image: postgres:13
     container_name: database_service
     environment:
-      POSTGRES_USER: postgres                              # Utilisateur par dÃ©faut
+      POSTGRES_USER: postgres                              # Utilisateur par défaut
       POSTGRES_PASSWORD_FILE: /run/secrets/db_password     # Mot de passe depuis un secret Docker
-      POSTGRES_DB: postgres                                # Base de donnÃ©es par dÃ©faut
+      POSTGRES_DB: postgres                                # Base de données par défaut
     ports:
-      - "5432:5432"                                        # Port PostgreSQL accessible depuis l'hÃ´te
+      - "5432:5432"                                        # Port PostgreSQL accessible depuis l'hôte
     volumes:
-      - pgdata:/var/lib/postgresql/data                    # Persistance des donnÃ©es DB
+      - pgdata:/var/lib/postgresql/data                    # Persistance des données DB
     secrets:
-      - db_password                                        # AccÃ¨s au secret du mot de passe
-    healthcheck:                                           # VÃ©rification de l'Ã©tat de santÃ©
+      - db_password                                        # Accès au secret du mot de passe
+    healthcheck:                                           # Vérification de l'état de santé
       test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
-      interval: 10s                                        # VÃ©rification toutes les 10s
-      timeout: 5s                                          # Timeout de 5s par vÃ©rification
-      retries: 5                                           # 5 tentatives avant Ã©chec
+      interval: 10s                                        # Vérification toutes les 10s
+      timeout: 5s                                          # Timeout de 5s par vérification
+      retries: 5                                           # 5 tentatives avant échec
     networks:
-      - backend_network                                    # Connexion au rÃ©seau backend
+      - backend_network                                    # Connexion au réseau backend
 
   # ==========================================================================
   # BACKEND API - Application Python
   # ==========================================================================
   # Service API backend construit depuis le dossier ./backend
-  # GÃ¨re la logique mÃ©tier et les interactions avec la base de donnÃ©es
+  # Gère la logique métier et les interactions avec la base de données
   backend:
     build: ./backend                                       # Construit l'image depuis le Dockerfile local
     container_name: backend_api_service
-    depends_on:                                            # Attend que la DB soit prÃªte
+    depends_on:                                            # Attend que la DB soit prête
       db:
         condition: service_healthy                         # Attend le healthcheck de la DB
     ports:
       - "8000:8000"                                        # API accessible sur le port 8000
     environment:                                           # Variables d'environnement pour la connexion DB
       DB_USER: postgres
-      DB_HOST: db                                          # Nom du service DB (rÃ©solution DNS interne)
+      DB_HOST: db                                          # Nom du service DB (résolution DNS interne)
       DB_PORT: 5432                                        # Port de connexion PostgreSQL
-      DB_NAME: postgres                                    # Nom de la base de donnÃ©es
+      DB_NAME: postgres                                    # Nom de la base de données
     secrets:
       - db_password                                        # Accès au mot de passe DB
       - mfa_encryption_key                                 # Clé de chiffrement pour l'authentification 2FA
@@ -64,76 +64,76 @@ services:
   # ==========================================================================
   # PGADMIN - Interface d'administration PostgreSQL
   # ==========================================================================
-  # Interface web pour administrer la base de donnÃ©es PostgreSQL
-  # Accessible via navigateur pour gÃ©rer les donnÃ©es et schÃ©mas
+  # Interface web pour administrer la base de données PostgreSQL
+  # Accessible via navigateur pour gérer les données et schémas
   pgadmin:
     image: dpage/pgadmin4                                  # Interface d'administration PostgreSQL
     container_name: pgadmin_service
     depends_on:
       db:
-        condition: service_healthy                         # Attend que la DB soit opÃ©rationnelle
+        condition: service_healthy                         # Attend que la DB soit opérationnelle
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com               # Email de connexion par dÃ©faut
-      PGADMIN_DEFAULT_PASSWORD: admin                      # Mot de passe de connexion par dÃ©faut
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com               # Email de connexion par défaut
+      PGADMIN_DEFAULT_PASSWORD: admin                      # Mot de passe de connexion par défaut
       PGADMIN_CONFIG_SERVER_MODE: 'False'                  # Mode standalone (non serveur)
     ports:
       - "5050:80"                                          # Interface web accessible sur le port 5050
     volumes:
-      - pgadmin-data:/var/lib/pgadmin                      # Persistance des donnÃ©es pgAdmin
-      - ./pgadmin-config/servers.json:/pgadmin4/servers.json              # Configuration serveurs prÃ©-dÃ©finis
-      - ./pgadmin-config/entrypoint-pgadmin.sh:/custom-entrypoint.sh      # Script de dÃ©marrage personnalisÃ©
+      - pgadmin-data:/var/lib/pgadmin                      # Persistance des données pgAdmin
+      - ./pgadmin-config/servers.json:/pgadmin4/servers.json              # Configuration serveurs pré-définis
+      - ./pgadmin-config/entrypoint-pgadmin.sh:/custom-entrypoint.sh      # Script de démarrage personnalisé
     secrets:
-      - db_password                                        # AccÃ¨s au mot de passe DB
-    entrypoint: ["/bin/sh", "/custom-entrypoint.sh"]       # Point d'entrÃ©e personnalisÃ©
+      - db_password                                        # Accès au mot de passe DB
+    entrypoint: ["/bin/sh", "/custom-entrypoint.sh"]       # Point d'entrée personnalisé
     networks:
-      - backend_network                                    # Connexion au rÃ©seau backend
+      - backend_network                                    # Connexion au réseau backend
 
   # ==========================================================================
   # FRONTEND WEB - Interface utilisateur
   # ==========================================================================
   # Serveur web NGINX servant l'interface utilisateur statique
-  # ConfigurÃ© avec HTTPS et certificats SSL
+  # Configuré avec HTTPS et certificats SSL
   frontend:
-    image: nginx:alpine                                    # Serveur web lÃ©ger basÃ© sur Alpine Linux
-    container_name: frontend_service                       # Nom de conteneur explicite et cohÃ©rent
-    depends_on:                                            # Attend que le backend soit prÃªt
-      - backend                                            # DÃ©pendance sur le service backend
+    image: nginx:alpine                                    # Serveur web léger basé sur Alpine Linux
+    container_name: frontend_service                       # Nom de conteneur explicite et cohérent
     ports:
-      - "9080:80"                                          # HTTP accessible sur le port 9080
-      - "9443:443"                                         # HTTPS accessible sur le port 9443
+      - "9080:80"
+      - "9443:443"
     volumes:
-      - ./frontend:/usr/share/nginx/html:ro                # Fichiers statiques du frontend (lecture seule)
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro    # Configuration NGINX personnalisÃ©e
-      - ./secrets/nginx.crt:/etc/ssl/certs/nginx.crt:ro   # Certificat SSL (depuis secrets/)
-      - ./secrets/nginx.key:/etc/ssl/private/nginx.key:ro # ClÃ© privÃ©e SSL (depuis secrets/)
+      - ./frontend:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./secrets/nginx.crt:/etc/ssl/certs/nginx.crt:ro
+      - ./secrets/nginx.key:/etc/ssl/private/nginx.key:ro
+    depends_on:                                            # Attend que le backend soit prêt
+      - backend                                            # Dépendance sur le service backend
     networks:
-      - backend_network                                    # Connexion au rÃ©seau backend pour le proxy API
+      - backend_network
 
   # ==========================================================================
   # SNORT IDS - Système de détection d'intrusion
   # ==========================================================================
   # Snort en mode IDS pour surveiller le trafic réseau
-  # DÃ©tecte les tentatives d'intrusion et activitÃ©s suspectes
+  # Détecte les tentatives d'intrusion et activités suspectes
   snort:
     build: ./snort                                         # Construction depuis le Dockerfile Snort local
     container_name: snort_service
     cap_add:
-      - NET_ADMIN                                          # PrivilÃ¨ges rÃ©seau pour capturer le trafic
-    # network_mode: host                                   # CommentÃ© car problÃ©matique sur Windows Docker Desktop
+      - NET_ADMIN                                          # Privilèges réseau pour capturer le trafic
+    # network_mode: host                                   # Commenté car problématique sur Windows Docker Desktop
     networks:
-      - backend_network                                    # Utilisation du rÃ©seau bridge pour Windows
+      - backend_network                                    # Utilisation du réseau bridge pour Windows
     ports:
       - "8080:8080"                                        # Port pour le monitoring Snort
-    command: ["monitor"]                                   # Mode monitoring pour tests et dÃ©veloppement
+    command: ["monitor"]                                   # Mode monitoring pour tests et développement
     volumes:
-      - ./snort/rules:/etc/snort/rules:ro                 # RÃ¨gles de dÃ©tection personnalisÃ©es
+      - ./snort/rules:/etc/snort/rules:ro                 # Règles de détection personnalisées
       - ./snort/snort.conf:/etc/snort/snort.conf:ro       # Configuration Snort
-      - snort_logs:/var/log/snort                         # Stockage des logs de dÃ©tection
+      - snort_logs:/var/log/snort                         # Stockage des logs de détection
 
   # ==========================================================================
-  # WAZUH HIDS - Surveillance d'intÃ©gritÃ© des fichiers
+  # WAZUH HIDS - Surveillance d'intégrité des fichiers
   # ==========================================================================
-  # Version simplifiÃ©e de Wazuh pour les tests de sÃ©curitÃ©
+  # Version simplifiée de Wazuh pour les tests de sécurité
   wazuh_manager:
     image: wazuh/wazuh-manager:4.7.5
     container_name: wazuh_service
@@ -148,7 +148,7 @@ services:
         hard: 655360
     ports:
       - "1515:1515"                                      # Communication des agents Wazuh
-      - "1514:1514/udp"                                  # RÃ©ception des logs syslog
+      - "1514:1514/udp"                                  # Réception des logs syslog
       - "55000:55000"                                    # API RESTful Wazuh
     environment:
       - WAZUH_MANAGER_SERVICE=wazuh-manager               # Service principal Wazuh
@@ -157,39 +157,39 @@ services:
       - INDEXER_URL=https://elasticsearch:9200             # URL d'Elasticsearch pour l'indexation
       - INDEXER_USERNAME=""                                # Authentification Elasticsearch (vide pour test)
       - INDEXER_PASSWORD=""                                # Mot de passe Elasticsearch (vide pour test)
-      - FILEBEAT_SSL_VERIFICATION_MODE=none                # DÃ©sactivation SSL pour dev/test
+      - FILEBEAT_SSL_VERIFICATION_MODE=none                # Désactivation SSL pour dev/test
     volumes:
-      - wazuh_data:/var/ossec/data                         # DonnÃ©es et configuration Wazuh
-      - wazuh_logs:/var/ossec/logs                         # Logs gÃ©nÃ©rÃ©s par Wazuh
+      - wazuh_data:/var/ossec/data                         # Données et configuration Wazuh
+      - wazuh_logs:/var/ossec/logs                         # Logs générés par Wazuh
       - ./backend:/host_files:ro                           # Surveillance des fichiers backend
     depends_on:
       elasticsearch:
-        condition: service_healthy                       # Attendre qu'Elasticsearch soit prÃªt
+        condition: service_healthy                       # Attendre qu'Elasticsearch soit prêt
     networks:
       - backend_network
 
   # ==========================================================================
   # ELASTICSEARCH - Moteur de recherche et d'analyse
   # ==========================================================================
-  # Base de donnÃ©es NoSQL pour indexation et recherche des logs
-  # CÅ“ur de la stack ELK pour l'analyse des donnÃ©es de sÃ©curitÃ©
+  # Base de données NoSQL pour indexation et recherche des logs
+  # Cœur de la stack ELK pour l'analyse des données de sécurité
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.9    # Version stable d'Elasticsearch
     container_name: elasticsearch_service
     environment:
-      - discovery.type=single-node                         # Configuration nÅ“ud unique (non-cluster)
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m                     # Allocation mÃ©moire JVM (512MB min/max)
+      - discovery.type=single-node                         # Configuration nœud unique (non-cluster)
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m                     # Allocation mémoire JVM (512MB min/max)
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data   # Persistance des index Elasticsearch
       - ./elk/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
     ports:
       - "9200:9200"                                        # API REST Elasticsearch
-      - "9300:9300"                                        # Port de communication inter-nÅ“uds
-    healthcheck:                                           # VÃ©rification de l'Ã©tat de santÃ© d'Elasticsearch
+      - "9300:9300"                                        # Port de communication inter-nœuds
+    healthcheck:                                           # Vérification de l'état de santé d'Elasticsearch
       test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=1s || exit 1"]
-      interval: 30s                                        # VÃ©rification toutes les 30s
-      timeout: 10s                                         # Timeout de 10s par vÃ©rification
-      retries: 5                                           # 5 tentatives avant Ã©chec
+      interval: 30s                                        # Vérification toutes les 30s
+      timeout: 10s                                         # Timeout de 10s par vérification
+      retries: 5                                           # 5 tentatives avant échec
     networks:
       - backend_network
 
@@ -197,28 +197,28 @@ services:
   # LOGSTASH - Collecteur et transformateur de logs
   # ==========================================================================
   # Pipeline de traitement des logs : collecte, transformation, envoi vers Elasticsearch
-  # Traite les logs de Snort et Wazuh pour analyse unifiÃ©e
+  # Traite les logs de Snort et Wazuh pour analyse unifiée
   logstash:
     image: docker.elastic.co/logstash/logstash:7.17.9     # Version compatible avec Elasticsearch
     container_name: logstash_service
     depends_on:
       elasticsearch:
-        condition: service_healthy                         # Attend qu'Elasticsearch soit prÃªt
+        condition: service_healthy                         # Attend qu'Elasticsearch soit prêt
     volumes:
       - ./elk/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro        # Config Logstash
       - ./elk/logstash/pipeline/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro  # Pipeline de traitement
-      - snort_logs:/var/log/snort:ro                       # AccÃ¨s aux logs Snort (lecture seule)
-      - wazuh_logs:/var/log/wazuh:ro                       # AccÃ¨s aux logs Wazuh (lecture seule)
+      - snort_logs:/var/log/snort:ro                       # Accès aux logs Snort (lecture seule)
+      - wazuh_logs:/var/log/wazuh:ro                       # Accès aux logs Wazuh (lecture seule)
     ports:
-      - "5044:5044"                                        # Port d'entrÃ©e pour les beats
+      - "5044:5044"                                        # Port d'entrée pour les beats
     networks:
       - backend_network
 
   # ==========================================================================
   # KIBANA - Interface de visualisation et analyse
   # ==========================================================================
-  # Dashboard web pour visualiser et analyser les donnÃ©es Elasticsearch
-  # Interface principale pour le monitoring de sÃ©curitÃ©
+  # Dashboard web pour visualiser et analyser les données Elasticsearch
+  # Interface principale pour le monitoring de sécurité
   kibana:
     image: docker.elastic.co/kibana/kibana:7.17.9         # Interface de visualisation compatible
     container_name: kibana_service
@@ -231,36 +231,33 @@ services:
       - "5601:5601"                                        # Interface web Kibana
     networks:
       - backend_network
-    # RetirÃ© l'isolation rÃ©seau pour permettre l'accÃ¨s externe Ã  Kibana
 
 # =============================================================================
-# VOLUMES DOCKER - Persistance des donnÃ©es
+# VOLUMES DOCKER - Persistance des données
 # =============================================================================
-# Volumes nommÃ©s pour garantir la persistance des donnÃ©es entre redÃ©marrages
+# Volumes nommés pour garantir la persistance des données entre redémarrages
 volumes:
-  pgdata:                                                  # DonnÃ©es PostgreSQL
-  pgadmin-data:                                            # Configuration et donnÃ©es pgAdmin
-  snort_logs:                                              # Logs du systÃ¨me de dÃ©tection Snort
-  wazuh_data:                                              # DonnÃ©es et configuration Wazuh
-  wazuh_logs:                                              # Logs Wazuh
-  elasticsearch_data:                                      # Index et donnÃ©es Elasticsearch
+  pgdata:
+  pgadmin-data:
+  snort_logs:
+  wazuh_data:
+  wazuh_logs:
+  elasticsearch_data:
 
 # =============================================================================
-# SECRETS DOCKER - Gestion sÃ©curisÃ©e des secrets
+# SECRETS DOCKER - Gestion sécurisée des secrets
 # =============================================================================
-# Secrets pour protÃ©ger les informations sensibles (mots de passe, clÃ©s)
+# Secrets pour protéger les informations sensibles (mots de passe, clés)
 secrets:
-  db_password:                                             # Mot de passe de la base de donnÃ©es
+  db_password:
     file: ./secrets/db_password.txt
-  mfa_encryption_key:                                      # ClÃ© de chiffrement pour l'authentification 2FA
+  mfa_encryption_key:
     file: ./secrets/mfa_encryption_key.txt
 
 # =============================================================================
-# RÃ‰SEAUX DOCKER - Isolation et sÃ©curitÃ© rÃ©seau
+# RÉSEAUX DOCKER - Isolation et sécurité réseau
 # =============================================================================
-# RÃ©seau backend pour les communications entre services
-# ModifiÃ© pour permettre l'accÃ¨s externe Ã  Kibana tout en gardant les autres services protÃ©gÃ©s
+# Réseau backend pour les communications entre services
 networks:
   backend_network:
-    # RetirÃ© internal: true pour permettre l'accÃ¨s Ã  Kibana depuis l'extÃ©rieur
 
