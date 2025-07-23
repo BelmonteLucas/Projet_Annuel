@@ -8,9 +8,15 @@ Définition des modèles de données pour l'application gestionnaire de mots de 
 
 Auteur: Équipe ESGI 2024-2025
 """
-
+import os
+import bcrypt
+from cryptography.fernet import Fernet
 from sqlalchemy import create_engine, Column, Integer, String, UniqueConstraint, Boolean
 from sqlalchemy.ext.declarative import declarative_base
+
+# Chargement de la clé Fernet
+with open("db_encryption_key.txt", "rb") as f:
+    fernet = Fernet(f.read())
 
 Base = declarative_base()
 
@@ -33,21 +39,34 @@ class User(Base):
 
 class Password(Base):
     """
-    Modèle de stockage des mots de passe
-    ===================================
-    
-    Stocke les mots de passe chiffrés des utilisateurs pour différents services.
-    Contrainte d'unicité sur (user, site, account) pour éviter les doublons.
+    Modèle Password chiffré
+    ========================
+    Stocke les mots de passe chiffrés à l'aide de Fernet.
     """
     __tablename__ = 'passwords'
 
-    id = Column(Integer, primary_key=True, index=True)                    # Identifiant unique auto-incrémenté
-    user = Column(String, index=True)                                     # Propriétaire du mot de passe (indexé)
-    site = Column(String)                                                 # Nom du service/site web
-    account = Column(String)                                              # Identifiant du compte sur le site
-    password = Column(String)                                             # Mot de passe chiffré
+    id = Column(Integer, primary_key=True, index=True)
+    user = Column(String, index=True)
+    site = Column(String)
+    account = Column(String)
+    _password = Column("password", String)  # champs réel en BDD
 
-    # Contrainte d'unicité pour éviter les doublons
     __table_args__ = (
         UniqueConstraint('user', 'site', 'account', name='uq_user_site_account'),
     )
+
+    @property
+    def password(self):
+        """
+        Retourne le mot de passe déchiffré
+        """
+        decrypted = fernet.decrypt(self._password.encode())
+        return decrypted.decode()
+
+    @password.setter
+    def password(self, plaintext):
+        """
+        Chiffre le mot de passe en Fernet avant de le stocker
+        """
+        encrypted = fernet.encrypt(plaintext.encode())
+        self._password = encrypted.decode()
