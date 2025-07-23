@@ -1,348 +1,231 @@
 #!/usr/bin/env python3
 """
-Setup Development Environment - HoneyPot Pro Max
-======================================================
+Setup Development Environment v2.0 - HoneyPot Pro Max
+====================================================
 
-Script d'initialisation automatique pour le projet ESGI.
-Cree les secrets, configure l'environnement et prepare le deploiement.
+Script principal d'installation avec architecture modulaire.
+Responsabilité unique : Orchestrer les différents modules.
 
 Usage:
-    python setup_dev_environment.py
+    python setup_dev_environment.py [options]
+    
+Options:
+    --skip-docker       Ignorer vérifications Docker
+    --skip-encoding     Ignorer configuration encodage  
+    --skip-ports        Ignorer vérification ports
+    --quick             Installation rapide (skip non-critiques)
 
-Auteur: Equipe ESGI 2024-2025
+Auteur: Équipe ESGI 2024-2025
 """
 
-import os
 import sys
+import argparse
 from pathlib import Path
-from cryptography.fernet import Fernet
-import secrets
-import string
 
-def print_banner():
-    """Affiche le banner du projet"""
-    print("""
-HoneyPot Pro Max - Setup Environment
-============================================
-Projet Annuel ESGI 2024-2025
-Configuration automatique de l'environnement de developpement
-    """)
+# Import des modules spécialisés
+try:
+    from setup.colors import print_banner, print_colored, Colors
+    from setup.system_checker import SystemChecker
+    from setup.secrets_manager import SecretsManager
+    from setup.project_configurator import ProjectConfigurator
+except ImportError as e:
+    print(f"❌ Erreur import modules: {e}")
+    print("💡 Assurez-vous d'être dans le répertoire racine du projet")
+    sys.exit(1)
 
-def create_secrets_directory():
-    """Cree le repertoire secrets avec les bonnes permissions"""
-    secrets_dir = Path("secrets")
-    if not secrets_dir.exists():
-        secrets_dir.mkdir(mode=0o700)
-        print("[OK] Repertoire 'secrets/' cree avec permissions securisees")
-    else:
-        print("[INFO] Repertoire 'secrets/' existe deja")
-
-def generate_db_encryption_password_key():
-    """Crée une clé de chiffrement pour les mdp crées par les utilisateurs"""
-    db_encryption_password_path = Path("backend/db_encryption_key.txt")
-
-    if not db_encryption_password_path.exists():
-        # Generer une cle Fernet (AES-256) 
-        key = Fernet.generate_key()
-
-         # Sauvegarder la cle
-        with open("backend/db_encryption_key.txt", "wb") as f:
-            f.write(key)
-
-        # Permissions restrictives (lecture seule pour le proprietaire)
-        db_encryption_password_path.chmod(0o600)
-
-        print("[OK] Cle de chiffrement pour les mdp crées par les utilisateurs generee (AES-256)")
-        print(f"Stockee dans: {db_encryption_password_path}")
-
-    else:
-        print("[INFO] Cle de chiffrement db existe deja")
-
-def generate_mfa_key():
-    """Genere une cle de chiffrement MFA unique"""
-    mfa_key_path = Path("secrets/mfa_encryption_key.txt")
+class SetupOrchestrator:
+    """Orchestrateur principal du setup"""
     
-    if not mfa_key_path.exists():
-        # Generer une cle Fernet (AES-256)
-        key = Fernet.generate_key()
+    def __init__(self, args):
+        self.args = args
+        self.results = {
+            'system_check': False,
+            'port_check': False,
+            'secrets_generation': False,
+            'project_config': False
+        }
+    
+    def check_ports(self) -> bool:
+        """Vérifie les conflits de ports (délégué au script existant)"""
+        if self.args.skip_ports:
+            print_colored("⏭️  Vérification ports ignorée", Colors.YELLOW)
+            return True
+            
+        print_colored("\n=== 🔌 VÉRIFICATION CONFLITS PORTS ===", Colors.BOLD)
         
-        # Sauvegarder la cle
-        with open(mfa_key_path, "wb") as f:
-            f.write(key)
-        
-        # Permissions restrictives (lecture seule pour le proprietaire)
-        mfa_key_path.chmod(0o600)
-        
-        print("[OK] Cle de chiffrement MFA generee (AES-256)")
-        print(f"     Stockee dans: {mfa_key_path}")
-    else:
-        print("[INFO] Cle MFA existe deja")
-
-def generate_secure_password(length=32):
-    """Génère un mot de passe cryptographiquement sécurisé"""
-    # Alphabet complet pour maximum de sécurité
-    alphabet = string.ascii_letters + string.digits + "!@#$%^&*()_+-=[]{}|;:,.<>?"
-    
-    # Génération avec secrets (cryptographiquement sûr)
-    password = ''.join(secrets.choice(alphabet) for _ in range(length))
-    
-    # Garantir au moins un caractère de chaque type pour respecter les politiques
-    if not any(c.islower() for c in password):
-        password = password[:-1] + secrets.choice(string.ascii_lowercase)
-    if not any(c.isupper() for c in password):
-        password = password[:-1] + secrets.choice(string.ascii_uppercase) 
-    if not any(c.isdigit() for c in password):
-        password = password[:-1] + secrets.choice(string.digits)
-    if not any(c in "!@#$%^&*()_+-=[]{}|;:,.<>?" for c in password):
-        password = password[:-1] + secrets.choice("!@#$%^&*()_+-=[]{}|;:,.<>?")
-    
-    return password
-
-def generate_db_password():
-    """Genere un mot de passe securise pour PostgreSQL"""
-    db_password_path = Path("secrets/db_password.txt")
-    
-    if not db_password_path.exists():
-        # Generer un mot de passe vraiment securise (32 caracteres)
-        password = generate_secure_password(32)
-        
-        # Sauvegarder le mot de passe
-        with open(db_password_path, "w", encoding='utf-8') as f:
-            f.write(password)
-        
-        # Permissions restrictives (Windows/Linux compatible)
-        try:
-            db_password_path.chmod(0o600)
-        except:
-            # Sur Windows, utiliser icacls pour sécuriser
-            import subprocess
-            try:
-                subprocess.run([
-                    'icacls', str(db_password_path), 
-                    '/inheritance:r', '/grant:r', f'{os.getenv("USERNAME")}:F'
-                ], check=True, capture_output=True)
-            except:
-                pass  # Permissions Windows non critiques pour le dev
-        
-        print("[OK] Mot de passe PostgreSQL securise genere")
-        print(f"     Longueur: {len(password)} caracteres")
-        print(f"     Stocke dans: {db_password_path}")
-        print("     [SECURITE] Mot de passe cryptographiquement fort")
-    else:
-        print("[INFO] Mot de passe DB existe deja")
-
-def migrate_existing_certificates():
-    """Migre les certificats existants vers secrets/"""
-    old_cert = Path("nginx.crt")
-    old_key = Path("nginx.key")
-    new_cert = Path("secrets/nginx.crt")
-    new_key = Path("secrets/nginx.key")
-    
-    moved_files = []
-    
-    if old_cert.exists() and not new_cert.exists():
-        old_cert.rename(new_cert)
-        new_cert.chmod(0o644)
-        moved_files.append("nginx.crt")
-    
-    if old_key.exists() and not new_key.exists():
-        old_key.rename(new_key)
-        new_key.chmod(0o600)
-        moved_files.append("nginx.key")
-    
-    if moved_files:
-        print(f"[OK] Certificats migres vers secrets/: {', '.join(moved_files)}")
-        return True
-    
-    return False
-
-def generate_ssl_certificates():
-    """Genere les certificats SSL auto-signes dans secrets/"""
-    cert_path = Path("secrets/nginx.crt")
-    key_path = Path("secrets/nginx.key")
-    
-    if not cert_path.exists() or not key_path.exists():
         try:
             import subprocess
-            print("[INFO] Generation des certificats SSL...")
+            scripts_dir = Path("scripts")
+            port_checker_script = scripts_dir / "check_port_conflicts.py"
             
-            # Commande OpenSSL pour generer certificat auto-signe
-            cmd = [
-                "openssl", "req", "-x509", "-newkey", "rsa:4096",
-                "-keyout", str(key_path),
-                "-out", str(cert_path),
-                "-days", "365", "-nodes",
-                "-subj", "/C=FR/ST=IDF/L=Paris/O=ESGI/OU=Security/CN=localhost"
-            ]
+            if not port_checker_script.exists():
+                print_colored("⚠️  Script de vérification des ports non trouvé", Colors.YELLOW)
+                return True
+                
+            result = subprocess.run([
+                sys.executable, str(port_checker_script), "--no-report"
+            ], capture_output=True, text=True)
             
-            subprocess.run(cmd, check=True, capture_output=True)
+            # Afficher seulement les conflits critiques pour ne pas polluer
+            if result.returncode == 2:  # Conflits critiques
+                print_colored("🚨 CONFLITS CRITIQUES DÉTECTÉS", Colors.RED)
+                print_colored("💡 Exécutez: python scripts/check_port_conflicts.py", Colors.CYAN)
+                print_colored("   pour voir les détails et solutions", Colors.CYAN)
+                
+                if not self.args.quick:
+                    response = input("\nContinuer malgré les conflits ? (y/N): ").lower().strip()
+                    if response not in ['y', 'yes', 'oui']:
+                        print_colored("❌ Installation interrompue", Colors.RED)
+                        sys.exit(1)
+                        
+            elif result.returncode == 1:  # Conflits mineurs
+                print_colored("⚠️  Conflits mineurs détectés - Continuons", Colors.YELLOW)
+            else:  # Pas de conflits
+                print_colored("✅ Aucun conflit de port", Colors.GREEN)
+                
+            return True
             
-            # Permissions restrictives
-            cert_path.chmod(0o644)
-            key_path.chmod(0o600)
-            
-            print("[OK] Certificats SSL generes dans secrets/")
-            print(f"     Certificat: {cert_path}")
-            print(f"     Cle privee: {key_path}")
-            
-        except subprocess.CalledProcessError as e:
-            print(f"[ERROR] Echec generation SSL: {e}")
-            print("        Installez OpenSSL ou copiez manuellement les certificats")
-            return False
-        except FileNotFoundError:
-            print("[WARNING] OpenSSL non trouve")
-            print("          Copiez manuellement nginx.crt et nginx.key dans secrets/")
-            return False
-    else:
-        print("[INFO] Certificats SSL existent deja dans secrets/")
+        except Exception as e:
+            print_colored(f"⚠️  Erreur vérification ports: {e}", Colors.YELLOW)
+            return True  # Continue en cas d'erreur
     
-    return True
-
-def check_docker():
-    """Verifie que Docker est disponible"""
-    try:
-        import subprocess
-        result = subprocess.run(["docker", "--version"], 
-                               capture_output=True, text=True, check=True)
-        print(f"[OK] {result.stdout.strip()}")
+    def create_validation_summary(self):
+        """Crée un résumé de validation final"""
+        print_colored("\n=== ✅ RÉSUMÉ DE L'INSTALLATION ===", Colors.BOLD)
         
-        result = subprocess.run(["docker", "compose", "version"], 
-                               capture_output=True, text=True, check=True)
-        print(f"[OK] {result.stdout.strip()}")
-        return True
-    except subprocess.CalledProcessError:
-        print("[ERROR] Docker ou Docker Compose non disponible")
-        print("        Installez Docker Desktop avant de continuer")
-        return False
-    except FileNotFoundError:
-        print("[ERROR] Docker non trouve dans le PATH")
-        return False
-
-def validate_environment():
-    """Valide que l'environnement est pret"""
-    print("\n=== VALIDATION DE L'ENVIRONNEMENT ===")
-    
-    checks = [
-        ("Secrets", Path("secrets").exists()),
-        ("Cle de chiffrement DB", Path("backend/db_encryption_key.txt").exists()),
-        ("Cle MFA", Path("secrets/mfa_encryption_key.txt").exists()),
-        ("Mot de passe DB", Path("secrets/db_password.txt").exists()),
-        ("Certificat SSL", Path("secrets/nginx.crt").exists()),
-        ("Cle privee SSL", Path("secrets/nginx.key").exists()),
-        ("Docker Compose", Path("docker-compose.yml").exists())
-    ]
-    
-    all_good = True
-    for check_name, check_result in checks:
-        status = "[OK]" if check_result else "[MISSING]"
-        print(f"{status} {check_name}")
-        if not check_result:
-            all_good = False
-    
-    if all_good:
-        print("\n[SUCCESS] Environnement pret pour le deploiement !")
-        print("          Commande suivante: docker compose up -d --build")
-    else:
-        print("\n[WARNING] Certains elements sont manquants")
-        print("          Verifiez les erreurs ci-dessus")
-    
-    return all_good
-
-def update_gitignore():
-    """Met a jour .gitignore pour proteger les secrets"""
-    gitignore_content = """
-# Secrets et donnees sensibles
-secrets/
-*.key
-*.crt
-*.env
-.env*
-
-# Donnees Docker
-docker-data/
-postgres-data/
-
-# Logs
-*.log
-logs/
-
-# Fichiers temporaires
-*.tmp
-*.temp
-__pycache__/
-*.pyc
-"""
-    
-    gitignore_path = Path(".gitignore")
-    
-    if gitignore_path.exists():
-        with open(gitignore_path, "r") as f:
-            existing_content = f.read()
+        required_files = [
+            'docker-compose.yml',
+            'backend/main.py', 
+            'frontend/index.html',
+            'secrets/db_password.txt',
+            'secrets/mfa_encryption_key.txt',
+            'backend/db_encryption_key.txt'
+        ]
         
-        if "secrets/" not in existing_content:
-            with open(gitignore_path, "a") as f:
-                f.write(gitignore_content)
-            print("[OK] .gitignore mis a jour pour proteger les secrets")
+        missing_files = []
+        for file_path in required_files:
+            if not Path(file_path).exists():
+                missing_files.append(file_path)
+        
+        if missing_files:
+            print_colored("❌ Fichiers critiques manquants:", Colors.RED)
+            for file in missing_files:
+                print_colored(f"   - {file}", Colors.RED)
+            return False
+        
+        # Afficher le statut de chaque étape
+        steps = [
+            ("Vérifications système", self.results['system_check']),
+            ("Vérification ports", self.results['port_check']),
+            ("Génération secrets", self.results['secrets_generation']),
+            ("Configuration projet", self.results['project_config'])
+        ]
+        
+        for step_name, success in steps:
+            status = "✅" if success else "❌"
+            color = Colors.GREEN if success else Colors.RED
+            print_colored(f"{status} {step_name}", color)
+        
+        all_critical_ok = all([
+            self.results['system_check'],
+            self.results['secrets_generation']
+        ])
+        
+        return all_critical_ok
+    
+    def print_next_steps(self):
+        """Affiche les prochaines étapes"""
+        print_colored(f"""
+{Colors.GREEN}╔═══════════════════════════════════════════════════════════════╗
+║                    🎉 INSTALLATION TERMINÉE !                ║
+╚═══════════════════════════════════════════════════════════════╝{Colors.END}
+
+{Colors.BOLD}🚀 PROCHAINES ÉTAPES :{Colors.END}
+
+{Colors.CYAN}1. Démarrer l'environnement :{Colors.END}
+   docker compose up -d --build
+
+{Colors.CYAN}2. Vérifier les services :{Colors.END}
+   docker compose ps
+
+{Colors.CYAN}3. Accéder aux interfaces :{Colors.END}
+   • Frontend :  http://localhost:9080
+   • Backend :   http://localhost:8000/docs  
+   • Kibana :    http://localhost:5601
+   • pgAdmin :   http://localhost:5050
+
+{Colors.CYAN}4. En cas de problème :{Colors.END}
+   python scripts/validate_installation.py
+
+{Colors.GREEN}✅ Environnement prêt pour le développement !{Colors.END}
+""")
+    
+    def run_setup(self):
+        """Exécute l'installation complète"""
+        print_banner()
+        
+        # 1. Vérifications système (critique)
+        system_checker = SystemChecker()
+        self.results['system_check'] = system_checker.check_all()
+        
+        if not self.results['system_check']:
+            print_colored("\n❌ Prérequis système non respectés", Colors.RED)
+            sys.exit(1)
+        
+        # 2. Vérification ports (importante mais pas bloquante)
+        self.results['port_check'] = self.check_ports()
+        
+        # 3. Génération secrets (critique)
+        secrets_manager = SecretsManager()
+        self.results['secrets_generation'] = secrets_manager.generate_all()
+        
+        if not self.results['secrets_generation']:
+            print_colored("\n❌ Impossible de générer les secrets", Colors.RED)
+            sys.exit(1)
+        
+        # 4. Configuration projet (importante mais pas bloquante)
+        if not self.args.skip_encoding:
+            project_configurator = ProjectConfigurator()
+            self.results['project_config'] = project_configurator.configure_all()
         else:
-            print("[INFO] .gitignore deja configure")
-    else:
-        with open(gitignore_path, "w") as f:
-            f.write(gitignore_content.strip())
-        print("[OK] .gitignore cree pour proteger les secrets")
-
-def print_next_steps():
-    """Affiche les prochaines etapes"""
-    print("""
-=== PROCHAINES ETAPES ===
-1. Lancez l'environnement: docker compose up -d --build
-2. Attendez 2-3 minutes pour le demarrage complet
-3. Verifiez l'installation: python scripts/validate_installation.py
-4. Acces web:
-   - HoneyPot HTTPS: https://localhost:9443
-   - API Docs: http://localhost:8000/docs
-   - Kibana: http://localhost:5601
-   - pgAdmin: http://localhost:5050
-
-Bon test de securite !
-    """)
+            print_colored("⏭️  Configuration encodage ignorée", Colors.YELLOW)
+            self.results['project_config'] = True
+        
+        # 5. Validation finale
+        if self.create_validation_summary():
+            self.print_next_steps()
+            sys.exit(0)
+        else:
+            print_colored("\n❌ Installation incomplète", Colors.RED)
+            sys.exit(1)
 
 def main():
-    """Fonction principale"""
-    print_banner()
+    """Point d'entrée principal"""
+    parser = argparse.ArgumentParser(
+        description='Setup automatique HoneyPot Pro Max v2.0',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Exemples:
+    python setup_dev_environment.py                 # Installation complète
+    python setup_dev_environment.py --quick         # Installation rapide
+    python setup_dev_environment.py --skip-docker   # Sans vérif Docker
+        """
+    )
     
-    print("\n=== CONFIGURATION DE L'ENVIRONNEMENT ===")
+    parser.add_argument('--skip-docker', action='store_true', 
+                       help='Ignorer les vérifications Docker')
+    parser.add_argument('--skip-encoding', action='store_true',
+                       help='Ignorer la configuration encodage')
+    parser.add_argument('--skip-ports', action='store_true',
+                       help='Ignorer la vérification des ports')
+    parser.add_argument('--quick', action='store_true',
+                       help='Installation rapide (skip confirmations)')
     
-    # Etape 1: Creer le repertoire secrets
-    create_secrets_directory()
-
-    # Etape 2: Generer la cle de chiffrement db
-    generate_db_encryption_password_key()
+    args = parser.parse_args()
     
-    # Etape 3: Generer la cle MFA
-    generate_mfa_key()
-    
-    # Etape 4: Generer le mot de passe DB
-    generate_db_password()
-    
-    # Etape 5: Migrer et generer les certificats SSL
-    migrate_existing_certificates()
-    generate_ssl_certificates()
-    
-    # Etape 6: Verifier Docker
-    docker_ok = check_docker()
-    
-    # Etape 7: Mettre a jour .gitignore
-    update_gitignore()
-    
-    # Etape 8: Validation finale
-    env_ready = validate_environment()
-    
-    if env_ready and docker_ok:
-        print_next_steps()
-        sys.exit(0)
-    else:
-        print("\n[ERROR] Configuration incomplete")
-        sys.exit(1)
+    # Lancer l'orchestrateur
+    orchestrator = SetupOrchestrator(args)
+    orchestrator.run_setup()
 
 if __name__ == "__main__":
     main()

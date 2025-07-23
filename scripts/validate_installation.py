@@ -3,13 +3,13 @@
 Validation de l'Installation - HoneyPot Pro Max
 ======================================================
 
-Script de validation automatique de l'installation complète.
-Vérifie tous les composants mentionnés dans le README.
+Script de validation automatique de l'installation complÃ¨te.
+VÃ©rifie tous les composants mentionnÃ©s dans le README.
 
 Usage:
     python scripts/validate_installation.py
 
-Auteur: Équipe ESGI 2024-2025
+Auteur: Ã‰quipe ESGI 2024-2025
 """
 
 import requests
@@ -32,15 +32,15 @@ class InstallationValidator:
     def print_banner(self):
         """Affiche le banner de validation"""
         print("""
-🔍 VALIDATION DE L'INSTALLATION
+ðŸ” VALIDATION DE L'INSTALLATION
 ===============================
-🛡️  HoneyPot Pro Max
-📋 Vérification de tous les composants
+ðŸ›¡ï¸  HoneyPot Pro Max
+ðŸ“‹ VÃ©rification de tous les composants
         """)
 
     def check_docker_services(self) -> Dict:
-        """Vérifie l'état des services Docker"""
-        print("\n🐳 Vérification des services Docker...")
+        """VÃ©rifie l'Ã©tat des services Docker"""
+        print("\nðŸ³ VÃ©rification des services Docker...")
         
         expected_services = [
             "postgres_db_service",
@@ -79,7 +79,7 @@ class InstallationValidator:
                     except json.JSONDecodeError:
                         continue
             
-            # Vérifier chaque service attendu
+            # VÃ©rifier chaque service attendu
             for service in expected_services:
                 found = False
                 for container in containers:
@@ -90,37 +90,37 @@ class InstallationValidator:
                         
                         if status == "running":
                             result["running_services"].append(service)
-                            print(f"   ✅ {service}: RUNNING")
+                            print(f"   âœ… {service}: RUNNING")
                         else:
                             result["stopped_services"].append(service)
-                            print(f"   ❌ {service}: {status}")
+                            print(f"   âŒ {service}: {status}")
                         break
                 
                 if not found:
                     result["missing_services"].append(service)
-                    print(f"   ⚠️  {service}: NOT FOUND")
+                    print(f"   âš ï¸  {service}: NOT FOUND")
             
-            # Déterminer le statut global
+            # DÃ©terminer le statut global
             if len(result["running_services"]) == len(expected_services):
                 result["status"] = "HEALTHY"
-                print(f"\n✅ Tous les services Docker sont opérationnels ({len(result['running_services'])}/{len(expected_services)})")
+                print(f"\nâœ… Tous les services Docker sont opÃ©rationnels ({len(result['running_services'])}/{len(expected_services)})")
             elif len(result["running_services"]) > 0:
                 result["status"] = "PARTIAL"
-                print(f"\n⚠️  Services partiellement opérationnels ({len(result['running_services'])}/{len(expected_services)})")
+                print(f"\nâš ï¸  Services partiellement opÃ©rationnels ({len(result['running_services'])}/{len(expected_services)})")
             else:
                 result["status"] = "FAILED"
-                print(f"\n❌ Aucun service opérationnel")
+                print(f"\nâŒ Aucun service opÃ©rationnel")
                 
         except subprocess.CalledProcessError as e:
             result["status"] = "ERROR"
             result["error"] = str(e)
-            print(f"❌ Erreur lors de la vérification Docker: {e}")
+            print(f"âŒ Erreur lors de la vÃ©rification Docker: {e}")
         
         return result
 
     def check_web_interfaces(self) -> Dict:
-        """Vérifie l'accessibilité des interfaces web"""
-        print("\n🌐 Vérification des interfaces web...")
+        """VÃ©rifie l'accessibilitÃ© des interfaces web"""
+        print("\nðŸŒ VÃ©rification des interfaces web...")
         
         endpoints = {
             "HoneyPot HTTP": "http://localhost:9080",
@@ -143,18 +143,18 @@ class InstallationValidator:
                 if response.status_code == 200:
                     result["accessible"].append(name)
                     result["details"][name] = {"status": "OK", "code": response.status_code}
-                    print(f"   ✅ {name}: ACCESSIBLE ({response.status_code})")
+                    print(f"   âœ… {name}: ACCESSIBLE ({response.status_code})")
                 else:
                     result["inaccessible"].append(name)
                     result["details"][name] = {"status": "ERROR", "code": response.status_code}
-                    print(f"   ⚠️  {name}: HTTP {response.status_code}")
+                    print(f"   âš ï¸  {name}: HTTP {response.status_code}")
                     
             except requests.RequestException as e:
                 result["inaccessible"].append(name)
                 result["details"][name] = {"status": "ERROR", "error": str(e)}
-                print(f"   ❌ {name}: INACCESSIBLE ({e})")
+                print(f"   âŒ {name}: INACCESSIBLE ({e})")
         
-        # Déterminer le statut
+        # DÃ©terminer le statut
         if len(result["accessible"]) == len(endpoints):
             result["status"] = "HEALTHY"
         elif len(result["accessible"]) > 0:
@@ -165,8 +165,8 @@ class InstallationValidator:
         return result
 
     def check_api_endpoints(self) -> Dict:
-        """Vérifie les endpoints de l'API backend"""
-        print("\n🔌 Vérification des endpoints API...")
+        """VÃ©rifie les endpoints de l'API backend"""
+        print("\nðŸ”Œ VÃ©rification des endpoints API...")
         
         endpoints = {
             "Root": "/",
@@ -191,20 +191,20 @@ class InstallationValidator:
                 url = f"{base_url}{endpoint}"
                 response = requests.get(url, timeout=5)
                 
-                # Pour les endpoints qui requièrent POST ou authentication
+                # Pour les endpoints qui requiÃ¨rent POST ou authentication
                 if response.status_code in [200, 405, 422, 401]:
                     result["available"].append(name)
                     result["details"][name] = {"status": "OK", "code": response.status_code}
-                    print(f"   ✅ {name}: DISPONIBLE ({response.status_code})")
+                    print(f"   âœ… {name}: DISPONIBLE ({response.status_code})")
                 else:
                     result["unavailable"].append(name)
                     result["details"][name] = {"status": "ERROR", "code": response.status_code}
-                    print(f"   ⚠️  {name}: HTTP {response.status_code}")
+                    print(f"   âš ï¸  {name}: HTTP {response.status_code}")
                     
             except requests.RequestException as e:
                 result["unavailable"].append(name)
                 result["details"][name] = {"status": "ERROR", "error": str(e)}
-                print(f"   ❌ {name}: ERREUR ({e})")
+                print(f"   âŒ {name}: ERREUR ({e})")
         
         if len(result["available"]) == len(endpoints):
             result["status"] = "HEALTHY"
@@ -216,8 +216,8 @@ class InstallationValidator:
         return result
 
     def check_secrets_configuration(self) -> Dict:
-        """Vérifie la configuration des secrets"""
-        print("\n🔐 Vérification des secrets...")
+        """VÃ©rifie la configuration des secrets"""
+        print("\nðŸ” VÃ©rification des secrets...")
         
         result = {
             "status": "UNKNOWN",
@@ -235,7 +235,7 @@ class InstallationValidator:
             path = Path(secret_path)
             if path.exists():
                 result["secrets_found"].append(secret_path)
-                # Vérifier les permissions (Windows compatible)
+                # VÃ©rifier les permissions (Windows compatible)
                 try:
                     stat_info = path.stat()
                     result["details"][secret_path] = {
@@ -243,14 +243,14 @@ class InstallationValidator:
                         "size": stat_info.st_size,
                         "permissions": oct(stat_info.st_mode)[-3:]
                     }
-                    print(f"   ✅ {secret_path}: TROUVÉ ({stat_info.st_size} bytes)")
+                    print(f"   âœ… {secret_path}: TROUVÃ‰ ({stat_info.st_size} bytes)")
                 except Exception as e:
                     result["details"][secret_path] = {"status": "ERROR", "error": str(e)}
-                    print(f"   ⚠️  {secret_path}: ERREUR PERMISSIONS ({e})")
+                    print(f"   âš ï¸  {secret_path}: ERREUR PERMISSIONS ({e})")
             else:
                 result["secrets_missing"].append(secret_path)
                 result["details"][secret_path] = {"status": "MISSING"}
-                print(f"   ❌ {secret_path}: MANQUANT")
+                print(f"   âŒ {secret_path}: MANQUANT")
         
         if len(result["secrets_found"]) == len(expected_secrets):
             result["status"] = "HEALTHY"
@@ -262,8 +262,8 @@ class InstallationValidator:
         return result
 
     def check_monitoring_stack(self) -> Dict:
-        """Vérifie la stack de monitoring (ELK + Snort + Wazuh)"""
-        print("\n📊 Vérification de la stack de monitoring...")
+        """VÃ©rifie la stack de monitoring (ELK + Snort + Wazuh)"""
+        print("\nðŸ“Š VÃ©rification de la stack de monitoring...")
         
         result = {
             "status": "UNKNOWN",
@@ -271,7 +271,7 @@ class InstallationValidator:
             "overall_health": "UNKNOWN"
         }
         
-        # Vérifier Elasticsearch
+        # VÃ©rifier Elasticsearch
         try:
             response = requests.get("http://localhost:9200/_cluster/health", timeout=10)
             if response.status_code == 200:
@@ -281,28 +281,28 @@ class InstallationValidator:
                     "cluster_status": health_data.get("status", "unknown"),
                     "nodes": health_data.get("number_of_nodes", 0)
                 }
-                print(f"   ✅ Elasticsearch: OK ({health_data.get('status', 'unknown')})")
+                print(f"   âœ… Elasticsearch: OK ({health_data.get('status', 'unknown')})")
             else:
                 result["components"]["elasticsearch"] = {"status": "ERROR", "code": response.status_code}
-                print(f"   ❌ Elasticsearch: HTTP {response.status_code}")
+                print(f"   âŒ Elasticsearch: HTTP {response.status_code}")
         except requests.RequestException as e:
             result["components"]["elasticsearch"] = {"status": "ERROR", "error": str(e)}
-            print(f"   ❌ Elasticsearch: INACCESSIBLE ({e})")
+            print(f"   âŒ Elasticsearch: INACCESSIBLE ({e})")
         
-        # Vérifier Kibana
+        # VÃ©rifier Kibana
         try:
             response = requests.get("http://localhost:5601/api/status", timeout=10)
             if response.status_code == 200:
                 result["components"]["kibana"] = {"status": "OK"}
-                print("   ✅ Kibana: OK")
+                print("   âœ… Kibana: OK")
             else:
                 result["components"]["kibana"] = {"status": "ERROR", "code": response.status_code}
-                print(f"   ⚠️  Kibana: HTTP {response.status_code}")
+                print(f"   âš ï¸  Kibana: HTTP {response.status_code}")
         except requests.RequestException as e:
             result["components"]["kibana"] = {"status": "ERROR", "error": str(e)}
-            print(f"   ❌ Kibana: INACCESSIBLE ({e})")
+            print(f"   âŒ Kibana: INACCESSIBLE ({e})")
         
-        # Vérifier Snort (via Docker)
+        # VÃ©rifier Snort (via Docker)
         try:
             cmd_result = subprocess.run(
                 ["docker", "logs", "snort_ids", "--tail", "5"],
@@ -312,18 +312,18 @@ class InstallationValidator:
             )
             if cmd_result.returncode == 0:
                 result["components"]["snort"] = {"status": "OK", "logs_available": True}
-                print("   ✅ Snort IDS: OK")
+                print("   âœ… Snort IDS: OK")
             else:
                 result["components"]["snort"] = {"status": "ERROR", "error": "No logs"}
-                print("   ⚠️  Snort IDS: PAS DE LOGS")
+                print("   âš ï¸  Snort IDS: PAS DE LOGS")
         except subprocess.TimeoutExpired:
             result["components"]["snort"] = {"status": "ERROR", "error": "Timeout"}
-            print("   ❌ Snort IDS: TIMEOUT")
+            print("   âŒ Snort IDS: TIMEOUT")
         except Exception as e:
             result["components"]["snort"] = {"status": "ERROR", "error": str(e)}
-            print(f"   ❌ Snort IDS: ERREUR ({e})")
+            print(f"   âŒ Snort IDS: ERREUR ({e})")
         
-        # Vérifier Wazuh
+        # VÃ©rifier Wazuh
         try:
             cmd_result = subprocess.run(
                 ["docker", "logs", "wazuh_manager", "--tail", "5"],
@@ -333,18 +333,18 @@ class InstallationValidator:
             )
             if cmd_result.returncode == 0:
                 result["components"]["wazuh"] = {"status": "OK", "logs_available": True}
-                print("   ✅ Wazuh HIDS: OK")
+                print("   âœ… Wazuh HIDS: OK")
             else:
                 result["components"]["wazuh"] = {"status": "ERROR", "error": "No logs"}
-                print("   ⚠️  Wazuh HIDS: PAS DE LOGS")
+                print("   âš ï¸  Wazuh HIDS: PAS DE LOGS")
         except subprocess.TimeoutExpired:
             result["components"]["wazuh"] = {"status": "ERROR", "error": "Timeout"}
-            print("   ❌ Wazuh HIDS: TIMEOUT")
+            print("   âŒ Wazuh HIDS: TIMEOUT")
         except Exception as e:
             result["components"]["wazuh"] = {"status": "ERROR", "error": str(e)}
-            print(f"   ❌ Wazuh HIDS: ERREUR ({e})")
+            print(f"   âŒ Wazuh HIDS: ERREUR ({e})")
         
-        # Déterminer le statut global
+        # DÃ©terminer le statut global
         healthy_components = [comp for comp in result["components"].values() if comp["status"] == "OK"]
         if len(healthy_components) == len(result["components"]):
             result["status"] = "HEALTHY"
@@ -356,50 +356,50 @@ class InstallationValidator:
         return result
 
     def generate_recommendations(self):
-        """Génère des recommandations basées sur les résultats"""
+        """GÃ©nÃ¨re des recommandations basÃ©es sur les rÃ©sultats"""
         recommendations = []
         
-        # Vérifier les services Docker
+        # VÃ©rifier les services Docker
         docker_status = self.results["components"].get("docker_services", {}).get("status")
         if docker_status == "FAILED":
-            recommendations.append("🐳 Lancer les services Docker: docker compose up -d --build")
+            recommendations.append("ðŸ³ Lancer les services Docker: docker compose up -d --build")
         elif docker_status == "PARTIAL":
-            recommendations.append("🔄 Redémarrer les services en échec: docker compose restart")
+            recommendations.append("ðŸ”„ RedÃ©marrer les services en Ã©chec: docker compose restart")
         
-        # Vérifier les secrets
+        # VÃ©rifier les secrets
         secrets_status = self.results["components"].get("secrets", {}).get("status")
         if secrets_status in ["FAILED", "PARTIAL"]:
-            recommendations.append("🔐 Exécuter le script de setup: python setup_dev_environment.py")
+            recommendations.append("ðŸ” ExÃ©cuter le script de setup: python setup_dev_environment.py")
         
-        # Vérifier les interfaces web
+        # VÃ©rifier les interfaces web
         web_status = self.results["components"].get("web_interfaces", {}).get("status")
         if web_status in ["FAILED", "PARTIAL"]:
-            recommendations.append("⏰ Attendre le démarrage complet (2-3 minutes)")
-            recommendations.append("🔍 Vérifier les logs: docker compose logs")
+            recommendations.append("â° Attendre le dÃ©marrage complet (2-3 minutes)")
+            recommendations.append("ðŸ” VÃ©rifier les logs: docker compose logs")
         
-        # Vérifier le monitoring
+        # VÃ©rifier le monitoring
         monitoring_status = self.results["components"].get("monitoring", {}).get("status")
         if monitoring_status in ["FAILED", "PARTIAL"]:
-            recommendations.append("📊 Vérifier la stack ELK: docker compose logs elasticsearch kibana logstash")
-            recommendations.append("🛡️  Vérifier Snort/Wazuh: docker compose logs snort_ids wazuh_manager")
+            recommendations.append("ðŸ“Š VÃ©rifier la stack ELK: docker compose logs elasticsearch kibana logstash")
+            recommendations.append("ðŸ›¡ï¸  VÃ©rifier Snort/Wazuh: docker compose logs snort_ids wazuh_manager")
         
         return recommendations
 
     def run_full_validation(self) -> Dict:
-        """Exécute la validation complète"""
+        """ExÃ©cute la validation complÃ¨te"""
         self.print_banner()
         
-        # Exécuter toutes les vérifications
+        # ExÃ©cuter toutes les vÃ©rifications
         self.results["components"]["docker_services"] = self.check_docker_services()
         self.results["components"]["web_interfaces"] = self.check_web_interfaces()
         self.results["components"]["api_endpoints"] = self.check_api_endpoints()
         self.results["components"]["secrets"] = self.check_secrets_configuration()
         self.results["components"]["monitoring"] = self.check_monitoring_stack()
         
-        # Générer les recommandations
+        # GÃ©nÃ©rer les recommandations
         self.results["recommendations"] = self.generate_recommendations()
         
-        # Déterminer le statut global
+        # DÃ©terminer le statut global
         component_statuses = [comp.get("status") for comp in self.results["components"].values()]
         
         if all(status == "HEALTHY" for status in component_statuses):
@@ -413,44 +413,44 @@ class InstallationValidator:
         return self.results
 
     def print_summary(self):
-        """Affiche le résumé de validation"""
+        """Affiche le rÃ©sumÃ© de validation"""
         status_emoji = {
-            "HEALTHY": "✅",
-            "PARTIAL": "⚠️",
-            "FAILED": "❌",
-            "UNKNOWN": "❓"
+            "HEALTHY": "âœ…",
+            "PARTIAL": "âš ï¸",
+            "FAILED": "âŒ",
+            "UNKNOWN": "â“"
         }
         
-        emoji = status_emoji.get(self.results["overall_status"], "❓")
+        emoji = status_emoji.get(self.results["overall_status"], "â“")
         
         print(f"""
-📋 RÉSUMÉ DE VALIDATION
+ðŸ“‹ RÃ‰SUMÃ‰ DE VALIDATION
 ======================
 {emoji} Statut global: {self.results["overall_status"]}
-🕐 Timestamp: {self.results["timestamp"]}
+ðŸ• Timestamp: {self.results["timestamp"]}
 
-📊 COMPOSANTS:
+ðŸ“Š COMPOSANTS:
 """)
         
         for component, details in self.results["components"].items():
             status = details.get("status", "UNKNOWN")
-            emoji = status_emoji.get(status, "❓")
+            emoji = status_emoji.get(status, "â“")
             component_name = component.replace("_", " ").title()
             print(f"   {emoji} {component_name}: {status}")
         
         if self.results["recommendations"]:
-            print(f"\n💡 RECOMMANDATIONS:")
+            print(f"\nðŸ’¡ RECOMMANDATIONS:")
             for rec in self.results["recommendations"]:
                 print(f"   {rec}")
         
         print(f"""
-🎯 PROCHAINES ÉTAPES:
-   1. Résoudre les problèmes identifiés ci-dessus
-   2. Lancer les tests de sécurité: python scripts/security_tests.py
+ðŸŽ¯ PROCHAINES Ã‰TAPES:
+   1. RÃ©soudre les problÃ¨mes identifiÃ©s ci-dessus
+   2. Lancer les tests de sÃ©curitÃ©: python scripts/security_tests.py
    3. Consulter Kibana pour le monitoring: http://localhost:5601
    4. Commencer vos tests d'intrusion !
 
-📁 Rapport sauvegardé: validation_report.json
+ðŸ“ Rapport sauvegardÃ©: validation_report.json
         """)
         
         # Sauvegarder le rapport
@@ -462,7 +462,7 @@ def main():
     validator = InstallationValidator()
     results = validator.run_full_validation()
     
-    # Code de sortie basé sur le statut
+    # Code de sortie basÃ© sur le statut
     if results["overall_status"] == "HEALTHY":
         sys.exit(0)
     elif results["overall_status"] == "PARTIAL":

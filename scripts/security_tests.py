@@ -1,22 +1,22 @@
 #!/usr/bin/env python3
 """
-Tests de Sécurité Automatisés - HoneyPot Pro Max
+Tests de SÃ©curitÃ© AutomatisÃ©s - HoneyPot Pro Max
 ========================================================
 
-Script d'automatisation des tests d'intrusion mentionnés dans le README.
-Exécute les scénarios de test et vérifie les résultats.
+Script d'automatisation des tests d'intrusion mentionnÃ©s dans le README.
+ExÃ©cute les scÃ©narios de test et vÃ©rifie les rÃ©sultats.
 
 Usage:
     python scripts/security_tests.py [--scenario SCENARIO]
 
-Scénarios disponibles:
+ScÃ©narios disponibles:
     - brute_force: Test d'attaque par force brute
     - sql_injection: Test d'injection SQL
     - port_scan: Test de scan de ports
     - mfa_bypass: Test de contournement MFA
     - all: Tous les tests
 
-Auteur: Équipe ESGI 2024-2025
+Auteur: Ã‰quipe ESGI 2024-2025
 """
 
 import requests
@@ -36,16 +36,16 @@ class SecurityTester:
     def print_banner(self):
         """Affiche le banner des tests"""
         print("""
-🔴 TESTS DE SÉCURITÉ AUTOMATISÉS
+ðŸ”´ TESTS DE SÃ‰CURITÃ‰ AUTOMATISÃ‰S
 ==================================
-⚠️  ATTENTION: Tests d'intrusion en cours
-🎯 Cible: HoneyPot Pro Max
-📊 Monitoring: Vérifiez Kibana pour les alertes
+âš ï¸  ATTENTION: Tests d'intrusion en cours
+ðŸŽ¯ Cible: HoneyPot Pro Max
+ðŸ“Š Monitoring: VÃ©rifiez Kibana pour les alertes
         """)
 
     def test_brute_force(self, attempts: int = 20) -> Dict:
         """Test d'attaque par force brute sur le login"""
-        print(f"\n🚨 Test 1: Attaque par force brute ({attempts} tentatives)")
+        print(f"\nðŸš¨ Test 1: Attaque par force brute ({attempts} tentatives)")
         
         results = {
             "test": "brute_force",
@@ -74,26 +74,26 @@ class SecurityTester:
                     results["failed_requests"] += 1
                 
                 print(f"   Tentative {i}/{attempts}: {response.status_code}")
-                time.sleep(0.5)  # Pause pour éviter de surcharger
+                time.sleep(0.5)  # Pause pour Ã©viter de surcharger
                 
             except requests.RequestException as e:
                 results["failed_requests"] += 1
                 print(f"   Tentative {i}/{attempts}: ERREUR - {e}")
         
-        # Vérifier si Snort a détecté l'attaque (simplification)
+        # VÃ©rifier si Snort a dÃ©tectÃ© l'attaque (simplification)
         results["detected"] = self.check_snort_detection("brute_force")
         
-        print(f"✅ Test terminé: {results['successful_requests']}/{attempts} requêtes réussies")
+        print(f"âœ… Test terminÃ©: {results['successful_requests']}/{attempts} requÃªtes rÃ©ussies")
         if results["detected"]:
-            print("🔍 Détection Snort: ACTIVÉE")
+            print("ðŸ” DÃ©tection Snort: ACTIVÃ‰E")
         else:
-            print("⚠️  Détection Snort: NON DÉTECTÉE")
+            print("âš ï¸  DÃ©tection Snort: NON DÃ‰TECTÃ‰E")
         
         return results
 
     def test_sql_injection(self) -> Dict:
         """Test d'injection SQL"""
-        print("\n🚨 Test 2: Injection SQL")
+        print("\nðŸš¨ Test 2: Injection SQL")
         
         sql_payloads = [
             "admin' OR '1'='1",
@@ -126,10 +126,10 @@ class SecurityTester:
                 
                 if response.status_code in [400, 401, 422]:
                     results["blocked"] += 1
-                    print(f"   Payload {i}: BLOQUÉ ✅")
+                    print(f"   Payload {i}: BLOQUÃ‰ âœ…")
                 else:
                     results["successful"] += 1
-                    print(f"   Payload {i}: PASSÉ ⚠️")
+                    print(f"   Payload {i}: PASSÃ‰ âš ï¸")
                 
                 time.sleep(0.3)
                 
@@ -139,12 +139,12 @@ class SecurityTester:
         
         results["detected"] = self.check_wazuh_detection("sql_injection")
         
-        print(f"✅ Test terminé: {results['blocked']}/{results['payloads_tested']} payloads bloqués")
+        print(f"âœ… Test terminÃ©: {results['blocked']}/{results['payloads_tested']} payloads bloquÃ©s")
         return results
 
     def test_port_scan(self) -> Dict:
         """Test de scan de ports"""
-        print("\n🚨 Test 3: Scan de ports")
+        print("\nðŸš¨ Test 3: Scan de ports")
         
         ports_to_scan = [22, 80, 443, 3306, 5432, 8000, 9080, 9443]
         
@@ -171,7 +171,7 @@ class SecurityTester:
                     print(f"   Port {port}: OUVERT")
                 else:
                     results["closed_ports"].append(port)
-                    print(f"   Port {port}: FERMÉ")
+                    print(f"   Port {port}: FERMÃ‰")
                     
             except subprocess.TimeoutExpired:
                 results["closed_ports"].append(port)
@@ -181,12 +181,12 @@ class SecurityTester:
         
         results["detected"] = self.check_snort_detection("port_scan")
         
-        print(f"✅ Test terminé: {len(results['open_ports'])} ports ouverts détectés")
+        print(f"âœ… Test terminÃ©: {len(results['open_ports'])} ports ouverts dÃ©tectÃ©s")
         return results
 
     def test_mfa_bypass(self) -> Dict:
         """Test de contournement MFA"""
-        print("\n🚨 Test 4: Tentative de contournement MFA")
+        print("\nðŸš¨ Test 4: Tentative de contournement MFA")
         
         results = {
             "test": "mfa_bypass",
@@ -195,19 +195,19 @@ class SecurityTester:
             "detected": False
         }
         
-        # Test 1: Tentative d'accès direct au gestionnaire sans MFA
+        # Test 1: Tentative d'accÃ¨s direct au gestionnaire sans MFA
         try:
             response = requests.get(f"{self.api_url}/list", timeout=5)
             results["bypass_attempts"] += 1
             
             if response.status_code == 401:
-                print("   Accès direct: BLOQUÉ ✅")
+                print("   AccÃ¨s direct: BLOQUÃ‰ âœ…")
             else:
-                print("   Accès direct: PASSÉ ⚠️")
+                print("   AccÃ¨s direct: PASSÃ‰ âš ï¸")
                 results["successful_bypass"] += 1
                 
         except requests.RequestException as e:
-            print(f"   Accès direct: ERREUR - {e}")
+            print(f"   AccÃ¨s direct: ERREUR - {e}")
         
         # Test 2: Codes MFA invalides
         invalid_codes = ["000000", "123456", "999999", "111111"]
@@ -228,9 +228,9 @@ class SecurityTester:
                 results["bypass_attempts"] += 1
                 
                 if response.status_code in [401, 400]:
-                    print(f"   Code {code}: REJETÉ ✅")
+                    print(f"   Code {code}: REJETÃ‰ âœ…")
                 else:
-                    print(f"   Code {code}: ACCEPTÉ ⚠️")
+                    print(f"   Code {code}: ACCEPTÃ‰ âš ï¸")
                     results["successful_bypass"] += 1
                 
                 time.sleep(0.5)
@@ -240,15 +240,15 @@ class SecurityTester:
         
         results["detected"] = self.check_wazuh_detection("mfa_bypass")
         
-        print(f"✅ Test terminé: {results['successful_bypass']}/{results['bypass_attempts']} tentatives réussies")
+        print(f"âœ… Test terminÃ©: {results['successful_bypass']}/{results['bypass_attempts']} tentatives rÃ©ussies")
         return results
 
     def check_snort_detection(self, test_type: str) -> bool:
-        """Vérifie si Snort a détecté l'attaque (simulation)"""
+        """VÃ©rifie si Snort a dÃ©tectÃ© l'attaque (simulation)"""
         # Dans un vrai environnement, ceci interrogerait les logs Snort
-        # Pour la démo, on simule une détection
+        # Pour la dÃ©mo, on simule une dÃ©tection
         try:
-            # Vérifier si le conteneur Snort fonctionne
+            # VÃ©rifier si le conteneur Snort fonctionne
             result = subprocess.run(
                 ["docker", "ps", "--filter", "name=snort_ids", "--format", "{{.Status}}"],
                 capture_output=True,
@@ -260,8 +260,8 @@ class SecurityTester:
             return False
 
     def check_wazuh_detection(self, test_type: str) -> bool:
-        """Vérifie si Wazuh a détecté l'attaque (simulation)"""
-        # Simulation de détection Wazuh
+        """VÃ©rifie si Wazuh a dÃ©tectÃ© l'attaque (simulation)"""
+        # Simulation de dÃ©tection Wazuh
         try:
             result = subprocess.run(
                 ["docker", "ps", "--filter", "name=wazuh_manager", "--format", "{{.Status}}"],
@@ -274,7 +274,7 @@ class SecurityTester:
             return False
 
     def run_all_tests(self) -> Dict:
-        """Exécute tous les tests de sécurité"""
+        """ExÃ©cute tous les tests de sÃ©curitÃ©"""
         self.print_banner()
         
         all_results = {
@@ -283,7 +283,7 @@ class SecurityTester:
             "tests": []
         }
         
-        # Exécuter tous les tests
+        # ExÃ©cuter tous les tests
         tests = [
             self.test_brute_force,
             self.test_sql_injection,
@@ -296,36 +296,36 @@ class SecurityTester:
                 result = test_func()
                 all_results["tests"].append(result)
             except Exception as e:
-                print(f"❌ Erreur dans {test_func.__name__}: {e}")
+                print(f"âŒ Erreur dans {test_func.__name__}: {e}")
         
         self.generate_report(all_results)
         return all_results
 
     def generate_report(self, results: Dict):
-        """Génère un rapport des tests"""
+        """GÃ©nÃ¨re un rapport des tests"""
         print(f"""
-📊 RAPPORT DE TESTS DE SÉCURITÉ
+ðŸ“Š RAPPORT DE TESTS DE SÃ‰CURITÃ‰
 ===============================
-🕐 Timestamp: {results['timestamp']}
-🎯 Cible: {results['target']}
-🧪 Tests exécutés: {len(results['tests'])}
+ðŸ• Timestamp: {results['timestamp']}
+ðŸŽ¯ Cible: {results['target']}
+ðŸ§ª Tests exÃ©cutÃ©s: {len(results['tests'])}
 
-📋 RÉSUMÉ:
+ðŸ“‹ RÃ‰SUMÃ‰:
 """)
         
         for test in results["tests"]:
             test_name = test["test"].replace("_", " ").title()
-            detected = "✅ DÉTECTÉ" if test.get("detected", False) else "⚠️ NON DÉTECTÉ"
+            detected = "âœ… DÃ‰TECTÃ‰" if test.get("detected", False) else "âš ï¸ NON DÃ‰TECTÃ‰"
             print(f"   {test_name}: {detected}")
         
         print(f"""
-💡 RECOMMANDATIONS:
-   1. Vérifiez les alertes dans Kibana: http://localhost:5601
+ðŸ’¡ RECOMMANDATIONS:
+   1. VÃ©rifiez les alertes dans Kibana: http://localhost:5601
    2. Consultez les logs Snort: docker logs snort_ids
-   3. Vérifiez Wazuh: docker logs wazuh_manager
-   4. Analysez les patterns d'attaque détectés
+   3. VÃ©rifiez Wazuh: docker logs wazuh_manager
+   4. Analysez les patterns d'attaque dÃ©tectÃ©s
 
-📁 Rapport sauvegardé: security_test_report.json
+ðŸ“ Rapport sauvegardÃ©: security_test_report.json
         """)
         
         # Sauvegarder le rapport
@@ -334,11 +334,11 @@ class SecurityTester:
 
 def main():
     """Fonction principale"""
-    parser = argparse.ArgumentParser(description="Tests de sécurité automatisés")
+    parser = argparse.ArgumentParser(description="Tests de sÃ©curitÃ© automatisÃ©s")
     parser.add_argument("--scenario", 
                        choices=["brute_force", "sql_injection", "port_scan", "mfa_bypass", "all"],
                        default="all",
-                       help="Scénario de test à exécuter")
+                       help="ScÃ©nario de test Ã  exÃ©cuter")
     parser.add_argument("--target", 
                        default="http://localhost:9080",
                        help="URL cible pour les tests")

@@ -1,5 +1,35 @@
-/secrets/
+# =============================================================================
+# GITIGNORE - PROJET ANNUEL ESGI
+# =============================================================================
+
+# Fichiers temporaires de résolution de problèmes
+docker-compose.*.yml
+!docker-compose.yml
+*-temp.*
+*-test.*
+diagnostic-*.txt
+resolution-*.md
+
+# Fichiers temporaires de conversion d'encodage
+backup-encoding/
+convert-utf8.ps1
+fix-encoding.ps1
+
+# Rapports temporaires et logs
+*_report.json
+*_conflict_report.json
+port_conflict_report.json
+diagnostic.ps1
+diagnostic.sh
+
+# Cache Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
 # Secrets et fichiers sensibles
+/secrets/
 *.key
 *.crt
 .env

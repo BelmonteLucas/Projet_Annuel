@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """
-Test d'Installation Fraîche - HoneyPot Pro Max
+Test d'Installation FraÃ®che - HoneyPot Pro Max
 =====================================================
 
-Script de test qui simule une installation complètement fraîche
+Script de test qui simule une installation complÃ¨tement fraÃ®che
 en suivant exactement les instructions du README.
 
 Usage:
     python scripts/test_fresh_install.py
 
-Auteur: Équipe ESGI 2024-2025
+Auteur: Ã‰quipe ESGI 2024-2025
 """
 
 import subprocess
@@ -36,15 +36,15 @@ class FreshInstallTester:
     def print_banner(self):
         """Affiche le banner de test"""
         print("""
-🧪 TEST D'INSTALLATION FRAÎCHE
+ðŸ§ª TEST D'INSTALLATION FRAÃŽCHE
 ===============================
-🛡️  HoneyPot Pro Max
-📋 Simulation d'installation de zéro suivant le README
+ðŸ›¡ï¸  HoneyPot Pro Max
+ðŸ“‹ Simulation d'installation de zÃ©ro suivant le README
         """)
 
     def step_1_check_prerequisites(self):
-        """Étape 1: Vérifier les pré-requis selon le README"""
-        print("\n🎯 ÉTAPE 1: Vérification des pré-requis...")
+        """Ã‰tape 1: VÃ©rifier les prÃ©-requis selon le README"""
+        print("\nðŸŽ¯ Ã‰TAPE 1: VÃ©rification des prÃ©-requis...")
         
         result = {
             "status": "UNKNOWN",
@@ -54,7 +54,7 @@ class FreshInstallTester:
             "issues": []
         }
         
-        # Vérifier Docker
+        # VÃ©rifier Docker
         try:
             cmd_result = subprocess.run(
                 ["docker", "--version"],
@@ -63,12 +63,12 @@ class FreshInstallTester:
                 check=True
             )
             result["docker_version"] = cmd_result.stdout.strip()
-            print(f"   ✅ Docker: {result['docker_version']}")
+            print(f"   âœ… Docker: {result['docker_version']}")
         except Exception as e:
             result["issues"].append(f"Docker non disponible: {e}")
-            print(f"   ❌ Docker: MANQUANT ({e})")
+            print(f"   âŒ Docker: MANQUANT ({e})")
         
-        # Vérifier Docker Compose
+        # VÃ©rifier Docker Compose
         try:
             cmd_result = subprocess.run(
                 ["docker", "compose", "version"],
@@ -77,12 +77,12 @@ class FreshInstallTester:
                 check=True
             )
             result["docker_compose_version"] = cmd_result.stdout.strip()
-            print(f"   ✅ Docker Compose: {result['docker_compose_version']}")
+            print(f"   âœ… Docker Compose: {result['docker_compose_version']}")
         except Exception as e:
             result["issues"].append(f"Docker Compose non disponible: {e}")
-            print(f"   ❌ Docker Compose: MANQUANT ({e})")
+            print(f"   âŒ Docker Compose: MANQUANT ({e})")
         
-        # Vérifier Python
+        # VÃ©rifier Python
         try:
             cmd_result = subprocess.run(
                 ["python", "--version"],
@@ -91,24 +91,24 @@ class FreshInstallTester:
                 check=True
             )
             result["python_version"] = cmd_result.stdout.strip()
-            print(f"   ✅ Python: {result['python_version']}")
+            print(f"   âœ… Python: {result['python_version']}")
         except Exception as e:
             result["issues"].append(f"Python non disponible: {e}")
-            print(f"   ❌ Python: MANQUANT ({e})")
+            print(f"   âŒ Python: MANQUANT ({e})")
         
-        # Déterminer le statut
+        # DÃ©terminer le statut
         if len(result["issues"]) == 0:
             result["status"] = "SUCCESS"
-            print("\n✅ Tous les pré-requis sont satisfaits")
+            print("\nâœ… Tous les prÃ©-requis sont satisfaits")
         else:
             result["status"] = "FAILED"
-            print(f"\n❌ {len(result['issues'])} pré-requis manquants")
+            print(f"\nâŒ {len(result['issues'])} prÃ©-requis manquants")
         
         return result
 
     def step_2_simulate_git_clone(self):
-        """Étape 2: Simuler le git clone (utilise le projet actuel)"""
-        print("\n📥 ÉTAPE 2: Simulation du git clone...")
+        """Ã‰tape 2: Simuler le git clone (utilise le projet actuel)"""
+        print("\nðŸ“¥ Ã‰TAPE 2: Simulation du git clone...")
         
         result = {
             "status": "UNKNOWN",
@@ -117,7 +117,7 @@ class FreshInstallTester:
         }
         
         try:
-            # Créer un répertoire temporaire de test
+            # CrÃ©er un rÃ©pertoire temporaire de test
             self.test_dir = tempfile.mkdtemp(prefix="honeypot_test_")
             
             # Copier les fichiers essentiels (simule git clone)
@@ -147,19 +147,19 @@ class FreshInstallTester:
             
             result["test_directory"] = self.test_dir
             result["status"] = "SUCCESS"
-            print(f"   ✅ Projet copié vers: {self.test_dir}")
-            print(f"   ✅ {result['files_copied']} fichiers/dossiers copiés")
+            print(f"   âœ… Projet copiÃ© vers: {self.test_dir}")
+            print(f"   âœ… {result['files_copied']} fichiers/dossiers copiÃ©s")
             
         except Exception as e:
             result["status"] = "FAILED"
             result["error"] = str(e)
-            print(f"   ❌ Erreur lors de la copie: {e}")
+            print(f"   âŒ Erreur lors de la copie: {e}")
         
         return result
 
     def step_3_run_setup_script(self):
-        """Étape 3: Exécuter le script de setup selon le README"""
-        print("\n🔧 ÉTAPE 3: Exécution du script de configuration...")
+        """Ã‰tape 3: ExÃ©cuter le script de setup selon le README"""
+        print("\nðŸ”§ Ã‰TAPE 3: ExÃ©cution du script de configuration...")
         
         result = {
             "status": "UNKNOWN",
@@ -169,10 +169,10 @@ class FreshInstallTester:
         }
         
         try:
-            # Changer vers le répertoire de test
+            # Changer vers le rÃ©pertoire de test
             os.chdir(self.test_dir)
             
-            # Exécuter le script de setup
+            # ExÃ©cuter le script de setup
             cmd_result = subprocess.run(
                 ["python", "setup_dev_environment.py"],
                 capture_output=True,
@@ -183,37 +183,37 @@ class FreshInstallTester:
             result["setup_output"] = cmd_result.stdout + cmd_result.stderr
             
             if cmd_result.returncode == 0:
-                # Vérifier que les secrets ont été créés
+                # VÃ©rifier que les secrets ont Ã©tÃ© crÃ©Ã©s
                 secrets_dir = Path("secrets")
                 if secrets_dir.exists():
                     for secret_file in secrets_dir.glob("*.txt"):
                         result["secrets_created"].append(str(secret_file))
                 
                 result["status"] = "SUCCESS"
-                print(f"   ✅ Script de setup exécuté avec succès")
-                print(f"   ✅ {len(result['secrets_created'])} secrets créés")
+                print(f"   âœ… Script de setup exÃ©cutÃ© avec succÃ¨s")
+                print(f"   âœ… {len(result['secrets_created'])} secrets crÃ©Ã©s")
             else:
                 result["status"] = "FAILED"
                 result["errors"].append(f"Script exit code: {cmd_result.returncode}")
-                print(f"   ❌ Script de setup échoué (code: {cmd_result.returncode})")
+                print(f"   âŒ Script de setup Ã©chouÃ© (code: {cmd_result.returncode})")
                 
         except subprocess.TimeoutExpired:
             result["status"] = "FAILED"
             result["errors"].append("Timeout du script de setup")
-            print("   ❌ Timeout du script de setup (>60s)")
+            print("   âŒ Timeout du script de setup (>60s)")
         except Exception as e:
             result["status"] = "FAILED"
             result["errors"].append(str(e))
-            print(f"   ❌ Erreur lors de l'exécution: {e}")
+            print(f"   âŒ Erreur lors de l'exÃ©cution: {e}")
         finally:
-            # Retourner au répertoire original
+            # Retourner au rÃ©pertoire original
             os.chdir(self.original_dir)
         
         return result
 
     def step_4_docker_compose_syntax(self):
-        """Étape 4: Vérifier la syntaxe docker-compose"""
-        print("\n🐳 ÉTAPE 4: Vérification de la syntaxe Docker Compose...")
+        """Ã‰tape 4: VÃ©rifier la syntaxe docker-compose"""
+        print("\nðŸ³ Ã‰TAPE 4: VÃ©rification de la syntaxe Docker Compose...")
         
         result = {
             "status": "UNKNOWN",
@@ -225,7 +225,7 @@ class FreshInstallTester:
         try:
             os.chdir(self.test_dir)
             
-            # Vérifier la configuration docker-compose
+            # VÃ©rifier la configuration docker-compose
             cmd_result = subprocess.run(
                 ["docker", "compose", "config"],
                 capture_output=True,
@@ -236,7 +236,7 @@ class FreshInstallTester:
             if cmd_result.returncode == 0:
                 result["config_valid"] = True
                 
-                # Lister les services définis
+                # Lister les services dÃ©finis
                 try:
                     cmd_result = subprocess.run(
                         ["docker", "compose", "config", "--services"],
@@ -249,25 +249,25 @@ class FreshInstallTester:
                     pass
                 
                 result["status"] = "SUCCESS"
-                print(f"   ✅ Configuration Docker Compose valide")
-                print(f"   ✅ {len(result['services_found'])} services définis")
+                print(f"   âœ… Configuration Docker Compose valide")
+                print(f"   âœ… {len(result['services_found'])} services dÃ©finis")
             else:
                 result["status"] = "FAILED"
                 result["errors"].append(cmd_result.stderr)
-                print(f"   ❌ Configuration Docker Compose invalide")
+                print(f"   âŒ Configuration Docker Compose invalide")
                 
         except Exception as e:
             result["status"] = "FAILED"
             result["errors"].append(str(e))
-            print(f"   ❌ Erreur lors de la vérification: {e}")
+            print(f"   âŒ Erreur lors de la vÃ©rification: {e}")
         finally:
             os.chdir(self.original_dir)
         
         return result
 
     def step_5_simulate_docker_build(self):
-        """Étape 5: Simuler le build Docker (vérification uniquement)"""
-        print("\n🏗️  ÉTAPE 5: Simulation du build Docker...")
+        """Ã‰tape 5: Simuler le build Docker (vÃ©rification uniquement)"""
+        print("\nðŸ—ï¸  Ã‰TAPE 5: Simulation du build Docker...")
         
         result = {
             "status": "UNKNOWN",
@@ -282,11 +282,11 @@ class FreshInstallTester:
             for dockerfile in Path(".").rglob("Dockerfile"):
                 result["dockerfiles_found"].append(str(dockerfile))
             
-            # NOTE: On ne fait PAS le vrai build pour éviter les conflits
+            # NOTE: On ne fait PAS le vrai build pour Ã©viter les conflits
             # avec l'installation existante, mais on simule la commande
-            print(f"   ✅ {len(result['dockerfiles_found'])} Dockerfile(s) trouvé(s)")
-            print("   ⚠️  Build Docker simulé (non exécuté pour éviter les conflits)")
-            print("   📝 Commande qui serait exécutée: docker compose up -d --build")
+            print(f"   âœ… {len(result['dockerfiles_found'])} Dockerfile(s) trouvÃ©(s)")
+            print("   âš ï¸  Build Docker simulÃ© (non exÃ©cutÃ© pour Ã©viter les conflits)")
+            print("   ðŸ“ Commande qui serait exÃ©cutÃ©e: docker compose up -d --build")
             
             result["status"] = "SUCCESS"
             result["build_simulation"] = "SIMULATED_OK"
@@ -294,15 +294,15 @@ class FreshInstallTester:
         except Exception as e:
             result["status"] = "FAILED"
             result["error"] = str(e)
-            print(f"   ❌ Erreur lors de la simulation: {e}")
+            print(f"   âŒ Erreur lors de la simulation: {e}")
         finally:
             os.chdir(self.original_dir)
         
         return result
 
     def step_6_validate_file_structure(self):
-        """Étape 6: Valider la structure de fichiers attendue"""
-        print("\n📁 ÉTAPE 6: Validation de la structure de fichiers...")
+        """Ã‰tape 6: Valider la structure de fichiers attendue"""
+        print("\nðŸ“ Ã‰TAPE 6: Validation de la structure de fichiers...")
         
         result = {
             "status": "UNKNOWN",
@@ -332,22 +332,22 @@ class FreshInstallTester:
                 path = Path(file_path)
                 if path.exists():
                     result["present_files"].append(file_path)
-                    print(f"   ✅ {file_path}")
+                    print(f"   âœ… {file_path}")
                 else:
                     result["missing_files"].append(file_path)
-                    print(f"   ❌ {file_path}: MANQUANT")
+                    print(f"   âŒ {file_path}: MANQUANT")
             
             if len(result["missing_files"]) == 0:
                 result["status"] = "SUCCESS"
-                print(f"\n✅ Structure de fichiers complète ({len(result['present_files'])}/{len(expected_files)})")
+                print(f"\nâœ… Structure de fichiers complÃ¨te ({len(result['present_files'])}/{len(expected_files)})")
             else:
                 result["status"] = "PARTIAL"
-                print(f"\n⚠️  Structure partielle ({len(result['present_files'])}/{len(expected_files)})")
+                print(f"\nâš ï¸  Structure partielle ({len(result['present_files'])}/{len(expected_files)})")
                 
         except Exception as e:
             result["status"] = "FAILED"
             result["error"] = str(e)
-            print(f"   ❌ Erreur lors de la validation: {e}")
+            print(f"   âŒ Erreur lors de la validation: {e}")
         finally:
             os.chdir(self.original_dir)
         
@@ -358,36 +358,36 @@ class FreshInstallTester:
         if self.test_dir and Path(self.test_dir).exists():
             try:
                 shutil.rmtree(self.test_dir)
-                print(f"\n🧹 Environnement de test nettoyé: {self.test_dir}")
+                print(f"\nðŸ§¹ Environnement de test nettoyÃ©: {self.test_dir}")
             except Exception as e:
-                print(f"\n⚠️  Impossible de nettoyer {self.test_dir}: {e}")
+                print(f"\nâš ï¸  Impossible de nettoyer {self.test_dir}: {e}")
 
     def generate_recommendations(self):
-        """Générer des recommandations d'amélioration"""
+        """GÃ©nÃ©rer des recommandations d'amÃ©lioration"""
         recommendations = []
         
-        # Analyser les résultats pour des recommandations
+        # Analyser les rÃ©sultats pour des recommandations
         if self.test_results["steps"].get("prerequisites", {}).get("status") != "SUCCESS":
-            recommendations.append("📋 Améliorer la section pré-requis du README avec des liens d'installation")
+            recommendations.append("ðŸ“‹ AmÃ©liorer la section prÃ©-requis du README avec des liens d'installation")
         
         if self.test_results["steps"].get("setup_script", {}).get("status") != "SUCCESS":
-            recommendations.append("🔧 Améliorer la robustesse du script setup_dev_environment.py")
+            recommendations.append("ðŸ”§ AmÃ©liorer la robustesse du script setup_dev_environment.py")
         
         if self.test_results["steps"].get("file_structure", {}).get("status") != "SUCCESS":
-            recommendations.append("📁 Vérifier que tous les fichiers essentiels sont dans le repository")
+            recommendations.append("ðŸ“ VÃ©rifier que tous les fichiers essentiels sont dans le repository")
         
         return recommendations
 
     def run_full_test(self):
-        """Exécuter le test complet d'installation fraîche"""
+        """ExÃ©cuter le test complet d'installation fraÃ®che"""
         self.print_banner()
         
         try:
-            # Exécuter toutes les étapes
+            # ExÃ©cuter toutes les Ã©tapes
             self.test_results["steps"]["prerequisites"] = self.step_1_check_prerequisites()
             self.test_results["steps"]["git_clone"] = self.step_2_simulate_git_clone()
             
-            # Si les étapes de base réussissent, continuer
+            # Si les Ã©tapes de base rÃ©ussissent, continuer
             if (self.test_results["steps"]["prerequisites"]["status"] == "SUCCESS" and 
                 self.test_results["steps"]["git_clone"]["status"] == "SUCCESS"):
                 
@@ -396,10 +396,10 @@ class FreshInstallTester:
                 self.test_results["steps"]["docker_build"] = self.step_5_simulate_docker_build()
                 self.test_results["steps"]["file_structure"] = self.step_6_validate_file_structure()
             
-            # Générer les recommandations
+            # GÃ©nÃ©rer les recommandations
             self.test_results["recommendations"] = self.generate_recommendations()
             
-            # Déterminer le statut global
+            # DÃ©terminer le statut global
             step_statuses = [step.get("status") for step in self.test_results["steps"].values()]
             
             if all(status == "SUCCESS" for status in step_statuses):
@@ -418,43 +418,43 @@ class FreshInstallTester:
         return self.test_results
 
     def print_summary(self):
-        """Affiche le résumé du test"""
+        """Affiche le rÃ©sumÃ© du test"""
         status_emoji = {
-            "SUCCESS": "✅",
-            "PARTIAL": "⚠️",
-            "FAILED": "❌",
-            "UNKNOWN": "❓"
+            "SUCCESS": "âœ…",
+            "PARTIAL": "âš ï¸",
+            "FAILED": "âŒ",
+            "UNKNOWN": "â“"
         }
         
-        emoji = status_emoji.get(self.test_results["overall_status"], "❓")
+        emoji = status_emoji.get(self.test_results["overall_status"], "â“")
         
         print(f"""
-📋 RÉSUMÉ DU TEST D'INSTALLATION FRAÎCHE
+ðŸ“‹ RÃ‰SUMÃ‰ DU TEST D'INSTALLATION FRAÃŽCHE
 =========================================
 {emoji} Statut global: {self.test_results["overall_status"]}
-🕐 Timestamp: {self.test_results["timestamp"]}
+ðŸ• Timestamp: {self.test_results["timestamp"]}
 
-📊 ÉTAPES TESTÉES:
+ðŸ“Š Ã‰TAPES TESTÃ‰ES:
 """)
         
         for step_name, step_data in self.test_results["steps"].items():
             status = step_data.get("status", "UNKNOWN")
-            emoji = status_emoji.get(status, "❓")
+            emoji = status_emoji.get(status, "â“")
             step_display = step_name.replace("_", " ").title()
             print(f"   {emoji} {step_display}: {status}")
         
         if self.test_results["recommendations"]:
-            print(f"\n💡 RECOMMANDATIONS D'AMÉLIORATION:")
+            print(f"\nðŸ’¡ RECOMMANDATIONS D'AMÃ‰LIORATION:")
             for rec in self.test_results["recommendations"]:
                 print(f"   {rec}")
         
         print(f"""
-🎯 CONCLUSIONS:
-   • Le README est-il suivable ? {"✅ OUI" if self.test_results["overall_status"] == "SUCCESS" else "❌ NON"}
-   • Installation en 5 minutes possible ? {"✅ OUI" if self.test_results["overall_status"] == "SUCCESS" else "⚠️  AMÉLIORATION REQUISE"}
-   • Expérience utilisateur satisfaisante ? {"✅ OUI" if self.test_results["overall_status"] == "SUCCESS" else "⚠️  À AMÉLIORER"}
+ðŸŽ¯ CONCLUSIONS:
+   â€¢ Le README est-il suivable ? {"âœ… OUI" if self.test_results["overall_status"] == "SUCCESS" else "âŒ NON"}
+   â€¢ Installation en 5 minutes possible ? {"âœ… OUI" if self.test_results["overall_status"] == "SUCCESS" else "âš ï¸  AMÃ‰LIORATION REQUISE"}
+   â€¢ ExpÃ©rience utilisateur satisfaisante ? {"âœ… OUI" if self.test_results["overall_status"] == "SUCCESS" else "âš ï¸  Ã€ AMÃ‰LIORER"}
 
-📁 Rapport sauvegardé: fresh_install_test_report.json
+ðŸ“ Rapport sauvegardÃ©: fresh_install_test_report.json
         """)
         
         # Sauvegarder le rapport
@@ -466,7 +466,7 @@ def main():
     tester = FreshInstallTester()
     results = tester.run_full_test()
     
-    # Code de sortie basé sur le statut
+    # Code de sortie basÃ© sur le statut
     if results["overall_status"] == "SUCCESS":
         sys.exit(0)
     elif results["overall_status"] == "PARTIAL":

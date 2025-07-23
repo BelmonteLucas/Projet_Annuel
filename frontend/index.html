@@ -2,28 +2,28 @@
 =============================================================================
 FRONTEND - HoneyPot Pro Max
 =============================================================================
-Interface utilisateur pour le gestionnaire de mots de passe sécurisé
+Interface utilisateur pour le gestionnaire de mots de passe sÃ©curisÃ©
 - Authentification MFA avec TOTP
-- Gestion sécurisée des mots de passe
+- Gestion sÃ©curisÃ©e des mots de passe
 - Interface moderne et responsive
-- Intégration avec l'API backend FastAPI
+- IntÃ©gration avec l'API backend FastAPI
 
-Fonctionnalités principales :
+FonctionnalitÃ©s principales :
 - Connexion utilisateur avec double authentification
-- Création et gestion de comptes utilisateurs
-- Stockage et récupération de mots de passe chiffrés
-- Interface moderne avec design system cohérent
+- CrÃ©ation et gestion de comptes utilisateurs
+- Stockage et rÃ©cupÃ©ration de mots de passe chiffrÃ©s
+- Interface moderne avec design system cohÃ©rent
 
-Auteur: Équipe ESGI 2024-2025
+Auteur: Ã‰quipe ESGI 2024-2025
 =============================================================================
 -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <!-- =================================================================== -->
-    <!-- MÉTADONNÉES ET CONFIGURATION -->
+    <!-- MÃ‰TADONNÃ‰ES ET CONFIGURATION -->
     <!-- =================================================================== -->
-    <meta charset="UTF-8">                                           <!-- Encodage UTF-8 pour les caractères français -->
+    <meta charset="UTF-8">                                           <!-- Encodage UTF-8 pour les caractÃ¨res franÃ§ais -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">  <!-- Responsive design pour mobile -->
     <title>HoneyPot Pro Max - Gestionnaire de mots de passe</title>      <!-- Titre de l'application -->
     
@@ -32,27 +32,27 @@ Auteur: Équipe ESGI 2024-2025
         /* IMPORTS ET POLICES */
         /* =================================================================== */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        /* Police moderne Inter pour une meilleure lisibilité */
+        /* Police moderne Inter pour une meilleure lisibilitÃ© */
         
         /* =================================================================== */
         /* VARIABLES CSS - DESIGN SYSTEM */
         /* =================================================================== */
-        /* Palette de couleurs cohérente pour toute l'application */
+        /* Palette de couleurs cohÃ©rente pour toute l'application */
         :root {
-            --primary-color: #667eea;          /* Bleu principal pour les éléments interactifs */
-            --primary-dark: #5a67d8;           /* Variation foncée pour les états hover */
+            --primary-color: #667eea;          /* Bleu principal pour les Ã©lÃ©ments interactifs */
+            --primary-dark: #5a67d8;           /* Variation foncÃ©e pour les Ã©tats hover */
             --secondary-color: #764ba2;        /* Violet secondaire pour les accents */
             --accent-color: #f093fb;           /* Rose pour les highlights */
-            --success-color: #48bb78;          /* Vert pour les messages de succès */
+            --success-color: #48bb78;          /* Vert pour les messages de succÃ¨s */
             --error-color: #f56565;            /* Rouge pour les erreurs */
             --warning-color: #ed8936;          /* Orange pour les avertissements */
-            --dark-color: #2d3748;             /* Gris foncé pour le texte principal */
-            --light-color: #f7fafc;            /* Gris très clair pour les fonds */
+            --dark-color: #2d3748;             /* Gris foncÃ© pour le texte principal */
+            --light-color: #f7fafc;            /* Gris trÃ¨s clair pour les fonds */
             --border-color: #e2e8f0;           /* Gris clair pour les bordures */
             --text-primary: #2d3748;           /* Couleur du texte principal */
             --text-secondary: #718096;         /* Couleur du texte secondaire */
             
-            /* Système d'ombres cohérent */
+            /* SystÃ¨me d'ombres cohÃ©rent */
             --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
             --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
             --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
@@ -63,24 +63,24 @@ Auteur: Équipe ESGI 2024-2025
         /* RESET CSS ET STYLES DE BASE */
         /* =================================================================== */
         * {
-            margin: 0;                          /* Supprime les marges par défaut */
-            padding: 0;                         /* Supprime les paddings par défaut */
+            margin: 0;                          /* Supprime les marges par dÃ©faut */
+            padding: 0;                         /* Supprime les paddings par dÃ©faut */
             box-sizing: border-box;             /* Inclut padding et border dans la taille */
         }
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);     /* Dégradé de fond */
-            min-height: 100vh;                  /* Hauteur minimale plein écran */
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);     /* DÃ©gradÃ© de fond */
+            min-height: 100vh;                  /* Hauteur minimale plein Ã©cran */
             color: var(--text-primary);         /* Couleur du texte */
-            line-height: 1.6;                   /* Interlignage pour la lisibilité */
-            position: relative;                 /* Position pour les pseudo-éléments */
+            line-height: 1.6;                   /* Interlignage pour la lisibilitÃ© */
+            position: relative;                 /* Position pour les pseudo-Ã©lÃ©ments */
         }
 
         /* =================================================================== */
         /* EFFETS VISUELS DE FOND */
         /* =================================================================== */
-        /* Effet de particules/bulles en arrière-plan pour l'esthétique */
+        /* Effet de particules/bulles en arriÃ¨re-plan pour l'esthÃ©tique */
         body::before {
             content: '';
             position: fixed;                    /* Position fixe pour rester en place lors du scroll */
@@ -88,17 +88,17 @@ Auteur: Équipe ESGI 2024-2025
             left: 0;
             width: 100%;
             height: 100%;
-            /* Dégradés radiaux pour créer un effet de profondeur */
+            /* DÃ©gradÃ©s radiaux pour crÃ©er un effet de profondeur */
             background: 
                 radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
                 radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
                 radial-gradient(circle at 40% 80%, rgba(120, 119, 198, 0.2) 0%, transparent 50%);
-            pointer-events: none;               /* N'interfère pas avec les interactions */
-            z-index: -1;                        /* Reste en arrière-plan */
+            pointer-events: none;               /* N'interfÃ¨re pas avec les interactions */
+            z-index: -1;                        /* Reste en arriÃ¨re-plan */
         }
 
         /* =================================================================== */
-        /* BARRE SUPÉRIEURE MODERNE */
+        /* BARRE SUPÃ‰RIEURE MODERNE */
         /* =================================================================== */
         /* Header principal avec effet de transparence et blur */
         .topbar {
@@ -109,20 +109,20 @@ Auteur: Équipe ESGI 2024-2025
             padding: 20px 30px;
             font-size: 1.8em;
             font-weight: 700;
-            letter-spacing: -0.025em;           /* Espacement des lettres ajusté */
+            letter-spacing: -0.025em;           /* Espacement des lettres ajustÃ© */
             box-shadow: var(--shadow-md);
             position: sticky;                   /* Reste visible lors du scroll */
             top: 0;
-            z-index: 100;                       /* Au-dessus des autres éléments */
+            z-index: 100;                       /* Au-dessus des autres Ã©lÃ©ments */
             display: flex;                      /* Layout flexbox */
-            justify-content: space-between;     /* Espacement entre les éléments */
+            justify-content: space-between;     /* Espacement entre les Ã©lÃ©ments */
             align-items: center;                /* Centrage vertical */
         }
 
-        /* Titre avec effet de dégradé */
+        /* Titre avec effet de dÃ©gradÃ© */
         .topbar .title {
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            background-clip: text;              /* Applique le dégradé au texte */
+            background-clip: text;              /* Applique le dÃ©gradÃ© au texte */
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             display: inline-block;
@@ -130,11 +130,11 @@ Auteur: Équipe ESGI 2024-2025
 
         /* Exception pour l'emoji dans le titre */
         .topbar .title .emoji {
-            background: none !important;       /* Annule le dégradé pour l'emoji */
+            background: none !important;       /* Annule le dÃ©gradÃ© pour l'emoji */
             background-clip: unset !important;
             -webkit-background-clip: unset !important;
             -webkit-text-fill-color: unset !important;
-            color: #f39c12 !important;         /* Couleur dorée pour l'emoji */
+            color: #f39c12 !important;         /* Couleur dorÃ©e pour l'emoji */
             filter: none !important;
             display: inline-block !important;
         }
@@ -301,7 +301,7 @@ Auteur: Équipe ESGI 2024-2025
             transform: translateY(0);
         }
 
-        /* --- Boutons spécialisés --- */
+        /* --- Boutons spÃ©cialisÃ©s --- */
         .btn-danger {
             background: linear-gradient(135deg, var(--error-color), #e53e3e);
         }
@@ -314,7 +314,7 @@ Auteur: Équipe ESGI 2024-2025
             background: linear-gradient(135deg, var(--text-secondary), #4a5568);
         }
 
-        /* --- Gestionnaire principal avec layout amélioré --- */
+        /* --- Gestionnaire principal avec layout amÃ©liorÃ© --- */
         #app.card {
             max-width: 900px;
             padding: 50px;
@@ -363,7 +363,7 @@ Auteur: Équipe ESGI 2024-2025
             font-size: 0.95em;
         }
 
-        /* --- Container pour champs mot de passe amélioré --- */
+        /* --- Container pour champs mot de passe amÃ©liorÃ© --- */
         .password-container {
             position: relative;
             display: block;
@@ -417,7 +417,7 @@ Auteur: Équipe ESGI 2024-2025
             fill: var(--primary-color);
         }
 
-        /* --- Tableau moderne avec style élégant --- */
+        /* --- Tableau moderne avec style Ã©lÃ©gant --- */
         #password-list {
             margin-top: 40px;
         }
@@ -475,7 +475,7 @@ Auteur: Équipe ESGI 2024-2025
             transition: all 0.3s ease;
         }
 
-        /* --- Suggestions améliorées --- */
+        /* --- Suggestions amÃ©liorÃ©es --- */
         #site-link-list {
             position: absolute;
             background: rgba(255, 255, 255, 0.95);
@@ -508,7 +508,7 @@ Auteur: Équipe ESGI 2024-2025
             transform: translateX(5px);
         }
 
-        /* --- Indicateurs de complexité du mot de passe --- */
+        /* --- Indicateurs de complexitÃ© du mot de passe --- */
         #password-hint {
             background: rgba(255, 255, 255, 0.9);
             border-radius: 12px;
@@ -531,12 +531,12 @@ Auteur: Équipe ESGI 2024-2025
         }
 
         #password-hint li::before {
-            content: '•';
+            content: 'â€¢';
             margin-right: 8px;
             font-size: 1.2em;
         }
 
-        /* --- Messages d'erreur stylisés --- */
+        /* --- Messages d'erreur stylisÃ©s --- */
         #add-error {
             background: rgba(245, 101, 101, 0.1);
             border: 1px solid rgba(245, 101, 101, 0.3);
@@ -548,7 +548,7 @@ Auteur: Équipe ESGI 2024-2025
             font-weight: 500;
         }
 
-        /* --- Liens stylisés --- */
+        /* --- Liens stylisÃ©s --- */
         a {
             color: var(--primary-color);
             text-decoration: none;
@@ -561,7 +561,7 @@ Auteur: Équipe ESGI 2024-2025
             text-decoration: underline;
         }
 
-        /* --- Responsive design amélioré --- */
+        /* --- Responsive design amÃ©liorÃ© --- */
         @media (max-width: 768px) {
             .card {
                 margin: 20px;
@@ -646,7 +646,7 @@ Auteur: Équipe ESGI 2024-2025
             animation: fadeInUp 0.6s ease-out;
         }
 
-        /* --- États de chargement --- */
+        /* --- Ã‰tats de chargement --- */
         .loading {
             position: relative;
             pointer-events: none;
@@ -673,45 +673,45 @@ Auteur: Équipe ESGI 2024-2025
     </style>
 </head>
 <body>
-    <!-- Barre supérieure moderne -->
+    <!-- Barre supÃ©rieure moderne -->
     <div class="topbar">
         <div style="display: flex; align-items: center;">
-            <span style="color: #f39c12; margin-right: 8px; font-size: 1em;">🔐</span>
+            <span style="color: #f39c12; margin-right: 8px; font-size: 1em;">ðŸ”</span>
             <span class="title">HoneyPot Pro Max</span>
         </div>
         <button id="logout-btn" class="logout-btn" style="display:none;" onclick="logout()">
-            <span>🚪 Déconnexion</span>
+            <span>ðŸšª DÃ©connexion</span>
         </button>
     </div>
 
     <!-- Page d'accueil moderne -->
     <div id="auth-choice" class="card" style="display:block;">
-        <h1>✨ Bienvenue sur HoneyPot Pro Max</h1>
+        <h1>âœ¨ Bienvenue sur HoneyPot Pro Max</h1>
         <img src="images/HoneyPot.png" alt="Logo HoneyPot Pro Max" class="logo-img">
         <p style="text-align: center; color: var(--text-secondary); margin-bottom: 30px; font-size: 1.1em;">
-            Votre gestionnaire de mots de passe sécurisé et moderne
+            Votre gestionnaire de mots de passe sÃ©curisÃ© et moderne
         </p>
         <button onclick="showSignup()" class="btn-success">
-            <span>🆕 Créer un compte</span>
+            <span>ðŸ†• CrÃ©er un compte</span>
         </button>
         <button onclick="showLogin()">
-            <span>🔑 Se connecter</span>
+            <span>ðŸ”‘ Se connecter</span>
         </button>
     </div>
 
-    <!-- Formulaire de création de compte moderne -->
+    <!-- Formulaire de crÃ©ation de compte moderne -->
     <div id="setup-container" class="card" style="display: none;">
-        <h1>📝 Créer votre compte</h1>
+        <h1>ðŸ“ CrÃ©er votre compte</h1>
         
         <div class="form-group">
-            <label class="form-label">👤 Identifiant</label>
+            <label class="form-label">ðŸ‘¤ Identifiant</label>
             <input type="text" id="new-username" placeholder="Choisissez votre identifiant unique">
         </div>
         
         <div class="form-group">
-            <label class="form-label">🔐 Mot de passe maître</label>
+            <label class="form-label">ðŸ” Mot de passe maÃ®tre</label>
             <div class="password-container">
-                <input type="password" id="new-master-password" placeholder="Créez un mot de passe sécurisé" oninput="updatePasswordHint()">
+                <input type="password" id="new-master-password" placeholder="CrÃ©ez un mot de passe sÃ©curisÃ©" oninput="updatePasswordHint()">
                 <span class="password-toggle" onclick="toggleNewPassword()">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                         <path d="M12.015 7c4.751 0 8.063 3.012 9.504 4.636-1.401 1.837-4.713 5.364-9.504 5.364-4.42 0-7.93-3.536-9.478-5.407 1.493-1.647 4.817-4.593 9.478-4.593zm0-2c-7.569 0-12.015 6.551-12.015 6.551s4.835 7.449 12.015 7.449c7.733 0 11.985-7.449 11.985-7.449s-4.291-6.551-11.985-6.551zm-.015 3c-2.209 0-4 1.792-4 4 0 2.209 1.791 4 4s4-1.791 4-4c0-2.208-1.791-4-4-4z"/>
@@ -723,27 +723,27 @@ Auteur: Équipe ESGI 2024-2025
         <div id="password-hint" style="display:none;"></div>
         
         <button onclick="setMasterPassword()" class="btn-success">
-            <span>✅ Créer mon compte</span>
+            <span>âœ… CrÃ©er mon compte</span>
         </button>
         
         <div style="margin-top:20px;text-align:center;">
             <a href="#" onclick="showLogin();return false;">
-                <span>🔄 Déjà un compte ? Se connecter</span>
+                <span>ðŸ”„ DÃ©jÃ  un compte ? Se connecter</span>
             </a>
         </div>
     </div>
 
     <!-- Formulaire de connexion moderne -->
     <div id="auth-container" class="card">
-        <h1>🔐 Connexion</h1>
+        <h1>ðŸ” Connexion</h1>
         
         <div class="form-group">
-            <label class="form-label">👤 Identifiant</label>
+            <label class="form-label">ðŸ‘¤ Identifiant</label>
             <input type="text" id="login-username" placeholder="Saisissez votre identifiant">
         </div>
         
         <div class="form-group">
-            <label class="form-label">🔑 Mot de passe</label>
+            <label class="form-label">ðŸ”‘ Mot de passe</label>
             <div class="password-container">
                 <input type="password" id="master-password" placeholder="Saisissez votre mot de passe">
                 <span class="password-toggle" onclick="toggleLoginPassword()">
@@ -755,34 +755,34 @@ Auteur: Équipe ESGI 2024-2025
         </div>
         
         <button onclick="authenticate()">
-            <span>🚪 Se connecter</span>
+            <span>ðŸšª Se connecter</span>
         </button>
         
         <div style="margin-top:20px;text-align:center;">
             <a href="#" onclick="showSignup();return false;">
-                <span>🆕 Créer un compte</span>
+                <span>ðŸ†• CrÃ©er un compte</span>
             </a>
         </div>
     </div>    <!-- Gestionnaire de mots de passe moderne -->
     <div id="app" class="card">
-        <h1>🔐 Vos mots de passe sécurisés</h1>
+        <h1>ðŸ” Vos mots de passe sÃ©curisÃ©s</h1>
         
         <div class="form-grid">
             <div class="form-group">
-                <label class="form-label">👤 Identifiant du compte</label>
+                <label class="form-label">ðŸ‘¤ Identifiant du compte</label>
                 <input type="text" id="account-username" placeholder="Ex: john.doe@gmail.com">
             </div>
             
             <div class="form-group" style="position:relative;">
-                <label class="form-label">🌐 Site web</label>
+                <label class="form-label">ðŸŒ Site web</label>
                 <input type="text" id="site-link" placeholder="Ex: https://www.google.com" autocomplete="off" oninput="showSiteSuggestions()" onblur="hideSiteSuggestionsWithDelay()">
                 <div id="site-link-list"></div>
             </div>
             
             <div class="form-group">
-                <label class="form-label">🔑 Mot de passe</label>
+                <label class="form-label">ðŸ”‘ Mot de passe</label>
                 <div class="password-container">
-                    <input type="password" id="password" placeholder="Votre mot de passe sécurisé">
+                    <input type="password" id="password" placeholder="Votre mot de passe sÃ©curisÃ©">
                     <span class="password-toggle" onclick="toggleMainPassword()">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                             <path d="M12.015 7c4.751 0 8.063 3.012 9.504 4.636-1.401 1.837-4.713 5.364-9.504 5.364-4.42 0-7.93-3.536-9.478-5.407 1.493-1.647 4.817-4.593 9.478-4.593zm0-2c-7.569 0-12.015 6.551-12.015 6.551s4.835 7.449 12.015 7.449c7.733 0 11.985-7.449 11.985-7.449s-4.291-6.551-11.985-6.551zm-.015 3c-2.209 0-4 1.792-4 4 0 2.209 1.791 4 4s4-1.791 4-4c0-2.208-1.791-4-4-4z"/>
@@ -794,96 +794,96 @@ Auteur: Équipe ESGI 2024-2025
         
         <div class="actions-grid">
             <button onclick="generatePassword()">
-                <span>🎲 Générer un mot de passe</span>
+                <span>ðŸŽ² GÃ©nÃ©rer un mot de passe</span>
             </button>
             <button onclick="addPassword()" class="btn-success">
-                <span>➕ Ajouter</span>
+                <span>âž• Ajouter</span>
             </button>
             <button onclick="showMfaSettings()" class="btn-secondary">
-                <span>🔐 Gérer la 2FA</span>
+                <span>ðŸ” GÃ©rer la 2FA</span>
             </button>
             <button onclick="deleteAllPasswords()" class="btn-danger">
-                <span>🗑️ Supprimer tout</span>
+                <span>ðŸ—‘ï¸ Supprimer tout</span>
             </button>
         </div>
         
         <div id="add-error" style="display:none;"></div>
         
-        <!-- Section des mots de passe sauvegardés -->
+        <!-- Section des mots de passe sauvegardÃ©s -->
         <div id="password-list"></div>
     </div>
 
     <!-- Interface de gestion MFA/2FA -->
     <div id="mfa-settings" class="card">
-        <h1>🔐 Authentification à deux facteurs (2FA)</h1>
+        <h1>ðŸ” Authentification Ã  deux facteurs (2FA)</h1>
         
         <div id="mfa-status" style="margin-bottom: 30px;">
             <div style="padding: 20px; border-radius: 12px; background: rgba(255, 193, 7, 0.1); border-left: 4px solid var(--warning-color);">
-                <p><strong>🔄 Vérification du statut MFA...</strong></p>
+                <p><strong>ðŸ”„ VÃ©rification du statut MFA...</strong></p>
             </div>
         </div>
 
         <!-- Activation de la MFA -->
         <div id="mfa-setup" style="display: none;">
             <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 30px;">
-                <h3>📱 Configurer l'authentification à deux facteurs</h3>
-                <p style="margin-bottom: 20px;">1. Téléchargez une application d'authentification comme <strong>Google Authenticator</strong>, <strong>Authy</strong> ou <strong>Microsoft Authenticator</strong></p>
+                <h3>ðŸ“± Configurer l'authentification Ã  deux facteurs</h3>
+                <p style="margin-bottom: 20px;">1. TÃ©lÃ©chargez une application d'authentification comme <strong>Google Authenticator</strong>, <strong>Authy</strong> ou <strong>Microsoft Authenticator</strong></p>
                 <p style="margin-bottom: 20px;">2. Scannez le QR code ci-dessous avec votre application :</p>
                 
                 <div id="qr-code" style="text-align: center; margin: 20px 0; padding: 20px; background: white; border-radius: 12px; display: inline-block; width: 100%;"></div>
                 
-                <p style="margin-bottom: 20px;">3. Entrez le code à 6 chiffres généré par votre application pour confirmer :</p>
+                <p style="margin-bottom: 20px;">3. Entrez le code Ã  6 chiffres gÃ©nÃ©rÃ© par votre application pour confirmer :</p>
                 
                 <div class="form-group">
                     <input type="text" id="mfa-verify-code" placeholder="123456" maxlength="6" style="text-align: center; font-size: 1.2em; letter-spacing: 0.3em;">
                 </div>
                 
                 <button onclick="setupMfa()" class="btn-success">
-                    <span>✅ Activer la 2FA</span>
+                    <span>âœ… Activer la 2FA</span>
                 </button>
             </div>
         </div>
 
-        <!-- MFA déjà activée -->
+        <!-- MFA dÃ©jÃ  activÃ©e -->
         <div id="mfa-active" style="display: none;">
             <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 30px;">
-                <h3>✅ Authentification à deux facteurs activée</h3>
-                <p>Votre compte est protégé par l'authentification à deux facteurs. Un code de vérification sera requis à chaque connexion.</p>
+                <h3>âœ… Authentification Ã  deux facteurs activÃ©e</h3>
+                <p>Votre compte est protÃ©gÃ© par l'authentification Ã  deux facteurs. Un code de vÃ©rification sera requis Ã  chaque connexion.</p>
             </div>
             
             <div style="background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.3); border-radius: 12px; padding: 20px;">
-                <h4>⚠️ Désactivation de la 2FA</h4>
-                <p>La désactivation de la 2FA n'est pas encore disponible via l'interface. Contactez l'administrateur si nécessaire.</p>
-                <p><em>Cette fonctionnalité sera disponible dans une prochaine mise à jour.</em></p>
+                <h4>âš ï¸ DÃ©sactivation de la 2FA</h4>
+                <p>La dÃ©sactivation de la 2FA n'est pas encore disponible via l'interface. Contactez l'administrateur si nÃ©cessaire.</p>
+                <p><em>Cette fonctionnalitÃ© sera disponible dans une prochaine mise Ã  jour.</em></p>
             </div>
         </div>
 
         <button onclick="backToMainApp()" class="btn-secondary" style="margin-top: 30px;">
-            <span>🔙 Retour au gestionnaire</span>
+            <span>ðŸ”™ Retour au gestionnaire</span>
         </button>
     </div>
 
-    <!-- Interface de vérification MFA lors de la connexion -->
+    <!-- Interface de vÃ©rification MFA lors de la connexion -->
     <div id="mfa-verification" class="card">
-        <h1>🔐 Vérification en deux étapes</h1>
+        <h1>ðŸ” VÃ©rification en deux Ã©tapes</h1>
         
         <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 30px; text-align: center;">
-            <p><strong>📱 Ouvrez votre application d'authentification</strong></p>
-            <p>Entrez le code à 6 chiffres affiché pour <strong id="mfa-username-display"></strong></p>
+            <p><strong>ðŸ“± Ouvrez votre application d'authentification</strong></p>
+            <p>Entrez le code Ã  6 chiffres affichÃ© pour <strong id="mfa-username-display"></strong></p>
         </div>
         
         <div class="form-group">
-            <label class="form-label">🔢 Code de vérification</label>
+            <label class="form-label">ðŸ”¢ Code de vÃ©rification</label>
             <input type="text" id="mfa-login-code" placeholder="123456" maxlength="6" style="text-align: center; font-size: 1.5em; letter-spacing: 0.3em;">
         </div>
         
         <button onclick="verifyMfaLogin()" class="btn-success">
-            <span>✅ Vérifier et se connecter</span>
+            <span>âœ… VÃ©rifier et se connecter</span>
         </button>
         
         <div style="margin-top: 20px; text-align: center;">
             <a href="#" onclick="cancelMfaLogin(); return false;">
-                <span>🔙 Annuler la connexion</span>
+                <span>ðŸ”™ Annuler la connexion</span>
             </a>
         </div>
     </div>
@@ -894,7 +894,7 @@ Auteur: Équipe ESGI 2024-2025
         let pendingUsername = null;
         let pendingPassword = null;
 
-        // Affiche uniquement le conteneur demandé, cache les autres
+        // Affiche uniquement le conteneur demandÃ©, cache les autres
         function showOnly(id) {
             ["auth-choice", "setup-container", "auth-container", "app", "mfa-settings", "mfa-verification"].forEach(function(div) {
                 document.getElementById(div).style.display = (div === id) ? "block" : "none";
@@ -902,25 +902,25 @@ Auteur: Équipe ESGI 2024-2025
             document.getElementById("logout-btn").style.display = (["app", "mfa-settings"].includes(id)) ? "block" : "none";
         }
 
-        // Affiche le formulaire de création de compte
+        // Affiche le formulaire de crÃ©ation de compte
         function showSignup() {
-            // Sécurité : vider tous les champs de mot de passe
+            // SÃ©curitÃ© : vider tous les champs de mot de passe
             clearAllPasswordFields();
             showOnly("setup-container");
         }
 
         // Affiche le formulaire de connexion
         function showLogin() {
-            // Sécurité : vider tous les champs de mot de passe
+            // SÃ©curitÃ© : vider tous les champs de mot de passe
             clearAllPasswordFields();
             if (localStorage.getItem("masterPassword") && localStorage.getItem("username")) {
                 showOnly("auth-container");
             } else {
-                alert("Aucun compte trouvé, veuillez créer un compte.");
+                alert("Aucun compte trouvÃ©, veuillez crÃ©er un compte.");
             }
         }
 
-        // Fonction de sécurité pour vider tous les champs sensibles
+        // Fonction de sÃ©curitÃ© pour vider tous les champs sensibles
         function clearAllPasswordFields() {
             const passwordFields = [
                 "new-master-password",
@@ -934,7 +934,7 @@ Auteur: Équipe ESGI 2024-2025
                 const field = document.getElementById(fieldId);
                 if (field) {
                     field.value = "";
-                    // Réinitialiser le type en mode masqué
+                    // RÃ©initialiser le type en mode masquÃ©
                     if (field.type === "text" && field.parentElement.classList.contains('password-container')) {
                         field.type = "password";
                         const toggleIcon = field.parentElement.querySelector('.password-toggle svg');
@@ -952,7 +952,7 @@ Auteur: Équipe ESGI 2024-2025
             }
         }
 
-        // Vérifie la complexité du mot de passe
+        // VÃ©rifie la complexitÃ© du mot de passe
         function checkPasswordComplexity(password) {
             const minLength = 8;
             const hasUpper = /[A-Z]/.test(password);
@@ -968,21 +968,21 @@ Auteur: Équipe ESGI 2024-2025
             };
         }
 
-        // Affiche les conseils de complexité du mot de passe
+        // Affiche les conseils de complexitÃ© du mot de passe
         function updatePasswordHint() {
             const password = document.getElementById("new-master-password").value;
             const hintDiv = document.getElementById("password-hint");
             const checks = checkPasswordComplexity(password);
 
             let html = "Le mot de passe n'est pas assez complexe.<br>Il doit contenir au moins :<ul style='margin:4px 0 0 18px;padding:0;'>";
-            html += `<li style="color:${checks.minLength ? '#22c55e' : '#ef4444'}">8 caractères</li>`;
+            html += `<li style="color:${checks.minLength ? '#22c55e' : '#ef4444'}">8 caractÃ¨res</li>`;
             html += `<li style="color:${checks.hasUpper ? '#22c55e' : '#ef4444'}">une lettre majuscule</li>`;
             html += `<li style="color:${checks.hasLower ? '#22c55e' : '#ef4444'}">une lettre minuscule</li>`;
             html += `<li style="color:${checks.hasDigit ? '#22c55e' : '#ef4444'}">un chiffre</li>`;
-            html += `<li style="color:${checks.hasSpecial ? '#22c55e' : '#ef4444'}">un caractère spécial (ex: !@#$%^&amp;*)</li>`;
+            html += `<li style="color:${checks.hasSpecial ? '#22c55e' : '#ef4444'}">un caractÃ¨re spÃ©cial (ex: !@#$%^&amp;*)</li>`;
             html += "</ul>";
 
-            // Affiche le hint si le champ n'est pas vide ou si tout n'est pas validé
+            // Affiche le hint si le champ n'est pas vide ou si tout n'est pas validÃ©
             if (password.length > 0 && Object.values(checks).some(v => !v)) {
                 hintDiv.innerHTML = html;
                 hintDiv.style.display = "block";
@@ -991,7 +991,7 @@ Auteur: Équipe ESGI 2024-2025
             }
         }
 
-        // Création de compte
+        // CrÃ©ation de compte
         function setMasterPassword() {
             const newUsername = document.getElementById("new-username").value;
             const newPassword = document.getElementById("new-master-password").value;
@@ -1023,8 +1023,8 @@ Auteur: Équipe ESGI 2024-2025
             })
             .then(res => res.json())
             .then(data => {
-                if (data.message === "Utilisateur créé avec succès") {
-                    alert("Compte créé !");
+                if (data.message === "Utilisateur crÃ©Ã© avec succÃ¨s") {
+                    alert("Compte crÃ©Ã© !");
                     showOnly("auth-container");
                 } else {
                     alert("Erreur : " + (data.detail || JSON.stringify(data)));
@@ -1046,7 +1046,7 @@ Auteur: Équipe ESGI 2024-2025
             }
 
             if (enteredUsername === savedUsername && btoa(enteredPassword) === savedPassword) {
-                // Utiliser l'endpoint /api/login du backend pour vérifier si MFA est requis
+                // Utiliser l'endpoint /api/login du backend pour vÃ©rifier si MFA est requis
                 fetch("/api/login", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -1055,7 +1055,7 @@ Auteur: Équipe ESGI 2024-2025
                 .then(res => res.json())
                 .then(data => {
                     if (data.mfa_required) {
-                        // MFA activée, demander le code de vérification
+                        // MFA activÃ©e, demander le code de vÃ©rification
                         pendingUsername = enteredUsername;
                         pendingPassword = enteredPassword;
                         document.getElementById("mfa-username-display").textContent = enteredUsername;
@@ -1068,7 +1068,7 @@ Auteur: Équipe ESGI 2024-2025
                     }
                 })
                 .catch(err => {
-                    console.error("Erreur vérification login:", err);
+                    console.error("Erreur vÃ©rification login:", err);
                     // En cas d'erreur, connexion normale (fallback)
                     localStorage.setItem("currentUser", btoa(enteredUsername + ":" + enteredPassword));
                     showOnly("app");
@@ -1079,7 +1079,7 @@ Auteur: Équipe ESGI 2024-2025
             }
         }
 
-        // Génère un mot de passe aléatoire
+        // GÃ©nÃ¨re un mot de passe alÃ©atoire
         function generatePassword() {
             const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
             const password = Array.from({ length: 12 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
@@ -1087,18 +1087,18 @@ Auteur: Équipe ESGI 2024-2025
             passwordInput.value = password;
         }
 
-        // Fonctions pour afficher/masquer les mots de passe avec les icônes SVG
+        // Fonctions pour afficher/masquer les mots de passe avec les icÃ´nes SVG
         function toggleMainPassword() {
             const passwordInput = document.getElementById("password");
             const toggleIcon = passwordInput.parentElement.querySelector('.password-toggle svg');
             
             if (passwordInput.type === "password") {
                 passwordInput.type = "text";
-                // Icône œil barré (mot de passe visible)
+                // IcÃ´ne Å“il barrÃ© (mot de passe visible)
                 toggleIcon.innerHTML = '<path d="M11.83,9L15,12.16C15,12.11 15,12.05 15,12A3,3 0 0,0 12,9C11.94,9 11.89,9 11.83,9M7.53,9.8L9.08,11.35C9.03,11.56 9,11.77 9,12A3,3 0 0,0 12,15C12.22,15 12.44,14.97 12.65,14.92L14.2,16.47C13.53,16.8 12.79,17 12,17A5,5 0 0,1 7,12C7,11.21 7.2,10.47 7.53,9.8M2,4.27L4.28,6.55L4.73,7C3.08,8.3 1.78,10 1,12C2.73,16.39 7,19.5 12,19.5C13.55,19.5 15.03,19.2 16.38,18.66L16.81,19.08L19.73,22L21,20.73L3.27,3M12,7A5,5 0 0,1 17,12C17,12.64 16.87,13.26 16.64,13.82L19.57,16.75C21.07,15.5 22.27,13.86 23,12C21.27,7.61 17,4.5 12,4.5C10.6,4.5 9.26,4.75 8,5.2L10.17,7.35C10.76,7.13 11.37,7 12,7Z"/>';
             } else {
                 passwordInput.type = "password";
-                // Icône œil normal (mot de passe masqué)
+                // IcÃ´ne Å“il normal (mot de passe masquÃ©)
                 toggleIcon.innerHTML = '<path d="M12.015 7c4.751 0 8.063 3.012 9.504 4.636-1.401 1.837-4.713 5.364-9.504 5.364-4.42 0-7.93-3.536-9.478-5.407 1.493-1.647 4.817-4.593 9.478-4.593zm0-2c-7.569 0-12.015 6.551-12.015 6.551s4.835 7.449 12.015 7.449c7.733 0 11.985-7.449 11.985-7.449s-4.291-6.551-11.985-6.551zm-.015 3c-2.209 0-4 1.792-4 4 0 2.209 1.791 4 4s4-1.791 4-4c0-2.208-1.791-4-4-4z"/>';
             }
         }
@@ -1109,11 +1109,11 @@ Auteur: Équipe ESGI 2024-2025
             
             if (passwordInput.type === "password") {
                 passwordInput.type = "text";
-                // Icône œil barré (mot de passe visible)
+                // IcÃ´ne Å“il barrÃ© (mot de passe visible)
                 toggleIcon.innerHTML = '<path d="M11.83,9L15,12.16C15,12.11 15,12.05 15,12A3,3 0 0,0 12,9C11.94,9 11.89,9 11.83,9M7.53,9.8L9.08,11.35C9.03,11.56 9,11.77 9,12A3,3 0 0,0 12,15C12.22,15 12.44,14.97 12.65,14.92L14.2,16.47C13.53,16.8 12.79,17 12,17A5,5 0 0,1 7,12C7,11.21 7.2,10.47 7.53,9.8M2,4.27L4.28,6.55L4.73,7C3.08,8.3 1.78,10 1,12C2.73,16.39 7,19.5 12,19.5C13.55,19.5 15.03,19.2 16.38,18.66L16.81,19.08L19.73,22L21,20.73L3.27,3M12,7A5,5 0 0,1 17,12C17,12.64 16.87,13.26 16.64,13.82L19.57,16.75C21.07,15.5 22.27,13.86 23,12C21.27,7.61 17,4.5 12,4.5C10.6,4.5 9.26,4.75 8,5.2L10.17,7.35C10.76,7.13 11.37,7 12,7Z"/>';
             } else {
                 passwordInput.type = "password";
-                // Icône œil normal (mot de passe masqué)
+                // IcÃ´ne Å“il normal (mot de passe masquÃ©)
                 toggleIcon.innerHTML = '<path d="M12.015 7c4.751 0 8.063 3.012 9.504 4.636-1.401 1.837-4.713 5.364-9.504 5.364-4.42 0-7.93-3.536-9.478-5.407 1.493-1.647 4.817-4.593 9.478-4.593zm0-2c-7.569 0-12.015 6.551-12.015 6.551s4.835 7.449 12.015 7.449c7.733 0 11.985-7.449 11.985-7.449s-4.291-6.551-11.985-6.551zm-.015 3c-2.209 0-4 1.792-4 4 0 2.209 1.791 4 4s4-1.791 4-4c0-2.208-1.791-4-4-4z"/>';
             }
         }
@@ -1124,16 +1124,16 @@ Auteur: Équipe ESGI 2024-2025
             
             if (passwordInput.type === "password") {
                 passwordInput.type = "text";
-                // Icône œil barré (mot de passe visible)
+                // IcÃ´ne Å“il barrÃ© (mot de passe visible)
                 toggleIcon.innerHTML = '<path d="M11.83,9L15,12.16C15,12.11 15,12.05 15,12A3,3 0 0,0 12,9C11.94,9 11.89,9 11.83,9M7.53,9.8L9.08,11.35C9.03,11.56 9,11.77 9,12A3,3 0 0,0 12,15C12.22,15 12.44,14.97 12.65,14.92L14.2,16.47C13.53,16.8 12.79,17 12,17A5,5 0 0,1 7,12C7,11.21 7.2,10.47 7.53,9.8M2,4.27L4.28,6.55L4.73,7C3.08,8.3 1.78,10 1,12C2.73,16.39 7,19.5 12,19.5C13.55,19.5 15.03,19.2 16.38,18.66L16.81,19.08L19.73,22L21,20.73L3.27,3M12,7A5,5 0 0,1 17,12C17,12.64 16.87,13.26 16.64,13.82L19.57,16.75C21.07,15.5 22.27,13.86 23,12C21.27,7.61 17,4.5 12,4.5C10.6,4.5 9.26,4.75 8,5.2L10.17,7.35C10.76,7.13 11.37,7 12,7Z"/>';
             } else {
                 passwordInput.type = "password";
-                // Icône œil normal (mot de passe masqué)
+                // IcÃ´ne Å“il normal (mot de passe masquÃ©)
                 toggleIcon.innerHTML = '<path d="M12.015 7c4.751 0 8.063 3.012 9.504 4.636-1.401 1.837-4.713 5.364-9.504 5.364-4.42 0-7.93-3.536-9.478-5.407 1.493-1.647 4.817-4.593 9.478-4.593zm0-2c-7.569 0-12.015 6.551-12.015 6.551s4.835 7.449 12.015 7.449c7.733 0 11.985-7.449 11.985-7.449s-4.291-6.551-11.985-6.551zm-.015 3c-2.209 0-4 1.792-4 4 0 2.209 1.791 4 4s4-1.791 4-4c0-2.208-1.791-4-4-4z"/>';
             }
         }
 
-        // Stocke les mots de passe récupérés pour vérifier les doublons côté client
+        // Stocke les mots de passe rÃ©cupÃ©rÃ©s pour vÃ©rifier les doublons cÃ´tÃ© client
         let currentPasswords = [];
 
         // Ajoute un mot de passe pour un site/compte
@@ -1152,12 +1152,12 @@ Auteur: Équipe ESGI 2024-2025
                 return;
             }
 
-            // Vérifie côté client s'il existe déjà ce compte pour ce site
+            // VÃ©rifie cÃ´tÃ© client s'il existe dÃ©jÃ  ce compte pour ce site
             const duplicate = currentPasswords.find(
                 item => item.site === siteLink && item.account === accountUsername
             );
             if (duplicate) {
-                errorDiv.textContent = "Un compte avec cet identifiant existe déjà pour ce site.";
+                errorDiv.textContent = "Un compte avec cet identifiant existe dÃ©jÃ  pour ce site.";
                 errorDiv.style.display = "block";
                 return;
             }
@@ -1188,7 +1188,7 @@ Auteur: Équipe ESGI 2024-2025
                     list.innerHTML = "";
 
                     if (!data.passwords || !Array.isArray(data.passwords) || data.passwords.length === 0) {
-                        list.innerHTML = "<p>Aucun mot de passe trouvé ou erreur de chargement.</p>";
+                        list.innerHTML = "<p>Aucun mot de passe trouvÃ© ou erreur de chargement.</p>";
                         currentPasswords = [];
                         return;
                     }
@@ -1256,7 +1256,7 @@ Auteur: Équipe ESGI 2024-2025
 
         // Supprime tous les mots de passe de l'utilisateur
         function deleteAllPasswords() {
-            if (!confirm("Êtes-vous sûr de vouloir supprimer tous vos mots de passe ?")) return;
+            if (!confirm("ÃŠtes-vous sÃ»r de vouloir supprimer tous vos mots de passe ?")) return;
             const user = localStorage.getItem("currentUser");
             fetch("/api/delete_all", {
                 method: "POST",
@@ -1271,18 +1271,18 @@ Auteur: Équipe ESGI 2024-2025
             .catch(err => alert("Erreur suppression : " + err.message));
         }
 
-        // Déconnexion utilisateur
+        // DÃ©connexion utilisateur
         function logout() {
             localStorage.removeItem("currentUser");
 
-            // Sécurité : vider tous les champs sensibles
+            // SÃ©curitÃ© : vider tous les champs sensibles
             clearAllPasswordFields();
 
-            // Réinitialiser les champs du gestionnaire
+            // RÃ©initialiser les champs du gestionnaire
             document.getElementById("account-username").value = "";
             document.getElementById("site-link").value = "";
 
-            // Réinitialiser les variables MFA
+            // RÃ©initialiser les variables MFA
             pendingUsername = null;
             pendingPassword = null;
             mfaSetupData = null;
@@ -1319,7 +1319,7 @@ Auteur: Équipe ESGI 2024-2025
                 listDiv.innerHTML = "";
                 return;
             }
-            // Suggestions à partir des sites populaires + ceux déjà enregistrés
+            // Suggestions Ã  partir des sites populaires + ceux dÃ©jÃ  enregistrÃ©s
             const allSites = Array.from(new Set([
                 ...popularSites,
                 ...currentPasswords.map(item => item.site)
@@ -1367,7 +1367,7 @@ Auteur: Équipe ESGI 2024-2025
             const setupDiv = document.getElementById("mfa-setup");
             const activeDiv = document.getElementById("mfa-active");
 
-            // Essayer de faire un setup MFA pour détecter si déjà activé
+            // Essayer de faire un setup MFA pour dÃ©tecter si dÃ©jÃ  activÃ©
             fetch("/api/mfa/setup", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -1375,22 +1375,22 @@ Auteur: Équipe ESGI 2024-2025
             })
             .then(res => res.json())
             .then(data => {
-                if (data.detail && data.detail.includes("déjà activé")) {
-                    // MFA déjà activée
+                if (data.detail && data.detail.includes("dÃ©jÃ  activÃ©")) {
+                    // MFA dÃ©jÃ  activÃ©e
                     statusDiv.innerHTML = `
                         <div style="padding: 20px; border-radius: 12px; background: rgba(34, 197, 94, 0.1); border-left: 4px solid var(--success-color);">
-                            <p><strong>✅ Authentification à deux facteurs activée</strong></p>
-                            <p>Votre compte est protégé par la 2FA.</p>
+                            <p><strong>âœ… Authentification Ã  deux facteurs activÃ©e</strong></p>
+                            <p>Votre compte est protÃ©gÃ© par la 2FA.</p>
                         </div>
                     `;
                     setupDiv.style.display = "none";
                     activeDiv.style.display = "block";
                 } else if (data.provisioning_uri) {
-                    // MFA pas encore activée, on peut la configurer
+                    // MFA pas encore activÃ©e, on peut la configurer
                     statusDiv.innerHTML = `
                         <div style="padding: 20px; border-radius: 12px; background: rgba(245, 101, 101, 0.1); border-left: 4px solid var(--error-color);">
-                            <p><strong>⚠️ Authentification à deux facteurs désactivée</strong></p>
-                            <p>Votre compte n'est protégé que par votre mot de passe. Activez la 2FA pour plus de sécurité.</p>
+                            <p><strong>âš ï¸ Authentification Ã  deux facteurs dÃ©sactivÃ©e</strong></p>
+                            <p>Votre compte n'est protÃ©gÃ© que par votre mot de passe. Activez la 2FA pour plus de sÃ©curitÃ©.</p>
                         </div>
                     `;
                     setupDiv.style.display = "block";
@@ -1400,8 +1400,8 @@ Auteur: Équipe ESGI 2024-2025
                     // Erreur inconnue
                     statusDiv.innerHTML = `
                         <div style="padding: 20px; border-radius: 12px; background: rgba(245, 101, 101, 0.1); border-left: 4px solid var(--error-color);">
-                            <p><strong>❌ Erreur lors de la vérification du statut MFA</strong></p>
-                            <p>Réponse inattendue du serveur : ${JSON.stringify(data)}</p>
+                            <p><strong>âŒ Erreur lors de la vÃ©rification du statut MFA</strong></p>
+                            <p>RÃ©ponse inattendue du serveur : ${JSON.stringify(data)}</p>
                         </div>
                     `;
                 }
@@ -1410,18 +1410,18 @@ Auteur: Équipe ESGI 2024-2025
                 console.error("Erreur statut MFA:", err);
                 statusDiv.innerHTML = `
                     <div style="padding: 20px; border-radius: 12px; background: rgba(245, 101, 101, 0.1); border-left: 4px solid var(--error-color);">
-                        <p><strong>❌ Erreur lors de la vérification du statut MFA</strong></p>
-                        <p>Erreur réseau : ${err.message}</p>
+                        <p><strong>âŒ Erreur lors de la vÃ©rification du statut MFA</strong></p>
+                        <p>Erreur rÃ©seau : ${err.message}</p>
                     </div>
                 `;
             });
         }
 
-        // Génère la configuration MFA à partir des données reçues
+        // GÃ©nÃ¨re la configuration MFA Ã  partir des donnÃ©es reÃ§ues
         function generateMfaSetupFromData(data) {
             if (data.provisioning_uri) {
                 mfaSetupData = data;
-                // Générer l'URL du QR code en utilisant un service en ligne
+                // GÃ©nÃ©rer l'URL du QR code en utilisant un service en ligne
                 const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(data.provisioning_uri)}`;
                 document.getElementById("qr-code").innerHTML = `
                     <img src="${qrCodeUrl}" alt="QR Code MFA" style="max-width: 200px; border: 2px solid #ddd; border-radius: 8px;">
@@ -1434,18 +1434,18 @@ Auteur: Équipe ESGI 2024-2025
             }
         }
 
-        // Génère la configuration MFA (QR code) - version simplifiée
+        // GÃ©nÃ¨re la configuration MFA (QR code) - version simplifiÃ©e
         function generateMfaSetup() {
-            // Cette fonction est appelée depuis loadMfaStatus maintenant
-            // Ne fait rien car le setup est déjà fait
+            // Cette fonction est appelÃ©e depuis loadMfaStatus maintenant
+            // Ne fait rien car le setup est dÃ©jÃ  fait
         }
 
-        // Active la MFA avec le code de vérification
+        // Active la MFA avec le code de vÃ©rification
         function setupMfa() {
             const code = document.getElementById("mfa-verify-code").value.trim();
             
             if (!code || code.length !== 6) {
-                alert("Veuillez entrer un code à 6 chiffres");
+                alert("Veuillez entrer un code Ã  6 chiffres");
                 return;
             }
 
@@ -1458,26 +1458,26 @@ Auteur: Équipe ESGI 2024-2025
             })
             .then(res => res.json())
             .then(data => {
-                if (data.message && data.message.includes("succès")) {
-                    alert("✅ Authentification à deux facteurs activée avec succès !");
+                if (data.message && data.message.includes("succÃ¨s")) {
+                    alert("âœ… Authentification Ã  deux facteurs activÃ©e avec succÃ¨s !");
                     document.getElementById("mfa-verify-code").value = "";
                     loadMfaStatus(); // Recharger le statut
                 } else {
-                    alert("❌ Code de vérification incorrect. Veuillez réessayer.");
+                    alert("âŒ Code de vÃ©rification incorrect. Veuillez rÃ©essayer.");
                 }
             })
             .catch(err => {
-                console.error("Erreur vérification MFA:", err);
+                console.error("Erreur vÃ©rification MFA:", err);
                 alert("Erreur lors de l'activation MFA : " + err.message);
             });
         }
 
-        // Vérifie le code MFA lors de la connexion
+        // VÃ©rifie le code MFA lors de la connexion
         function verifyMfaLogin() {
             const code = document.getElementById("mfa-login-code").value.trim();
             
             if (!code || code.length !== 6) {
-                alert("Veuillez entrer un code à 6 chiffres");
+                alert("Veuillez entrer un code Ã  6 chiffres");
                 return;
             }
 
@@ -1497,11 +1497,11 @@ Auteur: Équipe ESGI 2024-2025
             })
             .then(res => res.json())
             .then(data => {
-                if (data.message && data.message.includes("réussie")) {
-                    // Code correct, connexion réussie
+                if (data.message && data.message.includes("rÃ©ussie")) {
+                    // Code correct, connexion rÃ©ussie
                     localStorage.setItem("currentUser", btoa(pendingUsername + ":" + pendingPassword));
                     
-                    // Réinitialiser les variables temporaires
+                    // RÃ©initialiser les variables temporaires
                     pendingUsername = null;
                     pendingPassword = null;
                     document.getElementById("mfa-login-code").value = "";
@@ -1510,13 +1510,13 @@ Auteur: Équipe ESGI 2024-2025
                     showOnly("app");
                     displayPasswords();
                 } else {
-                    alert("❌ Code de vérification incorrect. Veuillez réessayer.");
+                    alert("âŒ Code de vÃ©rification incorrect. Veuillez rÃ©essayer.");
                     document.getElementById("mfa-login-code").focus();
                 }
             })
             .catch(err => {
-                console.error("Erreur vérification MFA login:", err);
-                alert("Erreur lors de la vérification : " + err.message);
+                console.error("Erreur vÃ©rification MFA login:", err);
+                alert("Erreur lors de la vÃ©rification : " + err.message);
             });
         }
 
