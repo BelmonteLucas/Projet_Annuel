@@ -37,7 +37,9 @@ Ce projet simule un **laboratoire de cybersécurité professionnel** où nous d�
 
 ---
 
-## 🏗️ Architecture du Laboratoire {#architecture}
+<a id="architecture"></a>
+
+## 🏗️ Architecture du Laboratoire
 
 ### 💡 Concept : Zone Démilitarisée (DMZ) Sécurisée
 
@@ -83,7 +85,9 @@ Notre laboratoire simule un **environnement de production réaliste** avec une a
 
 ---
 
-## 🔐 HoneyPot Pro Max - Application Cible {#application}
+<a id="application"></a>
+
+## 🔐 HoneyPot Pro Max - Application Cible
 
 ### 🎨 Interface Moderne & Sécurisée
 
@@ -136,7 +140,9 @@ Notre laboratoire simule un **environnement de production réaliste** avec une a
 
 ---
 
-## 🛡️ Système de Détection {#detection}
+<a id="detection"></a>
+
+## 🛡️ Système de Détection
 
 ### 🚨 Stack de Monitoring Professionnel
 
@@ -179,7 +185,9 @@ Notre laboratoire utilise les mêmes outils que les entreprises pour détecter e
 
 ---
 
-## ⚙️ Installation & Déploiement {#installation}
+<a id="installation"></a>
+
+## ⚙️ Installation & Déploiement
 
 ### 🚀 Installation en Une Commande
 
@@ -247,7 +255,9 @@ python scripts/test_fresh_install.py
 
 ---
 
-## 📊 Monitoring & Analyse {#monitoring}
+<a id="monitoring"></a>
+
+## 📊 Monitoring & Analyse
 
 ### 🎯 Centre de Commandement Kibana
 
@@ -309,7 +319,9 @@ curl -s "http://localhost:9200/_search?q=alert&size=10" | jq '.hits.hits[]._sour
 
 ---
 
-## 🌐 Accès aux Services {#acces}
+<a id="acces"></a>
+
+## 🌐 Accès aux Services
 
 ### 🎯 Applications Principales (Vos Cibles de Test)
 
@@ -352,7 +364,9 @@ curl -I http://localhost:5050/          # ✅ pgAdmin Interface
 
 ---
 
-## ⚔️ Tests de Sécurité {#tests}
+<a id="tests"></a>
+
+## ⚔️ Tests de Sécurité
 
 ### 🎯 Scénarios de Test par Niveau
 
@@ -444,7 +458,9 @@ docker exec -it backend_service /bin/bash
 
 ---
 
-## 🔧 Scripts & Outils {#scripts}
+<a id="scripts"></a>
+
+## 🔧 Scripts & Outils
 
 ### 🛠️ Scripts Disponibles
 
@@ -577,7 +593,9 @@ python setup_dev_environment.py --help
 
 ---
 
-## 🆘 Dépannage {#depannage}
+<a id="depannage"></a>
+
+## 🆘 Dépannage
 
 ### 🚨 Guide de Résolution des Problèmes
 
@@ -726,7 +744,9 @@ docker compose up -d --build
 
 ---
 
-## 👥 Équipe & Contributions {#equipe}
+<a id="equipe"></a>
+
+## 👥 Équipe & Contributions
 
 ### 🎓 Projet Annuel ESGI 2024-2025
 
