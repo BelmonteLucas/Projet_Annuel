@@ -99,7 +99,7 @@ class SetupOrchestrator:
             'frontend/index.html',
             'secrets/db_password.txt',
             'secrets/mfa_encryption_key.txt',
-            'backend/db_encryption_key.txt'
+            'secrets/db_encryption_key.txt'
         ]
         
         missing_files = []
@@ -136,8 +136,9 @@ class SetupOrchestrator:
     def print_next_steps(self):
         """Affiche les prochaines étapes"""
         print_colored(f"""
-{Colors.GREEN}╔═══════════════════════════════════════════════════════════════╗
-║                    🎉 INSTALLATION TERMINÉE !                ║
+{Colors.GREEN}
+╔═══════════════════════════════════════════════════════════════╗
+║                      INSTALLATION TERMINÉE !                  ║
 ╚═══════════════════════════════════════════════════════════════╝{Colors.END}
 
 {Colors.BOLD}🚀 PROCHAINES ÉTAPES :{Colors.END}

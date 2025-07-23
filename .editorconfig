@@ -1,12 +1,6 @@
-# =============================================================================
-# EDITORCONFIG - CONFIGURATION UNIVERSELLE DES ÉDITEURS
-# =============================================================================
-# Garantit un formatage uniforme dans tous les éditeurs (VS Code, IntelliJ, etc.)
-# =============================================================================
-
+# Configuration universelle des éditeurs - HoneyPot Pro Max
 root = true
 
-# Configuration par défaut pour tous les fichiers
 [*]
 charset = utf-8
 end_of_line = lf
@@ -15,48 +9,27 @@ trim_trailing_whitespace = true
 indent_style = space
 indent_size = 2
 
-# Fichiers Python
 [*.py]
 indent_size = 4
 max_line_length = 88
 
-# Fichiers JavaScript/HTML/CSS
 [*.{js,html,css}]
 indent_size = 2
 max_line_length = 100
 
-# Fichiers Markdown
 [*.md]
 trim_trailing_whitespace = false
 max_line_length = 80
 
-# Fichiers YAML/Docker
 [*.{yml,yaml}]
 indent_size = 2
 
-[Dockerfile*]
-indent_size = 2
-
-# Scripts PowerShell - Exception pour Windows
 [*.ps1]
 charset = utf-8-bom
 end_of_line = crlf
 indent_size = 4
 
-# Scripts batch Windows
 [*.{bat,cmd}]
 charset = utf-8
 end_of_line = crlf
 indent_size = 2
-
-# Fichiers de configuration
-[*.{json,conf,config}]
-indent_size = 2
-
-# Makefiles - Exception pour les tabs
-[Makefile]
-indent_style = tab
-
-# Fichiers de données
-[*.{csv,tsv}]
-trim_trailing_whitespace = false

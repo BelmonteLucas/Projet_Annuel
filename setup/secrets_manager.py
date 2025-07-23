@@ -32,20 +32,27 @@ class SecretsManager:
         self.secrets_dir = Path("secrets")
         self.backend_dir = Path("backend")
         
-    def create_secure_directories(self):
+    def create_secure_directories(self) -> bool:
         """Crée les répertoires avec permissions sécurisées"""
         print_colored("📁 Création répertoires sécurisés...", Colors.BLUE)
         
-        # Répertoire secrets principal
-        if not self.secrets_dir.exists():
-            self.secrets_dir.mkdir(mode=0o700, exist_ok=True)
-            print_colored("✅ Répertoire secrets/ créé", Colors.GREEN)
-        else:
-            print_colored("ℹ️  Répertoire secrets/ existe déjà", Colors.BLUE)
+        try:
+            # Répertoire secrets principal
+            if not self.secrets_dir.exists():
+                self.secrets_dir.mkdir(mode=0o700, exist_ok=True)
+                print_colored("✅ Répertoire secrets/ créé", Colors.GREEN)
+            else:
+                print_colored("ℹ️  Répertoire secrets/ existe déjà", Colors.BLUE)
+                
+            # Vérifier permissions Unix (Linux/Mac)
+            if hasattr(os, 'chmod'):
+                os.chmod(self.secrets_dir, 0o700)
             
-        # Vérifier permissions Unix (Linux/Mac)
-        if hasattr(os, 'chmod'):
-            os.chmod(self.secrets_dir, 0o700)
+            return True
+            
+        except Exception as e:
+            print_colored(f"❌ Erreur création répertoires: {e}", Colors.RED)
+            return False
     
     def generate_database_keys(self) -> bool:
         """Génère les clés de chiffrement pour la base de données"""
@@ -60,6 +67,7 @@ class SecretsManager:
         try:
             key = Fernet.generate_key()
             
+            # Créer la clé uniquement dans secrets/
             with open(db_key_path, "wb") as f:
                 f.write(key)
             

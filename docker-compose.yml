@@ -3,8 +3,8 @@
 # =============================================================================
 # Architecture multi-services incluant :
 # - Application web avec backend/frontend
-# - Base de donnÃ©es PostgreSQL avec interface d'administration
-# - Stack de sÃ©curitÃ© (Snort IDS + Wazuh HIDS)
+# - Base de données PostgreSQL avec interface d'administration
+# - Stack de sécurité (Snort IDS + Wazuh HIDS)
 # - Stack ELK pour l'analyse des logs et la visualisation
 # =============================================================================
 
@@ -54,10 +54,12 @@ services:
       DB_PORT: 5432                                        # Port de connexion PostgreSQL
       DB_NAME: postgres                                    # Nom de la base de donnÃ©es
     secrets:
-      - db_password                                        # AccÃ¨s au mot de passe DB
-      - mfa_encryption_key                                 # ClÃ© de chiffrement pour l'authentification 2FA
+      - db_password                                        # Accès au mot de passe DB
+      - mfa_encryption_key                                 # Clé de chiffrement pour l'authentification 2FA
+    volumes:
+      - ./secrets:/app/secrets:ro                          # Montage du répertoire secrets (lecture seule)
     networks:
-      - backend_network                                    # Connexion au rÃ©seau backend
+      - backend_network                                    # Connexion au réseau backend
 
   # ==========================================================================
   # PGADMIN - Interface d'administration PostgreSQL

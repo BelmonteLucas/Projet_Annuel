@@ -1,16 +1,10 @@
-# =============================================================================
-# GITATTRIBUTES - CONFIGURATION ENCODAGE ET FINS DE LIGNE
-# =============================================================================
-# Garantit un encodage uniforme UTF-8 pour tous les utilisateurs du dépôt
-# =============================================================================
-
-# Configuration par défaut : UTF-8 avec LF pour tous les fichiers texte
+# Configuration encodage et fins de ligne - HoneyPot Pro Max
 * text=auto eol=lf
 
-# Fichiers de code source - UTF-8 obligatoire
+# Code source - UTF-8 obligatoire
 *.py text eol=lf encoding=utf-8
 *.js text eol=lf encoding=utf-8
-*.html text eol=lf encoding=utf-8
+*.html text eol=lf encoding=utf-8-bom
 *.css text eol=lf encoding=utf-8
 *.json text eol=lf encoding=utf-8
 *.yml text eol=lf encoding=utf-8
@@ -20,25 +14,22 @@
 *.conf text eol=lf encoding=utf-8
 *.sh text eol=lf encoding=utf-8
 
-# Scripts Windows - UTF-8 avec BOM pour PowerShell
+# Scripts Windows - UTF-8 avec BOM
 *.ps1 text eol=crlf encoding=utf-8-bom
-*.bat text eol=crlf
-*.cmd text eol=crlf
+*.bat text eol=crlf encoding=utf-8
+*.cmd text eol=crlf encoding=utf-8
 
-# Fichiers binaires - ne pas modifier
+# Docker et configuration
+Dockerfile* text eol=lf encoding=utf-8
+docker-compose*.yml text eol=lf encoding=utf-8
+.gitignore text eol=lf encoding=utf-8
+.gitattributes text eol=lf encoding=utf-8
+
+# Fichiers binaires
+*.crt binary
+*.key binary
 *.png binary
 *.jpg binary
 *.jpeg binary
 *.gif binary
 *.ico binary
-*.crt binary
-*.key binary
-
-# Docker files
-Dockerfile text eol=lf
-docker-compose.yml text eol=lf
-
-# Configuration files
-.gitignore text eol=lf
-.gitattributes text eol=lf
-requirements*.txt text eol=lf

@@ -35,7 +35,7 @@ class ProjectConfigurator:
 # Code source - UTF-8 obligatoire
 *.py text eol=lf encoding=utf-8
 *.js text eol=lf encoding=utf-8
-*.html text eol=lf encoding=utf-8
+*.html text eol=lf encoding=utf-8-bom
 *.css text eol=lf encoding=utf-8
 *.json text eol=lf encoding=utf-8
 *.yml text eol=lf encoding=utf-8
