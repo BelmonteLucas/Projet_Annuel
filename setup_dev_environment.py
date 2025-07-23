@@ -37,6 +37,27 @@ def create_secrets_directory():
     else:
         print("[INFO] Repertoire 'secrets/' existe deja")
 
+def generate_db_encryption_password_key():
+    """Crée une clé de chiffrement pour les mdp crées par les utilisateurs"""
+    db_encryption_password_path = Path("backend/db_encryption_key.txt")
+
+    if not db_encryption_password_path.exists():
+        # Generer une cle Fernet (AES-256) 
+        key = Fernet.generate_key()
+
+         # Sauvegarder la cle
+        with open("backend/db_encryption_key.txt", "wb") as f:
+            f.write(key)
+
+        # Permissions restrictives (lecture seule pour le proprietaire)
+        db_encryption_password_path.chmod(0o600)
+
+        print("[OK] Cle de chiffrement pour les mdp crées par les utilisateurs generee (AES-256)")
+        print(f"Stockee dans: {db_encryption_password_path}")
+
+    else:
+        print("[INFO] Cle de chiffrement db existe deja")
+
 def generate_mfa_key():
     """Genere une cle de chiffrement MFA unique"""
     mfa_key_path = Path("secrets/mfa_encryption_key.txt")
@@ -203,6 +224,7 @@ def validate_environment():
     
     checks = [
         ("Secrets", Path("secrets").exists()),
+        ("Cle de chiffrement DB", Path("backend/db_encryption_key.txt").exists()),
         ("Cle MFA", Path("secrets/mfa_encryption_key.txt").exists()),
         ("Mot de passe DB", Path("secrets/db_password.txt").exists()),
         ("Certificat SSL", Path("secrets/nginx.crt").exists()),
@@ -292,24 +314,27 @@ def main():
     
     # Etape 1: Creer le repertoire secrets
     create_secrets_directory()
+
+    # Etape 2: Generer la cle de chiffrement db
+    generate_db_encryption_password_key()
     
-    # Etape 2: Generer la cle MFA
+    # Etape 3: Generer la cle MFA
     generate_mfa_key()
     
-    # Etape 3: Generer le mot de passe DB
+    # Etape 4: Generer le mot de passe DB
     generate_db_password()
     
-    # Etape 4: Migrer et generer les certificats SSL
+    # Etape 5: Migrer et generer les certificats SSL
     migrate_existing_certificates()
     generate_ssl_certificates()
     
-    # Etape 5: Verifier Docker
+    # Etape 6: Verifier Docker
     docker_ok = check_docker()
     
-    # Etape 6: Mettre a jour .gitignore
+    # Etape 7: Mettre a jour .gitignore
     update_gitignore()
     
-    # Etape 7: Validation finale
+    # Etape 8: Validation finale
     env_ready = validate_environment()
     
     if env_ready and docker_ok:
