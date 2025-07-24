@@ -27,8 +27,9 @@ Auteur: Jakub WERLINSKI
     <meta name="viewport" content="width=device-width, initial-scale=1.0">  <!-- Responsive design pour mobile -->
     <title>HoneyPot Pro Max - Gestionnaire de mots de passe</title>      <!-- Titre de l'application -->
     
-    <!-- Bibliothèque QR Code Generator - Plus fiable que QRCode.js -->
+    <!-- Bibliothèques QR Code - Multiple fallbacks pour fiabilité maximale -->
     <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
     
     <style>
         /* =================================================================== */
@@ -920,68 +921,80 @@ Auteur: Jakub WERLINSKI
         // ===================================================================
         // FONCTIONS DE NAVIGATION ET D'AFFICHAGE
         // ===================================================================
+        function clearAllSensitiveFields() {
+            // SÉCURITÉ : Nettoyer tous les champs sensibles lors de navigation
+            const fieldsToClean = [
+                'new-username',        // Page de création de compte
+                'new-master-password', // Page de création de compte
+                'login-username',      // Page de connexion
+                'master-password',     // Page de connexion
+                'mfa-login-code',      // Page MFA
+                'mfa-verify-code',     // Page configuration MFA
+                'mfa-disable-code'     // Page désactivation MFA
+            ];
+            
+            fieldsToClean.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) field.value = '';
+            });
+            
+            console.log('🔒 Tous les champs sensibles ont été nettoyés pour la sécurité');
+        }
 
-// Vide tous les champs sensibles (login, mot de passe, codes OTP, etc.)
-function clearSensitiveFields() {
-    const sensitiveIds = [
-        'new-username', 'new-master-password',
-        'login-username', 'master-password',
-        'account-username', 'site-link', 'password',
-        'mfa-verify-code', 'mfa-login-code', 'mfa-disable-code'
-    ];
-    sensitiveIds.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-            if (el.type === 'password' || el.type === 'text') {
-                el.value = '';
+        function showView(viewId) {
+            const views = ['auth-choice', 'setup-container', 'auth-container', 'app', 'mfa-settings', 'mfa-verification'];
+            views.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = (id === viewId) ? 'block' : 'none';
+            });
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) logoutBtn.style.display = (viewId === 'app' || viewId === 'mfa-settings') ? 'block' : 'none';
+            
+            // SÉCURITÉ : Nettoyer tous les champs sensibles quand on revient à la page d'accueil
+            if (viewId === 'auth-choice') {
+                clearAllSensitiveFields();
             }
         }
-    });
-    // Masquer les suggestions de site si affichées
-    const siteList = document.getElementById('site-link-list');
-    if (siteList) siteList.style.display = 'none';
-    
-    // Masquer les conseils de mot de passe lors du vidage des champs
-    const passwordHint = document.getElementById('password-hint');
-    if (passwordHint) {
-        passwordHint.style.display = 'none';
-    }
-}
 
-function showView(viewId) {
-    clearSensitiveFields();
-    const views = ['auth-choice', 'setup-container', 'auth-container', 'app', 'mfa-settings', 'mfa-verification'];
-    views.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = (id === viewId) ? 'block' : 'none';
-    });
-    const logoutBtn = document.getElementById('logout-btn');
-    if (logoutBtn) logoutBtn.style.display = (viewId === 'app' || viewId === 'mfa-settings') ? 'block' : 'none';
-    
-    // Masquer les conseils de mot de passe quand on change de vue
-    const passwordHint = document.getElementById('password-hint');
-    if (passwordHint) {
-        passwordHint.style.display = 'none';
-    }
-}
-
-function showSignup() {
-    showView('setup-container');
-}
-function showLogin() {
-    showView('auth-container');
-}
-function backToMainApp() {
-    showView('app');
-}
-function cancelMfaLogin() {
-    localStorage.removeItem('tempLoginData');
-    currentUsername = '';
-    showView('auth-container');
-}
+        function showSignup() { 
+            showView('setup-container'); 
+            
+            // SÉCURITÉ : Nettoyer automatiquement les champs de création de compte
+            // pour éviter que les identifiants restent visibles lors de la navigation
+            const usernameField = document.getElementById('new-username');
+            const passwordField = document.getElementById('new-master-password');
+            
+            if (usernameField) usernameField.value = '';
+            if (passwordField) passwordField.value = '';
+            
+            console.log('🔒 Champs de création de compte nettoyés pour la sécurité');
+        }
+        function showLogin() { 
+            showView('auth-container'); 
+            
+            // SÉCURITÉ : Toujours nettoyer tous les champs de connexion pour des raisons de sécurité maximale
+            const usernameField = document.getElementById('login-username');
+            const passwordField = document.getElementById('master-password');
+            
+            if (usernameField) usernameField.value = '';
+            if (passwordField) passwordField.value = '';
+            
+            console.log('🔒 Champs de connexion nettoyés pour la sécurité maximale');
+        }
+        function backToMainApp() { showView('app'); }
+        function cancelMfaLogin() { 
+            localStorage.removeItem('tempLoginData');
+            currentUsername = '';
+            
+            // SÉCURITÉ : Nettoyer le champ MFA lors de l'annulation
+            const mfaField = document.getElementById('mfa-login-code');
+            if (mfaField) mfaField.value = '';
+            
+            showView('auth-container'); 
+        }
 
         // ===================================================================
-        // FONCTIONS UTILITAIRES (Toast, Toggles)
+        // FONCTIONS UTILITAIRES (Toast, Toggles, Modals)
         // ===================================================================
         function showToast(message, type = 'success') {
             // Implémentation simple d'un toast/notification
@@ -1003,6 +1016,105 @@ function cancelMfaLogin() {
                 toast.style.opacity = '0';
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
+        }
+
+        function showConfirmModal(title, message, confirmText = "✅ Confirmer", cancelText = "❌ Annuler") {
+            return new Promise((resolve) => {
+                // Créer le modal
+                const modal = document.createElement('div');
+                modal.style.position = 'fixed';
+                modal.style.top = '0';
+                modal.style.left = '0';
+                modal.style.width = '100%';
+                modal.style.height = '100%';
+                modal.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                modal.style.display = 'flex';
+                modal.style.alignItems = 'center';
+                modal.style.justifyContent = 'center';
+                modal.style.zIndex = '2000';
+                modal.style.transition = 'opacity 0.3s ease';
+
+                // Créer le contenu du modal
+                modal.innerHTML = `
+                    <div style="background: white; border-radius: 16px; padding: 30px; max-width: 500px; width: 90%; box-shadow: 0 20px 40px rgba(0,0,0,0.3); text-align: center; transform: scale(0.8); transition: transform 0.3s ease;">
+                        <h3 style="margin: 0 0 20px 0; color: #333; font-size: 1.4em;">${title}</h3>
+                        <p style="margin: 0 0 30px 0; color: #666; line-height: 1.5; font-size: 1.1em;">${message}</p>
+                        <div style="display: flex; gap: 15px; justify-content: center;">
+                            <button id="modal-cancel" style="
+                                padding: 12px 24px; 
+                                border: 2px solid #28a745; 
+                                background: transparent; 
+                                color: #28a745; 
+                                border-radius: 8px; 
+                                cursor: pointer; 
+                                font-size: 1em;
+                                font-weight: 600;
+                                transition: all 0.2s ease;
+                            ">${cancelText}</button>
+                            <button id="modal-confirm" style="
+                                padding: 12px 24px; 
+                                border: none; 
+                                background: #dc3545; 
+                                color: white; 
+                                border-radius: 8px; 
+                                cursor: pointer; 
+                                font-size: 1em;
+                                font-weight: 600;
+                                transition: all 0.2s ease;
+                            ">${confirmText}</button>
+                        </div>
+                    </div>
+                `;
+
+                // Ajouter les événements hover
+                const confirmBtn = modal.querySelector('#modal-confirm');
+                const cancelBtn = modal.querySelector('#modal-cancel');
+                
+                confirmBtn.addEventListener('mouseenter', () => {
+                    confirmBtn.style.background = '#c82333';
+                    confirmBtn.style.transform = 'translateY(-2px)';
+                });
+                confirmBtn.addEventListener('mouseleave', () => {
+                    confirmBtn.style.background = '#dc3545';
+                    confirmBtn.style.transform = 'translateY(0)';
+                });
+
+                cancelBtn.addEventListener('mouseenter', () => {
+                    cancelBtn.style.background = '#28a745';
+                    cancelBtn.style.color = 'white';
+                });
+                cancelBtn.addEventListener('mouseleave', () => {
+                    cancelBtn.style.background = 'transparent';
+                    cancelBtn.style.color = '#28a745';
+                });
+
+                // Ajouter au DOM
+                document.body.appendChild(modal);
+
+                // Animation d'entrée
+                setTimeout(() => {
+                    modal.style.opacity = '1';
+                    modal.querySelector('div').style.transform = 'scale(1)';
+                }, 10);
+
+                // Gestion des événements
+                const handleResponse = (confirmed) => {
+                    modal.style.opacity = '0';
+                    modal.querySelector('div').style.transform = 'scale(0.8)';
+                    setTimeout(() => {
+                        document.body.removeChild(modal);
+                        resolve(confirmed);
+                    }, 300);
+                };
+
+                modal.querySelector('#modal-confirm').addEventListener('click', () => handleResponse(true));
+                modal.querySelector('#modal-cancel').addEventListener('click', () => handleResponse(false));
+                
+                // Fermer en cliquant sur le fond
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) handleResponse(false);
+                });
+            });
         }
 
         function togglePasswordVisibility(inputId) {
@@ -1056,7 +1168,9 @@ function cancelMfaLogin() {
                     showToast(result.message || 'Utilisateur créé avec succès!', 'success');
                     setTimeout(() => {
                         showLogin();
-                        document.getElementById('login-username').value = username;
+                        // SÉCURITÉ : Ne plus pré-remplir automatiquement l'identifiant
+                        // L'utilisateur devra saisir ses identifiants manuellement pour des raisons de sécurité
+                        console.log('🔒 Redirection vers la page de connexion - saisie manuelle requise pour la sécurité');
                     }, 1500);
                 } else {
                     console.error('Erreur détaillée du serveur:', result);
@@ -1115,6 +1229,13 @@ function cancelMfaLogin() {
                     throw new Error(data.detail || 'Identifiants incorrects.');
                 }
 
+                // SÉCURITÉ : Aucune sauvegarde d'identifiants - sécurité maximale
+                // S'assurer qu'aucun identifiant n'est jamais sauvegardé
+                localStorage.removeItem('savedUsername');
+                localStorage.removeItem('savedPassword');
+                localStorage.removeItem('rememberPassword');
+                console.log('� Aucun identifiant sauvegardé pour la sécurité maximale');
+
                 if (data.mfa_required) {
                     // Stocker temporairement les données de connexion pour la vérification MFA
                     localStorage.setItem('tempLoginData', btoa(`${username}:${password}`));
@@ -1149,6 +1270,12 @@ function cancelMfaLogin() {
 
         function logout() {
             localStorage.removeItem('currentUser');
+            // SÉCURITÉ : Supprimer TOUS les identifiants sauvegardés lors de la déconnexion
+            // pour éviter qu'un autre utilisateur accède aux informations confidentielles
+            localStorage.removeItem('savedUsername');
+            localStorage.removeItem('savedPassword');
+            localStorage.removeItem('rememberPassword');
+            localStorage.removeItem('tempLoginData');
             currentUsername = '';
             document.getElementById('password-list').innerHTML = '';
             showView('auth-choice');
@@ -1238,9 +1365,50 @@ function cancelMfaLogin() {
                     throw new Error(data.detail || 'Erreur lors de la génération du QR code');
                 }
 
-                // Vérification de QRCode.js et génération du QR code
+                console.log('✅ QR Code URI reçu:', data.provisioning_uri);
+                
+                // Méthode 1: QRCode.js depuis CDN (qrcode-generator library)
+                if (typeof qrcode !== 'undefined') {
+                    console.log('🔄 Utilisation de qrcode-generator library');
+                    try {
+                        const qr = qrcode(0, 'M');
+                        qr.addData(data.provisioning_uri);
+                        qr.make();
+                        
+                        // Créer le QR code et l'injecter avec un centrage approprié
+                        const qrImageHtml = qr.createImgTag(8, 8);
+                        qrCodeDiv.innerHTML = `
+                            <div style="text-align: center; margin: 20px 0;">
+                                <div style="display: inline-block; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); text-align: center;">
+                                    <div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">
+                                        <div id="qr-image-container" style="display: flex; align-items: center; justify-content: center;">
+                                        </div>
+                                    </div>
+                                </div>
+                                <p style="margin-top: 15px; color: var(--success-color); font-weight: 600;">✅ QR Code généré avec qrcode-generator</p>
+                            </div>
+                        `;
+                        
+                        // Injecter l'image et appliquer les styles après coup
+                        const container = document.getElementById('qr-image-container');
+                        container.innerHTML = qrImageHtml;
+                        const qrImage = container.querySelector('img');
+                        if (qrImage) {
+                            qrImage.style.display = 'block';
+                            qrImage.style.margin = '0 auto';
+                            qrImage.style.maxWidth = '100%';
+                            qrImage.style.height = 'auto';
+                        }
+                        console.log('✅ QR Code généré avec qrcode-generator library');
+                        return;
+                    } catch (error) {
+                        console.warn('⚠️ Erreur avec qrcode-generator:', error);
+                    }
+                }
+
+                // Méthode 2: QRCode.js (si disponible)
                 if (typeof QRCode !== 'undefined' && QRCode.toCanvas) {
-                    // Générer le QR code avec QRCode.js
+                    console.log('🔄 Utilisation de QRCode.js');
                     qrCodeDiv.innerHTML = '<canvas id="qrcode-canvas" style="display: block; margin: 0 auto; border-radius: 8px; background: white; padding: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></canvas>';
                     
                     try {
@@ -1261,16 +1429,51 @@ function cancelMfaLogin() {
                                 }
                             });
                         });
+                        console.log('✅ QR Code généré avec QRCode.js');
+                        return;
                     } catch (qrError) {
-                        throw qrError;
+                        console.warn('⚠️ Erreur avec QRCode.js:', qrError);
                     }
-                } else {
-                    throw new Error('QRCode.js non disponible');
                 }
+
+                // Méthode 3: Fallback vers Google Charts API
+                console.log('🔄 Fallback vers Google Charts API');
+                    qrCodeDiv.innerHTML = `
+                        <div style="text-align: center; padding: 20px; background: #f8f9fa; border-radius: 12px; border: 2px solid #28a745;">
+                            <h4 style="color: #28a745; margin-bottom: 15px;">📱 QR Code pour votre application d'authentification</h4>
+                            
+                            <div style="margin: 20px 0; display: flex; justify-content: center; align-items: center;">
+                                <div style="display: inline-block; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                                    <div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">
+                                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(data.provisioning_uri)}&bgcolor=ffffff&color=000000&qzone=2&format=png" 
+                                             alt="QR Code MFA" 
+                                             style="display: block; margin: 0 auto; border-radius: 8px; max-width: 250px; height: auto;"
+                                             onload="console.log('✅ QR Code chargé depuis Google Charts API')"
+                                             onerror="this.style.display='none'; document.getElementById('manual-config-fallback').style.display='block';">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div style="background: rgba(40, 167, 69, 0.1); border: 1px solid rgba(40, 167, 69, 0.3); border-radius: 8px; padding: 15px; margin: 20px 0;">
+                                <p style="margin: 0; font-weight: 600;">✅ Instructions :</p>
+                                <p style="margin: 5px 0 0 0;">1. Ouvrez votre app d'authentification (Google Authenticator, Authy, etc.)</p>
+                                <p style="margin: 5px 0 0 0;">2. Scannez le QR code ci-dessus</p>
+                                <p style="margin: 5px 0 0 0;">3. Entrez le code à 6 chiffres pour activer la 2FA</p>
+                            </div>
+                            
+                            <div id="manual-config-fallback" style="display: none; margin-top: 20px; padding: 15px; background: rgba(255, 193, 7, 0.1); border-radius: 8px;">
+                                <p><strong>🔑 Configuration manuelle :</strong></p>
+                                <p style="font-family: monospace; font-size: 1.1em; background: white; padding: 15px; border-radius: 8px; border: 2px solid #007bff; word-break: break-all; color: #007bff; font-weight: bold;">${data.provisioning_uri.match(/secret=([A-Z0-9]+)/)?.[1] || 'Clé non disponible'}</p>
+                                <p style="margin-top: 15px;"><small>📋 Copiez cette clé dans votre application d'authentification</small></p>
+                                <p><strong>Nom du compte :</strong> ${data.provisioning_uri.match(/\/([^?]+)/)?.[1] || 'ProjetAnnuelESGI'}</p>
+                                <p><strong>Émetteur :</strong> ProjetAnnuelESGI</p>
+                                <p><strong>Type :</strong> TOTP (Time-based)</p>
+                            </div>
+                        </div>
+                    `;
                 
-            } catch (error) {
-                // Fallback amélioré avec l'URI de configuration et un lien Google Charts
-                const uri = error.response ? error.response.provisioning_uri : (error.data ? error.data.provisioning_uri : '');
+            } catch (error) {                
+                console.error('❌ Erreur lors de la génération du QR code:', error);
                 
                 // Récupérer l'URI depuis la réponse si disponible
                 let fallbackUri = '';
@@ -1283,40 +1486,77 @@ function cancelMfaLogin() {
                     const data = await response.json();
                     if (response.ok) {
                         fallbackUri = data.provisioning_uri;
+                        console.log('✅ URI récupéré pour fallback final:', fallbackUri);
                     }
                 } catch (e) {
-                    // Erreur silencieuse pour éviter l'encombrement des logs
+                    console.error('❌ Impossible de récupérer l\'URI:', e);
                 }
 
-                qrCodeDiv.innerHTML = `
-                    <div style="text-align: center; padding: 20px; background: #f8f9fa; border-radius: 12px; border: 2px dashed #007bff;">
-                        <h4 style="color: #007bff; margin-bottom: 15px;">📱 Configuration manuelle</h4>
-                        
-                        ${fallbackUri ? `
-                            <!-- QR Code via Google Charts API -->
-                            <div style="margin: 20px 0;">
-                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(fallbackUri)}" 
-                                     alt="QR Code MFA" 
-                                     style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); background: white; padding: 10px;"
-                                     onerror="this.style.display='none'; document.getElementById('manual-config').style.display='block';">
+                // Fallback final: Configuration manuelle avec ou sans URI
+                if (fallbackUri) {
+                    console.log('🔄 Fallback final avec URI disponible');
+                    qrCodeDiv.innerHTML = `
+                        <div style="text-align: center; padding: 20px; background: #f8f9fa; border-radius: 12px; border: 2px solid #28a745;">
+                            <h4 style="color: #28a745; margin-bottom: 15px;">📱 Configuration manuelle avec clé secrète</h4>
+                            
+                            <div style="margin: 20px 0; display: flex; justify-content: center; align-items: center;">
+                                <div style="display: inline-block; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                                    <div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">
+                                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(fallbackUri)}&bgcolor=ffffff&color=000000&qzone=2&format=png" 
+                                             alt="QR Code MFA" 
+                                             style="display: block; margin: 0 auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); background: white; padding: 15px; max-width: 280px;"
+                                             onload="console.log('✅ QR Code de fallback chargé depuis API externe')"
+                                             onerror="console.error('❌ Échec du fallback externe'); this.style.display='none'; document.getElementById('manual-only-config').style.display='block';">
+                                    </div>
+                                </div>
                             </div>
                             
-                            <div id="manual-config" style="display: none;">
-                                <p><strong>🔑 Clé secrète pour configuration manuelle :</strong></p>
+                            <div style="background: rgba(40, 167, 69, 0.1); border: 1px solid rgba(40, 167, 69, 0.3); border-radius: 8px; padding: 15px; margin: 20px 0;">
+                                <p style="margin: 0; font-weight: 600;">✅ Instructions :</p>
+                                <p style="margin: 5px 0 0 0;">1. Ouvrez votre app d'authentification (Google Authenticator, Authy, etc.)</p>
+                                <p style="margin: 5px 0 0 0;">2. Scannez le QR code ci-dessus OU utilisez la configuration manuelle ci-dessous</p>
+                                <p style="margin: 5px 0 0 0;">3. Entrez le code à 6 chiffres pour activer la 2FA</p>
+                            </div>
+                            
+                            <div id="manual-only-config" style="margin-top: 20px; padding: 15px; background: rgba(255, 193, 7, 0.1); border-radius: 8px;">
+                                <p><strong>🔑 Configuration manuelle :</strong></p>
                                 <p style="font-family: monospace; font-size: 1.1em; background: white; padding: 15px; border-radius: 8px; border: 2px solid #007bff; word-break: break-all; color: #007bff; font-weight: bold;">${fallbackUri.match(/secret=([A-Z0-9]+)/)?.[1] || 'Clé non disponible'}</p>
                                 <p style="margin-top: 15px;"><small>📋 Copiez cette clé dans votre application d'authentification</small></p>
+                                <p><strong>Nom du compte :</strong> ${fallbackUri.match(/\/([^?]+)/)?.[1] || 'ProjetAnnuelESGI'}</p>
+                                <p><strong>Émetteur :</strong> ProjetAnnuelESGI</p>
+                                <p><strong>Type :</strong> TOTP (Time-based)</p>
                             </div>
-                        ` : ''}
-                        
-                        <div style="margin-top: 20px; padding: 15px; background: rgba(255, 193, 7, 0.1); border-radius: 8px;">
-                            <p><strong>⚠️ Instructions alternatives :</strong></p>
-                            <p>1. Ouvrez votre application d'authentification</p>
-                            <p>2. Choisissez "Ajouter un compte" ou "Configurer un compte"</p>
-                            <p>3. ${fallbackUri ? 'Scannez le QR code ci-dessus ou ' : ''}saisissez manuellement la clé secrète</p>
-                            <p>4. Le nom du compte sera : <strong>ProjetAnnuelESGI</strong></p>
                         </div>
-                    </div>
-                `;
+                    `;
+                } else {
+                    console.log('🔄 Fallback final - configuration manuelle uniquement');
+                    qrCodeDiv.innerHTML = `
+                        <div style="text-align: center; padding: 20px; background: #fff3cd; border-radius: 12px; border: 2px dashed #ffc107;">
+                            <h4 style="color: #856404; margin-bottom: 15px;">⚠️ Configuration manuelle requise</h4>
+                            
+                            <div style="background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.3); border-radius: 8px; padding: 20px;">
+                                <p><strong>🔧 Impossible de générer le QR code automatiquement</strong></p>
+                                <p style="margin: 15px 0;">Veuillez configurer manuellement votre application d'authentification :</p>
+                                
+                                <ol style="text-align: left; margin: 15px 0; padding-left: 20px;">
+                                    <li>Ouvrez votre application d'authentification</li>
+                                    <li>Choisissez "Ajouter un compte" → "Configuration manuelle"</li>
+                                    <li>Entrez les informations suivantes :</li>
+                                </ol>
+                                
+                                <div style="background: white; padding: 15px; border-radius: 8px; border: 2px solid #ffc107; margin: 15px 0;">
+                                    <p><strong>Nom du compte :</strong> ProjetAnnuelESGI</p>
+                                    <p><strong>Type :</strong> TOTP (Time-based)</p>
+                                    <p><strong>Clé secrète :</strong> <span style="font-family: monospace; color: #dc3545; font-weight: bold;">Contactez votre administrateur</span></p>
+                                </div>
+                                
+                                <p style="margin-top: 15px; font-size: 0.9em; color: #6c757d;">
+                                    💡 Astuce : Essayez de recharger la page ou vérifiez votre connexion internet
+                                </p>
+                            </div>
+                        </div>
+                    `;
+                }
             }
         }
 
@@ -1380,7 +1620,19 @@ function cancelMfaLogin() {
                 return;
             }
 
-            if (!currentUsername) {
+            // Récupérer le username depuis les données temporaires de connexion
+            const tempLoginData = localStorage.getItem('tempLoginData');
+            if (!tempLoginData) {
+                showToast('Session expirée. Veuillez vous reconnecter.', 'error');
+                showView('auth-choice');
+                return;
+            }
+
+            const decodedUser = atob(tempLoginData);
+            const [username, password] = decodedUser.split(':');
+
+            if (!username) {
+                showToast('Erreur de récupération des données utilisateur.', 'error');
                 showView('auth-choice');
                 return;
             }
@@ -1389,16 +1641,19 @@ function cancelMfaLogin() {
             button.disabled = true;
 
             try {
+                console.log('🔄 Vérification MFA pour:', username);
+                
                 const response = await fetch(`${API_BASE_URL}/login/otp`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
-                        username: currentUsername,
+                        username: username,
                         otp_code: otpCode
                     })
                 });
 
                 const data = await response.json();
+                console.log('Réponse MFA:', data);
                 
                 if (!response.ok) {
                     throw new Error(data.detail || 'Code de vérification invalide');
@@ -1407,13 +1662,18 @@ function cancelMfaLogin() {
                 // Connexion réussie avec MFA
                 showToast('🛡️ Connexion sécurisée réussie !', 'success');
                 
+                // SÉCURITÉ : Aucune sauvegarde d'identifiants - sécurité maximale
+                localStorage.removeItem('savedUsername');
+                localStorage.removeItem('savedPassword');
+                localStorage.removeItem('rememberPassword');
+                console.log('� Aucun identifiant sauvegardé après connexion MFA - sécurité maximale');
+                
                 // Créer le token utilisateur (similaire à la connexion normale)
-                const decodedUser = atob(localStorage.getItem('tempLoginData') || '');
-                const [username, password] = decodedUser.split(':');
                 const userToken = btoa(`${username}:${password}`);
                 
                 localStorage.setItem('currentUser', userToken);
                 localStorage.removeItem('tempLoginData');
+                currentUsername = ''; // Reset
                 
                 showView('app');
                 loadPasswords();
@@ -1442,7 +1702,15 @@ function cancelMfaLogin() {
                 return;
             }
 
-            if (!confirm('Êtes-vous sûr de vouloir désactiver l\'authentification à deux facteurs ? Cette action réduira la sécurité de votre compte.')) {
+            // Utiliser notre modal personnalisé au lieu de confirm()
+            const confirmed = await showConfirmModal(
+                '🔓 Désactiver l\'authentification à deux facteurs',
+                'Êtes-vous sûr de vouloir désactiver l\'authentification à deux facteurs ? Cette action réduira la sécurité de votre compte.',
+                '🔓 Désactiver la 2FA',
+                '🛡️ Conserver la 2FA'
+            );
+
+            if (!confirmed) {
                 return;
             }
 

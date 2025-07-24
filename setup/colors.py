@@ -32,12 +32,13 @@ def print_colored(message: str, color: str = Colors.END):
 def print_banner():
     """Affiche le banner principal du projet"""
     print_colored(f"""
-{Colors.CYAN}╔═══════════════════════════════════════════════════════════════╗
-║                HoneyPot Pro Max - Setup Environment          ║
-║                      Projet Annuel - Jakub WERLINSKI        ║
+{Colors.CYAN}
+╔═══════════════════════════════════════════════════════════════╗
+║                HoneyPot Pro Max - Setup Environment           ║
+║                      Projet Annuel - Jakub WERLINSKI          ║
 ║                                                               ║
-║  🔧 Configuration automatique complète de l'environnement    ║
-║  🐳 Docker + 📝 Encodage + 🔒 Sécurité + ✅ Validation      ║
+║  🔧 Configuration automatique complète de l'environnement     ║
+║  🐳 Docker + 📝 Encodage + 🔒 Sécurité + ✅ Validation        ║
 ╚═══════════════════════════════════════════════════════════════╝{Colors.END}
 """)
 
