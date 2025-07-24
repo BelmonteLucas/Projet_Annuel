@@ -12,7 +12,7 @@ Usage:
     from setup.colors import Colors, print_colored
     print_colored("Message", Colors.GREEN)
 
-Auteur: Équipe ESGI 2024-2025
+Auteur: Jakub WERLINSKI
 """
 
 class Colors:
@@ -34,7 +34,7 @@ def print_banner():
     print_colored(f"""
 {Colors.CYAN}╔═══════════════════════════════════════════════════════════════╗
 ║                HoneyPot Pro Max - Setup Environment          ║
-║                      Projet Annuel ESGI 2024-2025           ║
+║                      Projet Annuel - Jakub WERLINSKI        ║
 ║                                                               ║
 ║  🔧 Configuration automatique complète de l'environnement    ║
 ║  🐳 Docker + 📝 Encodage + 🔒 Sécurité + ✅ Validation      ║

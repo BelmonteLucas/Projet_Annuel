@@ -14,7 +14,7 @@ Usage:
     if not checker.check_all():
         exit(1)
 
-Auteur: Équipe ESGI 2024-2025
+Auteur: Jakub WERLINSKI
 """
 
 import sys

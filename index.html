@@ -920,65 +920,24 @@ Auteur: Jakub WERLINSKI
         // ===================================================================
         // FONCTIONS DE NAVIGATION ET D'AFFICHAGE
         // ===================================================================
-
-// Vide tous les champs sensibles (login, mot de passe, codes OTP, etc.)
-function clearSensitiveFields() {
-    const sensitiveIds = [
-        'new-username', 'new-master-password',
-        'login-username', 'master-password',
-        'account-username', 'site-link', 'password',
-        'mfa-verify-code', 'mfa-login-code', 'mfa-disable-code'
-    ];
-    sensitiveIds.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-            if (el.type === 'password' || el.type === 'text') {
-                el.value = '';
-            }
+        function showView(viewId) {
+            const views = ['auth-choice', 'setup-container', 'auth-container', 'app', 'mfa-settings', 'mfa-verification'];
+            views.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = (id === viewId) ? 'block' : 'none';
+            });
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) logoutBtn.style.display = (viewId === 'app' || viewId === 'mfa-settings') ? 'block' : 'none';
         }
-    });
-    // Masquer les suggestions de site si affichées
-    const siteList = document.getElementById('site-link-list');
-    if (siteList) siteList.style.display = 'none';
-    
-    // Masquer les conseils de mot de passe lors du vidage des champs
-    const passwordHint = document.getElementById('password-hint');
-    if (passwordHint) {
-        passwordHint.style.display = 'none';
-    }
-}
 
-function showView(viewId) {
-    clearSensitiveFields();
-    const views = ['auth-choice', 'setup-container', 'auth-container', 'app', 'mfa-settings', 'mfa-verification'];
-    views.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = (id === viewId) ? 'block' : 'none';
-    });
-    const logoutBtn = document.getElementById('logout-btn');
-    if (logoutBtn) logoutBtn.style.display = (viewId === 'app' || viewId === 'mfa-settings') ? 'block' : 'none';
-    
-    // Masquer les conseils de mot de passe quand on change de vue
-    const passwordHint = document.getElementById('password-hint');
-    if (passwordHint) {
-        passwordHint.style.display = 'none';
-    }
-}
-
-function showSignup() {
-    showView('setup-container');
-}
-function showLogin() {
-    showView('auth-container');
-}
-function backToMainApp() {
-    showView('app');
-}
-function cancelMfaLogin() {
-    localStorage.removeItem('tempLoginData');
-    currentUsername = '';
-    showView('auth-container');
-}
+        function showSignup() { showView('setup-container'); }
+        function showLogin() { showView('auth-container'); }
+        function backToMainApp() { showView('app'); }
+        function cancelMfaLogin() { 
+            localStorage.removeItem('tempLoginData');
+            currentUsername = '';
+            showView('auth-container'); 
+        }
 
         // ===================================================================
         // FONCTIONS UTILITAIRES (Toast, Toggles)

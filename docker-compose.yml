@@ -1,11 +1,13 @@
 # =============================================================================
-# DOCKER COMPOSE CONFIGURATION - PROJET ANNUEL ESGI
+# DOCKER COMPOSE CONFIGURATION - PROJET ANNUEL
 # =============================================================================
 # Architecture multi-services incluant :
 # - Application web avec backend/frontend
 # - Base de données PostgreSQL avec interface d'administration
 # - Stack de sécurité (Snort IDS + Wazuh HIDS)
 # - Stack ELK pour l'analyse des logs et la visualisation
+#
+# Auteur: Jakub WERLINSKI
 # =============================================================================
 
 services:
@@ -162,6 +164,7 @@ services:
       - wazuh_data:/var/ossec/data                         # Données et configuration Wazuh
       - wazuh_logs:/var/ossec/logs                         # Logs générés par Wazuh
       - ./backend:/host_files:ro                           # Surveillance des fichiers backend
+      - ./wazuh/config/ossec.conf:/var/ossec/etc/ossec.conf:ro   # Configuration personnalisée Wazuh
     depends_on:
       elasticsearch:
         condition: service_healthy                       # Attendre qu'Elasticsearch soit prêt

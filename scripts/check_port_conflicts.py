@@ -10,7 +10,7 @@ Usage:
     python scripts/check_port_conflicts.py
     python scripts/check_port_conflicts.py --fix-automatically
 
-Auteur: Équipe ESGI 2024-2025
+Auteur: Jakub WERLINSKI
 """
 
 import socket

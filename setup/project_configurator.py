@@ -13,7 +13,7 @@ Usage:
     configurator = ProjectConfigurator()
     configurator.configure_all()
 
-Auteur: Équipe ESGI 2024-2025
+Auteur: Jakub WERLINSKI
 """
 
 from pathlib import Path

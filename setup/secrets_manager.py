@@ -14,7 +14,7 @@ Usage:
     manager = SecretsManager()
     manager.generate_all()
 
-Auteur: Équipe ESGI 2024-2025
+Auteur: Jakub WERLINSKI
 """
 
 import os

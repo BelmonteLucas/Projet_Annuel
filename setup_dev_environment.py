@@ -15,7 +15,7 @@ Options:
     --skip-ports        Ignorer vérification ports
     --quick             Installation rapide (skip non-critiques)
 
-Auteur: Équipe ESGI 2024-2025
+Auteur: Jakub WERLINSKI
 """
 
 import sys

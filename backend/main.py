@@ -9,11 +9,11 @@ Implémente l'authentification MFA, le chiffrement des données et la gestion de
 Fonctionnalités principales :
 - Authentification utilisateur avec hashage bcrypt
 - Authentification à  double facteur (TOTP)
-- Chiffrement des secrets MFA avec Fernet
+
 - Gestion sécurisée des mots de passe utilisateurs
 - API RESTful pour l'interface frontend
 
-Auteur: quipe ESGI 2024-2025
+Auteur: Jakub WERLINSKI
 """
 
 print("INFO: main.py is running")
@@ -197,7 +197,7 @@ if test_direct_connection():
     # Créer l'engine avec des paramètres optimisés
     engine = create_engine(
         DATABASE_URL,
-        echo=False,  # Mettre Ã  True pour debug SQL
+        echo=False,  # Mettre é  True pour debug SQL
         pool_pre_ping=True,  # Vérifier la connexion avant utilisation
         pool_recycle=3600,    # Recycler les connexions toutes les heures
         pool_timeout=20,
@@ -526,7 +526,7 @@ def add_password(entry: PasswordEntry):
         username_for_db = get_username_from_b64(entry.user)
         existing = db.query(Password).filter_by(user=username_for_db, site=entry.site, account=entry.account).first()
         if existing:
-            raise HTTPException(status_code=400, detail="Ce compte existe déjÃ  pour ce site.")
+            raise HTTPException(status_code=400, detail="Ce compte existe déjé  pour ce site.")
 
         pwd = Password(user=username_for_db, site=entry.site, account=entry.account, password=encrypt_stored_password(entry.password))
         db.add(pwd)
@@ -596,7 +596,7 @@ def mfa_setup(request_data: MfaSetupRequest):
             raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
 
         if user.mfa_enabled:
-            raise HTTPException(status_code=400, detail="Le MFA est déjÃ  activé pour cet utilisateur.")
+            raise HTTPException(status_code=400, detail="Le MFA est déjé  activé pour cet utilisateur.")
 
         plain_mfa_secret = pyotp.random_base32()
         encrypted_mfa_secret = FERNET_INSTANCE.encrypt(plain_mfa_secret.encode()).decode() # Chiffrer et stocker en string
@@ -711,7 +711,7 @@ async def db_session_middleware(request: Request, call_next):
     response = None
     # Si vous décidez de gérer les sessions via middleware, vous initialiseriez et fermeriez la session ici.
     # Pour l'instant, les routes gèrent explicitement leurs sessions.
-    # Ce middleware peut Ãªtre utilisé pour d'autres logiques transversales si besoin.
+    # Ce middleware peut être utilisé pour d'autres logiques transversales si besoin.
     # Pour éviter des conflits avec la gestion manuelle dans les routes, on le laisse simple.
     # request.state.db = Session() # Exemple si on voulait injecter
     try:
